@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<form id="settings">
+	<label>Latitude</label><input name="lat" value="52.52">
+	<label>Longitude</label><input name="lon" value="13.405">
+	<button type="button" onclick="save()">Save (not implemented)</button>
+</form>
+<script>
+function save(){ alert('Client-side saving not implemented yet'); }
+</script>
+{% endblock %}

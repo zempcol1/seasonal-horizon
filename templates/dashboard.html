@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="app">
+	<div id="uplift">Loading uplift...</div>
+	<div id="sun">Loading sun times...</div>
+</div>
+<script>
+async function load(){
+	const lat = 52.52, lon = 13.405;
+	const u = await fetch(`/api/uplift?lat=${lat}&lon=${lon}`).then(r=>r.json());
+	document.getElementById('uplift').textContent = u.uplift || u.error || '';
+	const s = await fetch(`/api/solar?lat=${lat}&lon=${lon}`).then(r=>r.json());
+	if(s.sun_times){
+		const sr = new Date(s.sun_times.sunrise).toLocaleTimeString();
+		const ss = new Date(s.sun_times.sunset).toLocaleTimeString();
+		document.getElementById('sun').textContent = `Sunrise: ${sr}, Sunset: ${ss}, Δ minutes: ${s.daylight_delta.minutes_delta}`;
+	} else {
+		document.getElementById('sun').textContent = s.error || 'Could not load sun times';
+	}
+}
+load();
+</script>
+{% endblock %}
