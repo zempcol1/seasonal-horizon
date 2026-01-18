@@ -1,91 +1,67 @@
-from flask import Flask, render_template, jsonify, request
-from config import Config
-from services.solar_service import get_sun_times, get_daylight_stats
-from services.uplift_engine import generate_uplift
+from flask import Flask, render_template, request, jsonify
 import requests
-from datetime import date
+import time
 
-# explizit static_url_path setzen, damit statische Dateien nur unter /static/ liegen
-app = Flask(__name__, static_folder="static", static_url_path="/static")
-app.config.from_object(Config)
+app = Flask(__name__)
 
-@app.route("/")
+# Simple cache for geocoding
+_geo_cache = {}
+_geo_cache_ttl = 3600  # 1 hour
+
+def _request_with_retry(url, params, max_retries=3, timeout=6):
+    """Make HTTP request with retry logic."""
+    for attempt in range(max_retries):
+        try:
+            resp = requests.get(url, params=params, timeout=timeout)
+            resp.raise_for_status()
+            return resp.json()
+        except requests.exceptions.Timeout:
+            time.sleep(0.3 * (attempt + 1))
+        except requests.exceptions.RequestException:
+            time.sleep(0.2 * (attempt + 1))
+    return None
+
+@app.route('/')
 def index():
-	# pass ISO date (YYYY-MM-DD) so template can show current date
-	return render_template("index.html", today=date.today().isoformat())
+    return render_template('index.html')
 
-@app.route("/api/solar")
-def api_solar():
-	lat = request.args.get("lat", type=float) or Config.DEFAULT_LAT
-	lon = request.args.get("lon", type=float) or Config.DEFAULT_LON
-	try:
-		sun = get_sun_times(lat, lon)
-		stats = get_daylight_stats(lat, lon)
-		# keep response small and clear
-		return jsonify({
-			"sun_times": sun,
-			"daylight": stats
-		})
-	except Exception as e:
-		return jsonify({"error": str(e)}), 500
-
-@app.route("/api/uplift")
-def api_uplift():
-	lat = request.args.get("lat", type=float) or Config.DEFAULT_LAT
-	lon = request.args.get("lon", type=float) or Config.DEFAULT_LON
-	try:
-		text = generate_uplift(lat, lon)
-		return jsonify({"uplift": text})
-	except Exception as e:
-		return jsonify({"error": str(e)}), 500
-
-@app.route("/api/geocode")
-def api_geocode():
-	city = request.args.get("city", type=str)
-	if not city:
-		return jsonify({"error": "missing city parameter"}), 400
-	try:
-		url = "https://nominatim.openstreetmap.org/search"
-		params = {"q": city, "format": "json", "limit": 1}
-		headers = {"User-Agent": "SeasonalHorizon/1.0 (contact@example.com)"}
-		r = requests.get(url, params=params, headers=headers, timeout=6)
-		r.raise_for_status()
-		data = r.json()
-		if not data:
-			return jsonify({"error": "no results"}), 404
-		top = data[0]
-		lat = float(top.get("lat"))
-		lon = float(top.get("lon"))
-		name = top.get("display_name", city)
-		return jsonify({"lat": lat, "lon": lon, "name": name})
-	except Exception as e:
-		return jsonify({"error": str(e)}), 500
-
-@app.route("/api/geocode_suggest")
-def api_geocode_suggest():
-    q = request.args.get("city", type=str)
-    if not q:
-        return jsonify([])  # no query => empty list
+@app.route('/api/search')
+def search_city():
+    query = request.args.get('q', '').strip()
+    if len(query) < 2:
+        return jsonify([])
+    
+    # Check cache
+    cache_key = query.lower()
+    if cache_key in _geo_cache:
+        data, ts = _geo_cache[cache_key]
+        if time.time() - ts < _geo_cache_ttl:
+            return jsonify(data)
+    
     try:
-        url = "https://nominatim.openstreetmap.org/search"
-        params = {"q": q, "format": "json", "limit": 8, "addressdetails": 0}
-        headers = {"User-Agent": "SeasonalHorizon/1.0 (contact@example.com)"}
-        r = requests.get(url, params=params, headers=headers, timeout=6)
-        r.raise_for_status()
-        data = r.json()
-        out = []
-        for item in data:
-            try:
-                out.append({
-                    "name": item.get("display_name"),
-                    "lat": float(item.get("lat")),
-                    "lon": float(item.get("lon"))
-                })
-            except Exception:
-                continue
-        return jsonify(out)
-    except Exception:
-        return jsonify([]), 200
+        url = "https://geocoding-api.open-meteo.com/v1/search"
+        data = _request_with_retry(url, {"name": query, "count": 8, "language": "en"})
+        if data:
+            results = data.get('results', [])
+            _geo_cache[cache_key] = (results, time.time())
+            return jsonify(results)
+        return jsonify([])
+    except Exception as e:
+        app.logger.exception("Search error")
+        return jsonify([])
 
-if __name__ == "__main__":
-	app.run(host="0.0.0.0", port=5000, debug=True)
+@app.route('/api/uplift')
+def api_uplift():
+    from services.uplift_engine import generate_uplift_data
+    try:
+        lat = float(request.args.get('lat', 47.37))
+        lon = float(request.args.get('lon', 8.54))
+        city = request.args.get('city', '')
+        data = generate_uplift_data(lat, lon, city)
+        return jsonify({"success": True, **data})
+    except Exception as e:
+        app.logger.exception("Uplift error")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, port=8080)

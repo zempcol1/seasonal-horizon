@@ -1,5 +1,39 @@
-from datetime import date, timedelta
+import requests
+from datetime import date, timedelta, datetime
 import pytz
+import time
+
+# Simple in-memory cache
+_cache = {}
+_cache_ttl = 300  # 5 minutes
+
+def _get_cached(key):
+    if key in _cache:
+        data, timestamp = _cache[key]
+        if time.time() - timestamp < _cache_ttl:
+            return data
+        del _cache[key]
+    return None
+
+def _set_cached(key, data):
+    _cache[key] = (data, time.time())
+
+def _request_with_retry(url, params, max_retries=3, timeout=8):
+    """Make HTTP request with retry logic."""
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            resp = requests.get(url, params=params, timeout=timeout)
+            resp.raise_for_status()
+            return resp.json()
+        except requests.exceptions.Timeout:
+            last_error = "timeout"
+            time.sleep(0.5 * (attempt + 1))  # Backoff
+        except requests.exceptions.RequestException as e:
+            last_error = str(e)
+            time.sleep(0.3 * (attempt + 1))
+    print(f"API failed after {max_retries} retries: {last_error}")
+    return None
 
 # try astral v3 style imports first, fallback to suntime
 try:
@@ -40,13 +74,84 @@ else:
 			"day_length_seconds": int((sunset_utc - sunrise_utc).total_seconds())
 		}
 
+def _get_winter_solstice_date():
+    """Return the most recent winter solstice."""
+    today = date.today()
+    solstice = date(today.year, 12, 21)
+    if today < solstice:
+        solstice = date(today.year - 1, 12, 21)
+    return solstice
+
 def get_daylight_delta(lat, lon):
-	today = date.today()
-	today_len = get_sun_times(lat, lon, today)["day_length_seconds"]
-	yesterday = today - timedelta(days=1)
-	y_len = get_sun_times(lat, lon, yesterday)["day_length_seconds"]
-	delta = today_len - y_len
-	return {"seconds_delta": delta, "minutes_delta": delta // 60}
+    """
+    Fetches solar dynamics: day length, change from yesterday, week, and solstice.
+    """
+    # Check cache first
+    cache_key = f"solar_{lat:.2f}_{lon:.2f}_{date.today()}"
+    cached = _get_cached(cache_key)
+    if cached:
+        return cached
+
+    try:
+        solstice = _get_winter_solstice_date()
+        today = date.today()
+        days_since_solstice = (today - solstice).days
+        past_days = min(days_since_solstice, 92)
+        
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = {
+            "latitude": lat,
+            "longitude": lon,
+            "daily": ["sunrise", "sunset", "daylight_duration"],
+            "timezone": "auto",
+            "past_days": past_days,
+            "forecast_days": 1
+        }
+        
+        data = _request_with_retry(url, params)
+        if not data:
+            return {}
+
+        daily = data.get("daily", {})
+        durations = daily.get("daylight_duration", [])
+        sunrises = daily.get("sunrise", [])
+        sunsets = daily.get("sunset", [])
+
+        if not durations:
+            return {}
+
+        idx_today = len(durations) - 1
+        today_sec = durations[idx_today]
+        
+        yesterday_sec = durations[idx_today - 1] if idx_today > 0 else today_sec
+        delta_daily = today_sec - yesterday_sec
+        
+        idx_week = idx_today - 7
+        last_week_sec = durations[idx_week] if idx_week >= 0 else today_sec
+        delta_weekly = today_sec - last_week_sec
+        
+        solstice_sec = durations[0] if len(durations) > 7 else today_sec
+        delta_solstice = today_sec - solstice_sec
+
+        sunrise_str = sunrises[idx_today] if idx_today < len(sunrises) else ""
+        sunset_str = sunsets[idx_today] if idx_today < len(sunsets) else ""
+
+        fmt = "%Y-%m-%dT%H:%M"
+        result = {
+            "day_len_sec": today_sec,
+            "delta_daily_sec": delta_daily,
+            "delta_weekly_sec": delta_weekly,
+            "delta_solstice_sec": delta_solstice,
+            "sunrise": datetime.strptime(sunrise_str, fmt) if sunrise_str else None,
+            "sunset": datetime.strptime(sunset_str, fmt) if sunset_str else None
+        }
+        
+        _set_cached(cache_key, result)
+        return result
+        
+    except Exception as e:
+        print(f"Solar parsing error: {e}")
+        return {}
 
 def get_daylight_stats(lat, lon):
 	"""

@@ -1,202 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>{{ title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seasonal Horizon</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
 <body>
-    {% extends "base.html" %}
-    {% block content %}
-    <div class="container">
-    	<header class="top">
-    		<div>
-    			<h1 class="brand">{{ config.SITE_NAME }}</h1>
-    			<div id="location-display" class="muted"></div>
-    			<div id="date-display" style="font-size:0.95rem;color:#64748b;margin-top:6px;"></div>
-    		</div>
-    		<button id="open-settings" class="btn">Settings</button>
-    	</header>
-    
-    	<main class="grid">
-    		<section class="card uplift-card" id="uplift-card">
-    			<div id="uplift" class="uplift-text">Loading…</div>
-    		</section>
-    
-    		<section class="card sun-card" id="sun-card">
-    			<div id="sun-meta" class="sun-meta">Loading sun info…</div>
-    		</section>
-    	</main>
-    
-    	<footer class="foot">A small daily nudge towards the seasons.</footer>
+    <main class="container">
+        <header>
+            <div class="brand">
+                <span class="brand-icon">☀️</span>
+                <h1>Seasonal Horizon</h1>
+            </div>
+            <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
+        </header>
+
+        <section class="card">
+            <p id="location-label" class="location-label">Zurich</p>
+            <div id="loader" class="loader">
+                <div class="spinner"></div>
+                <span id="loader-text">Reading the sky...</span>
+            </div>
+            <div id="content" class="content hidden">
+                <p id="uplift-text" class="uplift-text"></p>
+                
+                <div class="facts-section">
+                    <div class="facts-row">
+                        <div class="fact">
+                            <span class="label">🌅 Sunrise</span>
+                            <span id="f-sunrise" class="val">--</span>
+                        </div>
+                        <div class="fact">
+                            <span class="label">🌇 Sunset</span>
+                            <span id="f-sunset" class="val">--</span>
+                        </div>
+                        <div class="fact">
+                            <span class="label">☀️ Daylight</span>
+                            <span id="f-length" class="val">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="facts-section">
+                    <div class="facts-row">
+                        <div class="fact delta-fact">
+                            <span class="label">vs Yesterday</span>
+                            <span id="f-delta-d" class="val">--</span>
+                        </div>
+                        <div class="fact delta-fact">
+                            <span class="label">vs Last Week</span>
+                            <span id="f-delta-w" class="val">--</span>
+                        </div>
+                        <div class="fact delta-fact">
+                            <span class="label">vs Solstice</span>
+                            <span id="f-delta-s" class="val">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="facts-section weather-section">
+                    <div class="facts-row">
+                        <div class="fact weather-fact">
+                            <span id="weather-icon" class="weather-icon">☀️</span>
+                            <span id="f-weather" class="val">Clear</span>
+                        </div>
+                        <div class="fact">
+                            <span class="label">🌡️ High Today</span>
+                            <span id="f-temp" class="val">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>Your daily reminder that light always returns.</p>
+        </footer>
+    </main>
+
+    <div id="overlay" class="overlay hidden" onclick="handleOverlayClick(event)">
+        <div class="overlay-box">
+            <h2>📍 Choose Your Location</h2>
+            <label>Search for a city</label>
+            <input type="text" id="city-input" placeholder="e.g. Berlin, Tokyo, New York..." autocomplete="off">
+            <ul id="city-results" class="results-list"></ul>
+            <div class="current-location" id="current-loc"></div>
+            <div class="overlay-actions">
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+            </div>
+        </div>
     </div>
-    
-    <!-- Settings overlay -->
-    <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
-    	<div class="modal-content">
-    		<h3>Settings</h3>
-    		<label>City
-    			<input id="city" type="text" list="city-list" placeholder="Zurich, Switzerland" autocomplete="off">
-    			<datalist id="city-list"></datalist>
-    		</label>
-    		<div class="modal-actions">
-    			<button id="save" class="btn primary">Save</button>
-    			<button id="close" class="btn">Close</button>
-    		</div>
-    	</div>
-    </div>
-    
+
     <script>
-    /* simple, compatible JS */
-    var defaults = {city: "{{ config.DEFAULT_CITY }}", lat: {{ config.DEFAULT_LAT }}, lon: {{ config.DEFAULT_LON }} };
-    
-    function getStored() {
-    	try {
-    		var s = localStorage.getItem('sh_location');
-    		if (!s) return {city: defaults.city, lat: defaults.lat, lon: defaults.lon, name: defaults.city};
-    		var o = JSON.parse(s);
-    		if (typeof o.lat !== 'number' || typeof o.lon !== 'number') return {city: defaults.city, lat: defaults.lat, lon: defaults.lon, name: defaults.city};
-    		if (!o.name) o.name = o.city || defaults.city;
-    		return o;
-    	} catch (e) { return {city: defaults.city, lat: defaults.lat, lon: defaults.lon, name: defaults.city}; }
-    }
-    function store(loc){ try { localStorage.setItem('sh_location', JSON.stringify(loc)); } catch(e){} }
-    async function safeFetchJson(url){
-    	var res = await fetch(url);
-    	if (!res.ok) throw new Error('Network error: ' + res.status);
-    	return res.json();
-    }
-    function updateLocationDisplay(loc){
-    	var el = document.getElementById('location-display');
-    	if (!el) return;
-    	el.textContent = loc.name || loc.city || '';
-    }
-    function updateDateDisplay(){
-    	var el = document.getElementById('date-display');
-    	if (!el) return;
-    	var now = new Date();
-    	el.textContent = now.toLocaleDateString(undefined, {weekday:'long', year:'numeric', month:'long', day:'numeric'});
-    }
-    
-    async function refreshAll(){
-    	var loc = getStored();
-    	updateLocationDisplay(loc);
-    	updateDateDisplay();
-    
-    	// uplift
-    	try {
-    		var u = await safeFetchJson('/api/uplift?lat=' + encodeURIComponent(loc.lat) + '&lon=' + encodeURIComponent(loc.lon));
-    		document.getElementById('uplift').innerHTML = (u.uplift || (u.error ? u.error : 'No uplift')).replace(/\n/g,'<br>');
-    	} catch(e){ document.getElementById('uplift').textContent = 'Error loading uplift'; }
-    
-    	// sun small meta
-    	try {
-    		var s = await safeFetchJson('/api/solar?lat=' + encodeURIComponent(loc.lat) + '&lon=' + encodeURIComponent(loc.lon));
-    		if (s && s.daylight) {
-    			var ds = s.daylight;
-    			var text = '';
-    			// human friendly wording
-    			var dy = ds.delta_since_yesterday_minutes;
-    			var ds_sol = ds.delta_since_solstice_minutes;
-    			if (dy > 0) text += 'A bit longer than yesterday (' + dy + ' min).';
-    			else if (dy < 0) text += 'Slightly shorter than yesterday (' + Math.abs(dy) + ' min).';
-    			else text += 'Same length as yesterday.';
-    			text += ' Since the winter solstice it is ';
-    			if (ds_sol > 0) text += 'about ' + ds_sol + ' minutes longer.';
-    			else if (ds_sol < 0) text += 'about ' + Math.abs(ds_sol) + ' minutes shorter.';
-    			else text += 'about the same as at the solstice.';
-    			document.getElementById('sun-meta').textContent = text;
-    		} else {
-    			document.getElementById('sun-meta').textContent = (s && s.error) ? s.error : 'Could not load sun info';
-    		}
-    	} catch(e){ document.getElementById('sun-meta').textContent = 'Error loading sun info'; }
-    }
-    
-    // city search with datalist
-    function setupCitySearch() {
-    	var cityIn = document.getElementById('city');
-    	var dataList = document.getElementById('city-list');
-    	var cityMap = {};
-    	var timer = null;
-    
-    	function populateList(items){
-    		while (dataList.firstChild) dataList.removeChild(dataList.firstChild);
-    		cityMap = {};
-    		for (var i=0;i<items.length;i++){
-    			var it = items[i];
-    			if (!it || !it.name) continue;
-    			var opt = document.createElement('option');
-    			opt.value = it.name;
-    			dataList.appendChild(opt);
-    			cityMap[it.name] = {lat: it.lat, lon: it.lon, name: it.name};
-    		}
-    	}
-    
-    	function search(q){
-    		if (!q || q.length < 2) { populateList([]); return; }
-    		safeFetchJson('/api/geocode_suggest?city=' + encodeURIComponent(q)).then(function(res){
-    			populateList(res || []);
-    		}).catch(function(){ populateList([]); });
-    	}
-    
-    	cityIn.addEventListener('input', function(){
-    		var q = (cityIn.value || '').trim();
-    		if (timer) clearTimeout(timer);
-    		timer = setTimeout(function(){ search(q); }, 300);
-    	});
-    
-    	return {
-    		resolve: function(value, fallback) {
-    			if (cityMap[value]) return Promise.resolve(cityMap[value]);
-    			if (!value) return Promise.resolve(fallback);
-    			return safeFetchJson('/api/geocode?city=' + encodeURIComponent(value)).then(function(r){
-    				if (r && !r.error) return {lat: r.lat, lon: r.lon, name: r.name || value};
-    				return fallback;
-    			}).catch(function(){ return fallback; });
-    		}
-    	};
-    }
-    
-    // modal & handlers
-    function setupUI(){
-    	var modal = document.getElementById('modal');
-    	var openBtn = document.getElementById('open-settings');
-    	var closeBtn = document.getElementById('close');
-    	var saveBtn = document.getElementById('save');
-    	var cityIn = document.getElementById('city');
-    	if (!modal) return;
-    	var citySearch = setupCitySearch();
-    
-    	function openSettings(){
-    		var loc = getStored();
-    		cityIn.value = loc.city || loc.name || defaults.city;
-    		modal.style.display = 'flex';
-    		modal.setAttribute('aria-hidden','false');
-    		cityIn.focus();
-    	}
-    	function closeSettings(){
-    		modal.style.display = 'none';
-    		modal.setAttribute('aria-hidden','true');
-    	}
-    
-    	if (openBtn) openBtn.addEventListener('click', openSettings);
-    	if (closeBtn) closeBtn.addEventListener('click', closeSettings);
-    	if (saveBtn) saveBtn.addEventListener('click', function(){
-    		var city = (cityIn.value || '').trim();
-    		if (!city) { closeSettings(); return; }
-    		citySearch.resolve(city, {lat: defaults.lat, lon: defaults.lon, name: city}).then(function(loc){
-    			var out = {city: city, lat: loc.lat, lon: loc.lon, name: loc.name || city};
-    			store(out);
-    			updateLocationDisplay(out);
-    			refreshAll();
-    			closeSettings();
-    		});
-    	});
-    	document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeSettings(); });
-    }
-    
-    window.addEventListener('load', function(){
-    	setupUI();
-    	refreshAll();
-    });
+        const state = {
+            city: localStorage.getItem('sh_city') || 'Zurich',
+            lat: parseFloat(localStorage.getItem('sh_lat')) || 47.37,
+            lon: parseFloat(localStorage.getItem('sh_lon')) || 8.54
+        };
+
+        const WEATHER_ICONS = {
+            0: ['☀️', 'Clear'], 1: ['🌤️', 'Mostly Clear'], 2: ['⛅', 'Partly Cloudy'],
+            3: ['☁️', 'Overcast'], 45: ['🌫️', 'Foggy'], 48: ['🌫️', 'Icy Fog'],
+            51: ['🌦️', 'Light Drizzle'], 53: ['🌦️', 'Drizzle'], 55: ['🌧️', 'Heavy Drizzle'],
+            61: ['🌧️', 'Light Rain'], 63: ['🌧️', 'Rain'], 65: ['🌧️', 'Heavy Rain'],
+            71: ['🌨️', 'Light Snow'], 73: ['🌨️', 'Snow'], 75: ['❄️', 'Heavy Snow'],
+            77: ['🌨️', 'Snow Grains'], 80: ['🌦️', 'Light Showers'], 81: ['🌧️', 'Showers'],
+            82: ['⛈️', 'Heavy Showers'], 85: ['🌨️', 'Snow Showers'], 86: ['❄️', 'Heavy Snow'],
+            95: ['⛈️', 'Thunderstorm'], 96: ['⛈️', 'Hail Storm'], 99: ['⛈️', 'Severe Storm']
+        };
+
+        // Global abort controllers
+        let dataController = null;
+        let searchController = null;
+        let searchTimer = null;
+        let searchRequestId = 0;
+
+        document.getElementById('location-label').textContent = state.city;
+        fetchData();
+
+        async function fetchData() {
+            // Abort any pending data request
+            if (dataController) {
+                dataController.abort();
+            }
+            dataController = new AbortController();
+            
+            const loader = document.getElementById('loader');
+            const loaderText = document.getElementById('loader-text');
+            const content = document.getElementById('content');
+            
+            loader.classList.remove('hidden');
+            content.classList.add('hidden');
+            loaderText.textContent = 'Reading the sky...';
+
+            try {
+                const res = await fetch(
+                    `/api/uplift?lat=${state.lat}&lon=${state.lon}&city=${encodeURIComponent(state.city)}`,
+                    { signal: dataController.signal }
+                );
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                
+                if (data.success) {
+                    document.getElementById('uplift-text').textContent = data.text;
+                    document.getElementById('f-sunrise').textContent = data.facts.sunrise;
+                    document.getElementById('f-sunset').textContent = data.facts.sunset;
+                    document.getElementById('f-length').textContent = data.facts.day_length;
+                    
+                    const deltaD = document.getElementById('f-delta-d');
+                    const deltaW = document.getElementById('f-delta-w');
+                    const deltaS = document.getElementById('f-delta-s');
+                    
+                    deltaD.textContent = data.facts.delta_yesterday;
+                    deltaW.textContent = data.facts.delta_week;
+                    deltaS.textContent = data.facts.delta_solstice;
+
+                    deltaD.className = 'val ' + (data.facts.delta_yesterday.includes('+') ? 'positive' : (data.facts.delta_yesterday.includes('-') ? 'negative' : ''));
+                    deltaW.className = 'val ' + (data.facts.delta_week.includes('+') ? 'positive' : (data.facts.delta_week.includes('-') ? 'negative' : ''));
+                    deltaS.className = 'val ' + (data.facts.delta_solstice.includes('+') ? 'positive' : (data.facts.delta_solstice.includes('-') ? 'negative' : ''));
+
+                    const weatherCode = data.facts.weather_code || 0;
+                    const weatherInfo = WEATHER_ICONS[weatherCode] || WEATHER_ICONS[0];
+                    document.getElementById('weather-icon').textContent = weatherInfo[0];
+                    document.getElementById('f-weather').textContent = weatherInfo[1];
+                    document.getElementById('f-temp').textContent = data.facts.temp_max;
+                } else {
+                    document.getElementById('uplift-text').textContent = data.error || 'Could not load data.';
+                }
+            } catch (e) {
+                if (e.name !== 'AbortError') {
+                    console.error('Fetch error:', e);
+                    document.getElementById('uplift-text').textContent = 'Connection issue. Please refresh.';
+                }
+            }
+            
+            loader.classList.add('hidden');
+            content.classList.remove('hidden');
+        }
+
+        function openSettings() {
+            document.getElementById('overlay').classList.remove('hidden');
+            document.getElementById('city-input').value = '';
+            document.getElementById('city-results').innerHTML = '';
+            document.getElementById('current-loc').innerHTML = `<small>Current: <strong>${state.city}</strong></small>`;
+            document.getElementById('city-input').focus();
+        }
+
+        function closeSettings() {
+            // Cancel any pending search
+            if (searchController) {
+                searchController.abort();
+                searchController = null;
+            }
+            clearTimeout(searchTimer);
+            document.getElementById('overlay').classList.add('hidden');
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target.id === 'overlay') closeSettings();
+        }
+
+        document.getElementById('city-input').addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            // Clear previous timer
+            clearTimeout(searchTimer);
+            
+            // Cancel previous request
+            if (searchController) {
+                searchController.abort();
+                searchController = null;
+            }
+            
+            if (query.length < 2) {
+                document.getElementById('city-results').innerHTML = '';
+                return;
+            }
+            
+            // Debounce
+            searchTimer = setTimeout(() => searchCity(query), 300);
+        });
+
+        async function searchCity(q) {
+            const list = document.getElementById('city-results');
+            const requestId = ++searchRequestId;
+            
+            // Create new controller for this request
+            searchController = new AbortController();
+            
+            list.innerHTML = '<li class="searching">Searching...</li>';
+            
+            try {
+                const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+                    signal: searchController.signal
+                });
+                
+                // Check if this is still the active request
+                if (requestId !== searchRequestId) return;
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                
+                // Double-check request is still active
+                if (requestId !== searchRequestId) return;
+                
+                if (data.length === 0) {
+                    list.innerHTML = '<li class="no-results">No cities found</li>';
+                    return;
+                }
+                
+                list.innerHTML = '';
+                data.forEach(city => {
+                    const li = document.createElement('li');
+                    const parts = [city.name];
+                    if (city.admin1) parts.push(city.admin1);
+                    if (city.country) parts.push(city.country);
+                    li.textContent = parts.join(', ');
+                    li.addEventListener('click', () => selectCity(city.name, city.latitude, city.longitude, city.country));
+                    list.appendChild(li);
+                });
+            } catch (e) {
+                if (e.name !== 'AbortError' && requestId === searchRequestId) {
+                    console.error('Search error:', e);
+                    list.innerHTML = '<li class="error">Search failed. Try again.</li>';
+                }
+            }
+        }
+
+        function selectCity(name, lat, lon, country) {
+            const fullName = country ? `${name}, ${country}` : name;
+            
+            state.city = fullName;
+            state.lat = lat;
+            state.lon = lon;
+            
+            localStorage.setItem('sh_city', fullName);
+            localStorage.setItem('sh_lat', String(lat));
+            localStorage.setItem('sh_lon', String(lon));
+            
+            document.getElementById('location-label').textContent = fullName;
+            closeSettings();
+            fetchData();
+        }
     </script>
-    {% endblock %}
 </body>
 </html>
