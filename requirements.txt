@@ -3,3 +3,4 @@ astral>=3.0
 suntime>=0.8
 requests>=2.28
 pytz
+gunicorn>=21.0

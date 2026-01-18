@@ -1,6 +1,6 @@
 # Seasonal Horizon
 
-Seasonal Horizon is a small Flask app that shows daily daylight dynamics and a short "uplift" message based on your location. The UI is a single-page dashboard; settings open as an overlay and are stored in the browser.
+Seasonal Horizon is a small Flask app that shows daily daylight dynamics, weather and a short "uplift" message based on your location. The UI is a single-page dashboard; settings (e.g. your location) open as an overlay and are stored in the browser.
 
 Run:
 - pip install -r requirements.txt

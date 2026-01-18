@@ -1,8 +1,20 @@
+import os
 from flask import Flask, render_template, request, jsonify
 import requests
 import time
+import logging
 
 app = Flask(__name__)
+
+# Production configuration
+app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
+# Configure logging for production
+if not app.debug:
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 # Simple cache for geocoding
 _geo_cache = {}
@@ -64,4 +76,5 @@ def api_uplift():
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
+    # Only for local development
     app.run(debug=True, port=8080)
