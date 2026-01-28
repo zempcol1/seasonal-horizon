@@ -1,8 +1,167 @@
+"""
+Uplift Engine - Narrative-driven, scenario-based daylight messaging.
+Analyzes 7-day forecast and solar data to identify the "hero" story.
+"""
+
 import random
-from datetime import date, datetime
+import hashlib
+from datetime import date, datetime, timedelta
 from services.solar_service import get_daylight_delta
 from services.weather_service import fetch_daily_weather
 from services import uplift_content as content
+
+
+# ===== SCENARIO DETECTION =====
+
+def detect_scenario(weather_data, solar_data, today):
+    """
+    Analyze weather and solar data to identify the primary narrative scenario.
+    Returns a tuple: (scenario_key, scenario_data)
+    """
+    scenarios = []
+    
+    forecast = weather_data.get("forecast", [])
+    analysis = weather_data.get("analysis", {})
+    today_weather = weather_data.get("today", {})
+    
+    delta_daily = solar_data.get("delta_daily_sec", 0)
+    delta_daily_min = abs(int(delta_daily // 60))
+    delta_solstice = solar_data.get("delta_solstice_sec", 0)
+    delta_solstice_min = int(delta_solstice // 60)
+    day_len_sec = solar_data.get("day_len_sec", 0)
+    
+    hours = int(day_len_sec // 3600)
+    mins = int((day_len_sec % 3600) // 60)
+    day_length = f"{hours}h {mins}m"
+    
+    solstice_hours = abs(delta_solstice_min) // 60
+    solstice_mins = abs(delta_solstice_min) % 60
+    hours_gained = f"{solstice_hours}h {solstice_mins}m" if solstice_hours > 0 else f"{solstice_mins}m"
+    
+    # 1. Rain clearing soon (The Tunnel)
+    if today_weather.get("is_bad", False) and analysis.get("next_good_day"):
+        days_until = analysis.get("next_good_day_index", 0)
+        if 1 <= days_until <= 4:
+            scenarios.append((
+                "rain_clearing_soon",
+                {"clear_day": analysis["next_good_day"], "days_until": days_until},
+                85 if days_until <= 2 else 70
+            ))
+    
+    # 2. Carpe Diem
+    if today_weather.get("is_good", False) and analysis.get("next_bad_day"):
+        days_until = analysis.get("next_bad_day_index", 0)
+        if 1 <= days_until <= 3:
+            scenarios.append((
+                "carpe_diem",
+                {"rain_day": analysis["next_bad_day"], "days_until": days_until},
+                90
+            ))
+    
+    # 3. Warming trend
+    if analysis.get("temp_trend") in ["warming", "warming_strong"]:
+        temp_change = abs(analysis.get("temp_change", 0))
+        weight = 75 if analysis["temp_trend"] == "warming_strong" else 55
+        scenarios.append(("warming_trend", {"temp_change": f"+{temp_change:.0f}"}, weight))
+    
+    # 4. Cooling trend
+    if analysis.get("temp_trend") in ["cooling", "cooling_strong"]:
+        temp_change = abs(analysis.get("temp_change", 0))
+        weight = 65 if analysis["temp_trend"] == "cooling_strong" else 45
+        scenarios.append(("cooling_trend", {"temp_change": f"{temp_change:.0f}"}, weight))
+    
+    # 5. Light Fighter
+    if today_weather.get("is_bad", False) and delta_daily > 60:
+        scenarios.append((
+            "light_fighter",
+            {"delta_min": delta_daily_min, "day_length": day_length},
+            80
+        ))
+    
+    # 6. Good streak
+    good_streak = analysis.get("good_streak_length", 0)
+    if good_streak >= 3:
+        scenarios.append(("good_streak", {"streak_days": good_streak}, 60))
+    
+    # 7. Grey stretch
+    bad_streak = analysis.get("bad_streak_length", 0)
+    if bad_streak >= 3:
+        scenarios.append(("grey_stretch", {"streak_days": bad_streak}, 50))
+    
+    # 8. Breakthrough day
+    if today_weather.get("is_good", False) and not analysis.get("next_good_day"):
+        scenarios.append(("breakthrough_day", {"bad_days": 3}, 70))
+    
+    # 9. Peak light
+    if today.month in [6, 7] and day_len_sec > 50000:
+        scenarios.append(("peak_light", {"day_length": day_length}, 65))
+    
+    # 10. Post-solstice grind
+    if today.month in [1, 2] and delta_solstice_min > 10:
+        scenarios.append(("post_solstice_grind", {"hours_gained": hours_gained}, 75))
+    
+    # 11. Weekend outlook
+    if today.weekday() in [3, 4, 5]:
+        weekend_outlook = analysis.get("weekend_outlook", "mixed")
+        if weekend_outlook == "good":
+            scenarios.append(("weekend_good", {}, 55))
+        elif weekend_outlook == "bad":
+            scenarios.append(("weekend_bad", {}, 45))
+    
+    # 12. Spring acceleration
+    if today.month in [2, 3, 4] and delta_daily_min >= 2:
+        scenarios.append(("spring_acceleration", {"delta_min": delta_daily_min}, 70))
+    
+    # 13. Solstice approaching
+    days_to_summer = _days_to_date(today, date(today.year, 6, 21))
+    days_to_winter = _days_to_date(today, date(today.year, 12, 21))
+    
+    if 0 < days_to_summer <= 14:
+        scenarios.append((
+            "solstice_approaching",
+            {"days_to_solstice": days_to_summer, "peak_or_min": "peak"},
+            60
+        ))
+    elif 0 < days_to_winter <= 14:
+        scenarios.append((
+            "solstice_approaching",
+            {"days_to_solstice": days_to_winter, "peak_or_min": "minimum"},
+            60
+        ))
+    
+    # 14. Default
+    scenarios.append((
+        "stable_focus_light",
+        {"day_length": day_length, "delta_min": delta_daily_min if delta_daily > 0 else abs(delta_daily_min)},
+        30
+    ))
+    
+    if not scenarios:
+        return "stable_focus_light", {"day_length": day_length, "delta_min": 0}
+    
+    scenarios.sort(key=lambda x: x[2], reverse=True)
+    top_scenarios = scenarios[:3]
+    total_weight = sum(s[2] for s in top_scenarios)
+    
+    # More random seed for variety
+    rng = random.Random(f"{today}|{len(forecast)}|{random.randint(0, 9999)}")
+    roll = rng.random() * total_weight
+    
+    cumulative = 0
+    for scenario_key, scenario_data, weight in top_scenarios:
+        cumulative += weight
+        if roll <= cumulative:
+            return scenario_key, scenario_data
+    
+    return scenarios[0][0], scenarios[0][1]
+
+
+def _days_to_date(from_date, to_date):
+    """Calculate days until a target date, handling year wrapping."""
+    if to_date < from_date:
+        to_date = to_date.replace(year=from_date.year + 1)
+    return (to_date - from_date).days
+
 
 def _get_seasonal_phase(month, day):
     """Determine seasonal phase based on date."""
@@ -23,130 +182,37 @@ def _get_seasonal_phase(month, day):
     else:
         return "late_autumn"
 
-def _get_trend_phrases(delta_min):
-    """Get appropriate trend phrases based on daily change."""
-    if delta_min >= 2:
-        return content.TREND_STRONG_GAIN
-    elif delta_min >= 1:
-        return content.TREND_MODERATE_GAIN
-    elif delta_min > 0:
-        return content.TREND_SLOW_GAIN
-    elif delta_min == 0:
-        return content.TREND_STABLE
-    elif delta_min > -1:
-        return content.TREND_SLOW_LOSS
-    elif delta_min > -2:
-        return content.TREND_MODERATE_LOSS
-    else:
-        return content.TREND_STRONG_LOSS
 
 def _get_weather_category(code):
-    """Convert weather code to category."""
+    """Convert weather code to category for nature observations."""
     if code in [0, 1]:
         return "clear"
-    elif code in [2, 3, 45, 48]:
-        return "cloudy"
     elif code in [71, 73, 75, 77, 85, 86]:
         return "snow"
-    else:
+    elif code in [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99]:
         return "rain"
-
-def _get_sunrise_category(hour):
-    """Categorize sunrise time."""
-    if hour < 5:
-        return "very_early"
-    elif hour < 6:
-        return "early"
-    elif hour < 7:
-        return "moderate"
-    elif hour < 8:
-        return "late"
     else:
-        return "very_late"
+        return "grey"
 
-def _get_sunset_category(hour, minute):
-    """Categorize sunset time."""
-    decimal_hour = hour + minute / 60
-    if decimal_hour < 16.5:
-        return "very_early"
-    elif decimal_hour < 17.5:
-        return "early"
-    elif decimal_hour < 19:
-        return "moderate"
-    elif decimal_hour < 20.5:
-        return "late"
-    else:
-        return "very_late"
 
-def _get_solstice_category(delta_s_min, month, day):
-    """Categorize progress relative to winter solstice."""
-    hours = abs(delta_s_min) / 60
-    
-    # Check if we're past summer solstice (losing light but still ahead of winter)
-    if month > 6 or (month == 6 and day > 21):
-        if month < 12 or (month == 12 and day < 21):
-            return "past_peak", hours
-    
-    # Winter solstice region
-    if month == 12 and day >= 21:
-        return "just_past_winter", hours
-    if month == 1 and day <= 10:
-        return "just_past_winter", hours
-    
-    # Recovery phases
-    if hours < 0.5:
-        return "early_recovery", hours
-    elif hours < 1.5:
-        return "early_recovery", hours
-    elif hours < 3:
-        return "mid_recovery", hours
-    elif hours < 5:
-        return "strong_recovery", hours
-    else:
-        return "near_peak", hours
+def _get_visit_hash(lat, lon):
+    """Generate a hash that changes periodically for variety."""
+    # Changes every ~6 hours for same location
+    time_bucket = datetime.now().hour // 6
+    key = f"{lat:.2f}|{lon:.2f}|{date.today()}|{time_bucket}"
+    return int(hashlib.md5(key.encode()).hexdigest()[:8], 16)
 
-def _get_weather_outlook(weather_data):
-    """Analyze weather trend for the week."""
-    if not weather_data:
-        return "stable"
-    
-    temp_trend = weather_data.get("week_temp_trend", "stable")
-    week_codes = weather_data.get("week_codes", [])
-    
-    if temp_trend == "warming":
-        return "warming"
-    elif temp_trend == "cooling":
-        return "cooling"
-    
-    if len(week_codes) >= 3:
-        bad_codes = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99]
-        today_bad = week_codes[0] in bad_codes
-        later_bad = any(c in bad_codes for c in week_codes[2:4])
-        
-        if today_bad and not later_bad:
-            return "improving"
-        elif not today_bad and later_bad:
-            return "worsening"
-    
-    return "stable"
-
-def _compare_tomorrow_weather(today_code, tomorrow_code):
-    """Compare today and tomorrow weather."""
-    good_codes = [0, 1, 2]
-    today_good = today_code in good_codes
-    tomorrow_good = tomorrow_code in good_codes
-    
-    if not today_good and tomorrow_good:
-        return "better"
-    elif today_good and not tomorrow_good:
-        return "worse"
-    return "same"
 
 def generate_uplift_data(lat, lon, city=None):
+    """
+    Generate narrative-driven uplift text based on location.
+    Returns cohesive paragraph and factual data for UI.
+    """
     solar = get_daylight_delta(lat, lon) or {}
-    weather = fetch_daily_weather(lat, lon) or {}
+    weather = fetch_daily_weather(lat, lon, days=7) or {}
     
-    # Parse solar data
+    today = date.today()
+    
     day_sec = solar.get("day_len_sec", 0)
     delta_daily = solar.get("delta_daily_sec", 0)
     delta_weekly = solar.get("delta_weekly_sec", 0)
@@ -154,111 +220,136 @@ def generate_uplift_data(lat, lon, city=None):
     sunrise = solar.get("sunrise")
     sunset = solar.get("sunset")
     
-    # Format values
     hours = int(day_sec // 3600)
     mins = int((day_sec % 3600) // 60)
     day_len_str = f"{hours}h {mins}m"
     sunrise_str = sunrise.strftime("%H:%M") if sunrise else "--:--"
     sunset_str = sunset.strftime("%H:%M") if sunset else "--:--"
     
-    # Calculate deltas
     delta_d_min = int(delta_daily // 60)
     delta_w_min = int(delta_weekly // 60)
     delta_s_min = int(delta_solstice // 60)
     
-    # Get weather info
     today_weather = weather.get("today", {})
-    tomorrow_weather = weather.get("tomorrow", {})
     weather_code = today_weather.get("code", 0)
-    tomorrow_code = tomorrow_weather.get("code", 0)
     weather_cat = _get_weather_category(weather_code)
-    temps = weather.get("daily", {}).get("temperature_2m_max", [10])
     
-    # Deterministic randomness for today's date + location + random element
-    today = date.today()
-    # Add some true randomness to vary output
-    random_seed = f"{today}|{lat:.2f}|{lon:.2f}|{random.randint(0, 999)}"
-    rng = random.Random(random_seed)
+    temps = []
+    if weather.get("forecast"):
+        temps = [d.get("temp_max") for d in weather["forecast"] if d.get("temp_max") is not None]
     
-    # Build text components
+    # Use multiple randomness sources for variety
+    visit_hash = _get_visit_hash(lat, lon)
+    random_factor = random.randint(0, 99999)
+    seed = f"{today}|{lat:.2f}|{lon:.2f}|{weather_code}|{visit_hash}|{random_factor}"
+    rng = random.Random(seed)
+    
+    scenario_key, scenario_data = detect_scenario(weather, solar, today)
+    
     text_parts = []
     
-    # 1. Core daylight fact (always included)
-    daylight_intros = [
-        f"Today brings {day_len_str} of daylight, from {sunrise_str} to {sunset_str}.",
-        f"You have {day_len_str} of light today, spanning {sunrise_str} to {sunset_str}.",
-        f"Daylight runs {day_len_str} today, with sunrise at {sunrise_str} and sunset at {sunset_str}.",
-        f"The day offers {day_len_str} of natural light, {sunrise_str} to {sunset_str}.",
-        f"Between {sunrise_str} and {sunset_str}, you have {day_len_str} of daylight.",
-    ]
-    text_parts.append(rng.choice(daylight_intros))
+    # 1. Primary scenario narrative
+    narrative_templates = content.FORECAST_NARRATIVES.get(scenario_key, [])
+    if narrative_templates:
+        template = rng.choice(narrative_templates)
+        try:
+            narrative = template.format(**scenario_data)
+        except KeyError:
+            narrative = template
+        text_parts.append(narrative)
     
-    # 2. Trend observation
-    if delta_d_min != 0:
-        trend_phrases = _get_trend_phrases(delta_d_min)
-        trend_text = rng.choice(trend_phrases)
-        if "{delta}" in trend_text:
-            trend_text = trend_text.format(delta=abs(delta_d_min))
-        text_parts.append(trend_text)
+    # 2. Daylight fact (high probability for grounding)
+    if rng.random() > 0.3:  # 70% chance
+        daylight_facts = [
+            f"Today you have {day_len_str} of daylight, running from {sunrise_str} to {sunset_str}.",
+            f"The day runs {day_len_str}, with sunrise at {sunrise_str} and sunset at {sunset_str}.",
+            f"Daylight today: {day_len_str}. The sun is up from {sunrise_str} to {sunset_str}.",
+            f"You're working with {day_len_str} of light today, {sunrise_str} to {sunset_str}.",
+            f"Today's daylight window: {day_len_str}, from {sunrise_str} sunrise to {sunset_str} sunset.",
+        ]
+        text_parts.append(rng.choice(daylight_facts))
     
-    # 3. Seasonal phase context
-    phase = _get_seasonal_phase(today.month, today.day)
-    phase_text = rng.choice(content.SEASONAL_PHASE[phase])
-    text_parts.append(phase_text)
-    
-    # 4. Weather observation (high probability)
-    if rng.random() > 0.25:
-        weather_phrases = content.WEATHER_TODAY.get(weather_cat, content.WEATHER_TODAY["cloudy"])
-        text_parts.append(rng.choice(weather_phrases))
-    
-    # 5. Tomorrow comparison or week outlook (medium probability)
-    if rng.random() > 0.5:
-        tomorrow_compare = _compare_tomorrow_weather(weather_code, tomorrow_code)
-        if tomorrow_compare != "same":
-            tomorrow_phrases = content.WEATHER_TOMORROW.get(tomorrow_compare, [])
-            if tomorrow_phrases:
-                text_parts.append(rng.choice(tomorrow_phrases))
+    # 3. Change from yesterday (if significant)
+    if abs(delta_d_min) >= 1 and rng.random() > 0.4:  # 60% chance
+        if delta_d_min > 0:
+            delta_phrases = [
+                f"That's {delta_d_min} minutes more than yesterday.",
+                f"You gained {delta_d_min} minutes compared to yesterday.",
+                f"+{delta_d_min} minutes versus yesterday.",
+                f"The day is {delta_d_min} minutes longer than it was yesterday.",
+            ]
         else:
-            outlook = _get_weather_outlook(weather)
-            if outlook != "stable":
-                outlook_phrases = content.WEATHER_WEEK_OUTLOOK.get(outlook, [])
-                if outlook_phrases:
-                    text_parts.append(rng.choice(outlook_phrases))
+            delta_phrases = [
+                f"That's {abs(delta_d_min)} minutes less than yesterday.",
+                f"You lost {abs(delta_d_min)} minutes compared to yesterday.",
+                f"{delta_d_min} minutes versus yesterday.",
+                f"The day is {abs(delta_d_min)} minutes shorter than yesterday.",
+            ]
+        text_parts.append(rng.choice(delta_phrases))
     
-    # 6. Nature observation (high probability - this was missing!)
-    if rng.random() > 0.2:
-        nature_obs = content.NATURE_OBSERVATIONS.get(today.month, [])
-        if nature_obs:
-            text_parts.append(rng.choice(nature_obs))
+    # 4. Seasonal context (medium probability)
+    if rng.random() > 0.5:  # 50% chance
+        phase = _get_seasonal_phase(today.month, today.day)
+        phase_texts = content.SEASONAL_PHASE.get(phase, [])
+        if phase_texts:
+            text_parts.append(rng.choice(phase_texts))
     
-    # 7. Practical sunrise/sunset note (lower probability)
-    if rng.random() > 0.7 and sunrise and sunset:
-        sunrise_hour = int(sunrise_str.split(":")[0])
-        sunset_parts = sunset_str.split(":")
-        sunset_hour = int(sunset_parts[0])
-        sunset_min = int(sunset_parts[1])
+    # 5. Nature observation - HIGH PROBABILITY (this is what you wanted more of)
+    if rng.random() > 0.2:  # 80% chance
+        month_signs = content.NATURE_SIGNS.get(today.month, {})
+        if isinstance(month_signs, dict):
+            # Try weather-specific first
+            weather_obs = month_signs.get(weather_cat, [])
+            general_obs = month_signs.get("general", [])
+            
+            # Combine options
+            all_obs = weather_obs + general_obs
+            if all_obs:
+                text_parts.append(rng.choice(all_obs))
         
-        sunrise_cat = _get_sunrise_category(sunrise_hour)
-        sunset_cat = _get_sunset_category(sunset_hour, sunset_min)
+        # Maybe add a second nature observation for more content
+        if rng.random() > 0.6 and isinstance(month_signs, dict):  # 40% chance of second
+            general_obs = month_signs.get("general", [])
+            if general_obs:
+                second_obs = rng.choice(general_obs)
+                if second_obs not in text_parts:
+                    text_parts.append(second_obs)
+    
+    # 6. General nature fact (lower probability, for variety)
+    if rng.random() > 0.7:  # 30% chance
+        text_parts.append(rng.choice(content.NATURE_FACTS_GENERAL))
+    
+    # 7. Closing (low probability)
+    if rng.random() > 0.8:  # 20% chance
+        closing_type = rng.choice(list(content.CLOSINGS.keys()))
+        text_parts.append(rng.choice(content.CLOSINGS[closing_type]))
+    
+    # Ensure we have at least 3 parts for longer text
+    if len(text_parts) < 3:
+        # Add more content
+        phase = _get_seasonal_phase(today.month, today.day)
+        phase_texts = content.SEASONAL_PHASE.get(phase, [])
+        if phase_texts and len(text_parts) < 3:
+            addition = rng.choice(phase_texts)
+            if addition not in text_parts:
+                text_parts.append(addition)
         
-        # Pick either sunrise or sunset observation
-        if rng.random() > 0.5:
-            phrases = content.PRACTICAL_SUNRISE.get(sunrise_cat, [])
-            if phrases:
-                text_parts.append(rng.choice(phrases).format(time=sunrise_str))
-        else:
-            phrases = content.PRACTICAL_SUNSET.get(sunset_cat, [])
-            if phrases:
-                text_parts.append(rng.choice(phrases).format(time=sunset_str))
+        month_signs = content.NATURE_SIGNS.get(today.month, {})
+        if isinstance(month_signs, dict) and len(text_parts) < 3:
+            general_obs = month_signs.get("general", [])
+            if general_obs:
+                addition = rng.choice(general_obs)
+                if addition not in text_parts:
+                    text_parts.append(addition)
     
-    # Combine text - aim for 3-5 sentences
-    final_parts = text_parts[:5]  # Limit to 5 components max
-    if len(final_parts) < 3 and len(text_parts) > len(final_parts):
-        final_parts = text_parts[:3]  # Ensure at least 3 if available
-    
+    # Limit to 5-6 parts for readability but aim for at least 4
+    final_parts = text_parts[:6]
     text = " ".join(final_parts)
     
-    # Format deltas for display
+    while "  " in text:
+        text = text.replace("  ", " ")
+    
+    # Format delta values
     if abs(delta_s_min) >= 60:
         s_hours = abs(delta_s_min) // 60
         s_mins = abs(delta_s_min) % 60
