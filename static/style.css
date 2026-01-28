@@ -232,7 +232,6 @@ h1 {
 
 .overlay-box h2 { 
     font-size: 1.25rem; 
-    margin-bottom: 1.5rem;
     font-weight: 600;
 }
 
@@ -351,4 +350,112 @@ h1 {
     .uplift-text {
         font-size: 1rem;
     }
+}
+
+/* ===== SETTINGS SECTIONS ===== */
+.settings-section {
+    margin-bottom: 1.5rem;
+}
+
+.settings-section h3 {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+/* ===== VERSION & CHANGELOG ===== */
+.version-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+.version-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.version-label:hover {
+    background: var(--border);
+    color: var(--text);
+}
+
+.changelog {
+    margin-top: 0.75rem;
+    text-align: left;
+    background: #f7fafc;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.changelog ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.changelog li {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.changelog li:last-child {
+    border-bottom: none;
+}
+
+.changelog li strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* ===== OVERLAY HEADER ===== */
+.overlay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.overlay-header h2 {
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background: var(--border);
+    color: var(--text);
+}
+
+/* Remove old h2 margin since it's now in header */
+.overlay-box h2 { 
+    font-size: 1.25rem; 
+    font-weight: 600;
+}
+
+/* ===== TEXT HIGHLIGHTS ===== */
+.uplift-text mark {
+    background: linear-gradient(120deg, #fef08a 0%, #fde047 100%);
+    color: inherit;
+    padding: 0.1em 0.2em;
+    border-radius: 3px;
+    font-weight: 400;
 }

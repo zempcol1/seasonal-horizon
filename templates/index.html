@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seasonal Horizon</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -83,13 +84,28 @@
 
     <div id="overlay" class="overlay hidden" onclick="handleOverlayClick(event)">
         <div class="overlay-box">
-            <h2>📍 Choose Your Location</h2>
-            <label>Search for a city</label>
-            <input type="text" id="city-input" placeholder="e.g. Berlin, Tokyo, New York..." autocomplete="off">
-            <ul id="city-results" class="results-list"></ul>
-            <div class="current-location" id="current-loc"></div>
-            <div class="overlay-actions">
-                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+            <div class="overlay-header">
+                <h2>Settings</h2>
+                <button class="close-btn" onclick="closeSettings()" title="Close">&times;</button>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Location</h3>
+                <label>Search for a city</label>
+                <input type="text" id="city-input" placeholder="e.g. Berlin, Tokyo, New York..." autocomplete="off">
+                <ul id="city-results" class="results-list"></ul>
+                <div class="current-location" id="current-loc"></div>
+            </div>
+            
+            <div class="version-section">
+                <span class="version-label" onclick="toggleChangelog()">v0.3</span>
+                <div id="changelog" class="changelog hidden">
+                    <ul>
+                        <li><strong>v0.3</strong> – Smart forecast narratives with 7-day weather analysis</li>
+                        <li><strong>v0.2</strong> – Location selection and improved text generation</li>
+                        <li><strong>v0.1</strong> – Initial release</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -146,7 +162,10 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    document.getElementById('uplift-text').textContent = data.text;
+                    // Apply highlights to text
+                    const highlightedText = applyHighlights(data.text, data.highlights || []);
+                    document.getElementById('uplift-text').innerHTML = highlightedText;
+                    
                     document.getElementById('f-sunrise').textContent = data.facts.sunrise;
                     document.getElementById('f-sunset').textContent = data.facts.sunset;
                     document.getElementById('f-length').textContent = data.facts.day_length;
@@ -285,6 +304,39 @@
             document.getElementById('location-label').textContent = fullName;
             closeSettings();
             fetchData();
+        }
+
+        function toggleChangelog() {
+            const changelog = document.getElementById('changelog');
+            changelog.classList.toggle('hidden');
+        }
+
+        function applyHighlights(text, highlights) {
+            if (!highlights || highlights.length === 0) {
+                return escapeHtml(text);
+            }
+            
+            let result = text;
+            // Sort highlights by length (longest first) to avoid partial replacements
+            const sortedHighlights = [...highlights].sort((a, b) => b.length - a.length);
+            
+            for (const phrase of sortedHighlights) {
+                const escaped = escapeHtml(phrase);
+                const regex = new RegExp(escapeRegex(phrase), 'gi');
+                result = result.replace(regex, `<mark>${escaped}</mark>`);
+            }
+            
+            return escapeHtml(result).replace(/&lt;mark&gt;/g, '<mark>').replace(/&lt;\/mark&gt;/g, '</mark>');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
     </script>
 </body>

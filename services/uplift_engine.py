@@ -5,6 +5,7 @@ Analyzes 7-day forecast and solar data to identify the "hero" story.
 
 import random
 import hashlib
+import re
 from datetime import date, datetime, timedelta
 from services.solar_service import get_daylight_delta
 from services.weather_service import fetch_daily_weather
@@ -203,6 +204,80 @@ def _get_visit_hash(lat, lon):
     return int(hashlib.md5(key.encode()).hexdigest()[:8], 16)
 
 
+def _extract_highlights(text, scenario_key, scenario_data, day_len_str, delta_d_min):
+    """
+    Extract 2-3 key phrases to highlight in the text.
+    Returns list of phrases (max 6 words total across all highlights).
+    """
+    highlights = []
+    
+    # Priority 1: Key numbers/facts
+    if day_len_str and day_len_str in text:
+        highlights.append(day_len_str)
+    
+    # Priority 2: Scenario-specific highlights
+    if scenario_key == "rain_clearing_soon" and scenario_data.get("clear_day"):
+        day = scenario_data["clear_day"]
+        if day in text:
+            highlights.append(day)
+    
+    elif scenario_key == "carpe_diem" and scenario_data.get("rain_day"):
+        day = scenario_data["rain_day"]
+        if day in text:
+            highlights.append(day)
+    
+    elif scenario_key == "light_fighter":
+        delta = scenario_data.get("delta_min", 0)
+        patterns = [f"+{delta} minutes", f"{delta} minutes", f"{delta} more minutes"]
+        for p in patterns:
+            if p in text:
+                highlights.append(p)
+                break
+    
+    elif scenario_key == "post_solstice_grind":
+        gained = scenario_data.get("hours_gained", "")
+        if gained and gained in text:
+            highlights.append(gained)
+    
+    elif scenario_key == "warming_trend":
+        change = scenario_data.get("temp_change", "")
+        if change:
+            patterns = [f"{change}°C", f"{change} °C"]
+            for p in patterns:
+                if p in text:
+                    highlights.append(p)
+                    break
+    
+    # Priority 3: Delta from yesterday
+    if delta_d_min != 0 and len(highlights) < 2:
+        patterns = [
+            f"+{abs(delta_d_min)} minutes",
+            f"{abs(delta_d_min)} minutes more",
+            f"{abs(delta_d_min)} minutes less",
+        ]
+        for p in patterns:
+            if p in text and p not in highlights:
+                highlights.append(p)
+                break
+    
+    # Priority 4: Key action words
+    action_phrases = [
+        "Get outside", "Make today count", "Plan accordingly",
+        "the sun is back", "the light is gaining", "turning point"
+    ]
+    if len(highlights) < 2:
+        for phrase in action_phrases:
+            if phrase.lower() in text.lower() and len(highlights) < 3:
+                # Find exact case in text
+                match = re.search(re.escape(phrase), text, re.IGNORECASE)
+                if match:
+                    highlights.append(match.group(0))
+                    break
+    
+    # Limit to 3 highlights max
+    return highlights[:3]
+
+
 def generate_uplift_data(lat, lon, city=None):
     """
     Generate narrative-driven uplift text based on location.
@@ -238,7 +313,6 @@ def generate_uplift_data(lat, lon, city=None):
     if weather.get("forecast"):
         temps = [d.get("temp_max") for d in weather["forecast"] if d.get("temp_max") is not None]
     
-    # Use multiple randomness sources for variety
     visit_hash = _get_visit_hash(lat, lon)
     random_factor = random.randint(0, 99999)
     seed = f"{today}|{lat:.2f}|{lon:.2f}|{weather_code}|{visit_hash}|{random_factor}"
@@ -349,6 +423,9 @@ def generate_uplift_data(lat, lon, city=None):
     while "  " in text:
         text = text.replace("  ", " ")
     
+    # Extract highlights
+    highlights = _extract_highlights(text, scenario_key, scenario_data, day_len_str, delta_d_min)
+    
     # Format delta values
     if abs(delta_s_min) >= 60:
         s_hours = abs(delta_s_min) // 60
@@ -369,4 +446,4 @@ def generate_uplift_data(lat, lon, city=None):
         "temp_max": f"{temps[0]:.0f}°C" if temps else "--"
     }
     
-    return {"text": text, "facts": facts}
+    return {"text": text, "facts": facts, "highlights": highlights}
