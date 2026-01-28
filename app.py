@@ -43,7 +43,6 @@ def search_city():
     if len(query) < 2:
         return jsonify([])
     
-    # Check cache
     cache_key = query.lower()
     if cache_key in _geo_cache:
         data, ts = _geo_cache[cache_key]
@@ -69,7 +68,13 @@ def api_uplift():
         lat = float(request.args.get('lat', 47.37))
         lon = float(request.args.get('lon', 8.54))
         city = request.args.get('city', '')
-        data = generate_uplift_data(lat, lon, city)
+        lang = request.args.get('lang', 'en')
+        
+        # Validate language
+        if lang not in ['en', 'de']:
+            lang = 'en'
+        
+        data = generate_uplift_data(lat, lon, city, lang=lang)
         return jsonify({"success": True, **data})
     except Exception as e:
         app.logger.exception("Uplift error")

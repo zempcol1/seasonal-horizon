@@ -1,6 +1,6 @@
 """
 Uplift Engine - Narrative-driven, scenario-based daylight messaging.
-Analyzes 7-day forecast and solar data to identify the "hero" story.
+Supports multiple languages (en, de).
 """
 
 import random
@@ -10,6 +10,24 @@ from datetime import date, datetime, timedelta
 from services.solar_service import get_daylight_delta
 from services.weather_service import fetch_daily_weather
 from services import uplift_content as content
+
+
+# ===== HELPER: Get localized content =====
+
+def _get_localized(data, lang, fallback="en"):
+    """Get content for specific language with fallback."""
+    if isinstance(data, dict):
+        if lang in data:
+            return data[lang]
+        return data.get(fallback, [])
+    return data  # Already a list
+
+
+def _get_localized_nested(data, key, lang, fallback="en"):
+    """Get nested content by key and language."""
+    if key not in data:
+        return []
+    return _get_localized(data[key], lang, fallback)
 
 
 # ===== SCENARIO DETECTION =====
@@ -39,7 +57,7 @@ def detect_scenario(weather_data, solar_data, today):
     solstice_mins = abs(delta_solstice_min) % 60
     hours_gained = f"{solstice_hours}h {solstice_mins}m" if solstice_hours > 0 else f"{solstice_mins}m"
     
-    # 1. Rain clearing soon (The Tunnel)
+    # 1. Rain clearing soon
     if today_weather.get("is_bad", False) and analysis.get("next_good_day"):
         days_until = analysis.get("next_good_day_index", 0)
         if 1 <= days_until <= 4:
@@ -144,7 +162,6 @@ def detect_scenario(weather_data, solar_data, today):
     top_scenarios = scenarios[:3]
     total_weight = sum(s[2] for s in top_scenarios)
     
-    # More random seed for variety
     rng = random.Random(f"{today}|{len(forecast)}|{random.randint(0, 9999)}")
     roll = rng.random() * total_weight
     
@@ -198,91 +215,97 @@ def _get_weather_category(code):
 
 def _get_visit_hash(lat, lon):
     """Generate a hash that changes periodically for variety."""
-    # Changes every ~6 hours for same location
     time_bucket = datetime.now().hour // 6
     key = f"{lat:.2f}|{lon:.2f}|{date.today()}|{time_bucket}"
     return int(hashlib.md5(key.encode()).hexdigest()[:8], 16)
 
 
-def _extract_highlights(text, scenario_key, scenario_data, day_len_str, delta_d_min):
-    """
-    Extract 2-3 key phrases to highlight in the text.
-    Returns list of phrases (max 6 words total across all highlights).
-    """
+def _extract_highlights(text, scenario_key, scenario_data, day_len_str, delta_d_min, lang="en"):
+    """Extract 1-2 key phrases to highlight (max 6 words total). Focus on words, not numbers."""
     highlights = []
     
-    # Priority 1: Key numbers/facts
-    if day_len_str and day_len_str in text:
-        highlights.append(day_len_str)
+    # Key phrases by scenario (prefer meaningful words over numbers)
+    key_phrases = {
+        "en": {
+            "rain_clearing_soon": ["breaking through", "clouds lift", "clearing"],
+            "carpe_diem": ["prime time", "your window", "make today count"],
+            "warming_trend": ["climbing", "warming", "softening"],
+            "cooling_trend": ["crisper", "cooling", "layers"],
+            "light_fighter": ["light is gaining", "progress continues", "permanent progress"],
+            "peak_light": ["at the top", "longest days", "peak daylight"],
+            "post_solstice_grind": ["turnaround", "climb has begun", "already gained"],
+            "good_streak": ["good weather", "clear skies", "cooperating"],
+            "grey_stretch": ["indoor", "slow down", "cozy"],
+            "breakthrough_day": ["Durchbruch", "Sonne zurück", "Serie bricht"],
+            "weekend_good": ["weekend", "both days", "outdoor"],
+            "weekend_bad": ["indoor", "cozy weekend", "movies"],
+            "spring_acceleration": ["fast phase", "steepest climb", "momentum"],
+            "solstice_approaching": ["turning point", "countdown", "solstice"],
+            "stable_focus_light": ["focus on the light", "quiet progress"],
+        },
+        "de": {
+            "rain_clearing_soon": ["Sonne durch", "durchhalten", "klart auf"],
+            "carpe_diem": ["deine Chance", "Gold wert", "nutze"],
+            "warming_trend": ["wärmer", "milder", "Wandel spürbar"],
+            "cooling_trend": ["frischer", "kühler", "Jacke"],
+            "light_fighter": ["Licht wächst", "Fortschritt", "trotz Wolken"],
+            "peak_light": ["am Zenit", "längsten Tage", "Maximum"],
+            "post_solstice_grind": ["Wende läuft", "Aufstieg begonnen", "gewonnen"],
+            "good_streak": ["Schönwetter", "spielt mit", "nutzen"],
+            "grey_stretch": ["drinnen", "Gemütlichkeit", "Entschleunigen"],
+            "breakthrough_day": ["Durchbruch", "Sonne zurück", "Serie bricht"],
+            "weekend_good": ["Wochenende", "beide Tage", "draußen"],
+            "weekend_bad": ["drinnen", "gemütlich", "Filme"],
+            "spring_acceleration": ["schnelle Phase", "steilste Anstieg", "Schwung"],
+            "solstice_approaching": ["Wendepunkt", "Countdown", "Sonnenwende"],
+            "stable_focus_light": ["Licht im Fokus", "stiller Fortschritt"],
+        }
+    }
     
-    # Priority 2: Scenario-specific highlights
-    if scenario_key == "rain_clearing_soon" and scenario_data.get("clear_day"):
-        day = scenario_data["clear_day"]
-        if day in text:
-            highlights.append(day)
+    phrases = key_phrases.get(lang, key_phrases["en"]).get(scenario_key, [])
     
-    elif scenario_key == "carpe_diem" and scenario_data.get("rain_day"):
-        day = scenario_data["rain_day"]
-        if day in text:
-            highlights.append(day)
+    for phrase in phrases:
+        if phrase.lower() in text.lower() and len(highlights) < 2:
+            # Find exact match in text
+            import re
+            match = re.search(re.escape(phrase), text, re.IGNORECASE)
+            if match:
+                highlights.append(match.group(0))
     
-    elif scenario_key == "light_fighter":
-        delta = scenario_data.get("delta_min", 0)
-        patterns = [f"+{delta} minutes", f"{delta} minutes", f"{delta} more minutes"]
-        for p in patterns:
-            if p in text:
-                highlights.append(p)
-                break
-    
-    elif scenario_key == "post_solstice_grind":
-        gained = scenario_data.get("hours_gained", "")
-        if gained and gained in text:
-            highlights.append(gained)
-    
-    elif scenario_key == "warming_trend":
-        change = scenario_data.get("temp_change", "")
-        if change:
-            patterns = [f"{change}°C", f"{change} °C"]
-            for p in patterns:
-                if p in text:
-                    highlights.append(p)
-                    break
-    
-    # Priority 3: Delta from yesterday
-    if delta_d_min != 0 and len(highlights) < 2:
-        patterns = [
-            f"+{abs(delta_d_min)} minutes",
-            f"{abs(delta_d_min)} minutes more",
-            f"{abs(delta_d_min)} minutes less",
-        ]
-        for p in patterns:
-            if p in text and p not in highlights:
-                highlights.append(p)
-                break
-    
-    # Priority 4: Key action words
-    action_phrases = [
-        "Get outside", "Make today count", "Plan accordingly",
-        "the sun is back", "the light is gaining", "turning point"
-    ]
-    if len(highlights) < 2:
-        for phrase in action_phrases:
-            if phrase.lower() in text.lower() and len(highlights) < 3:
-                # Find exact case in text
-                match = re.search(re.escape(phrase), text, re.IGNORECASE)
+    # If still need highlights, look for action words
+    if len(highlights) < 1:
+        action_words = {
+            "en": ["Get outside", "Plan", "Use it", "Notice", "Worth"],
+            "de": ["Nutze", "Plane", "Genieße", "Beachte", "Lohnt"]
+        }
+        for word in action_words.get(lang, action_words["en"]):
+            if word.lower() in text.lower() and len(highlights) < 2:
+                import re
+                match = re.search(re.escape(word), text, re.IGNORECASE)
                 if match:
                     highlights.append(match.group(0))
                     break
     
-    # Limit to 3 highlights max
-    return highlights[:3]
+    return highlights[:2]
 
 
-def generate_uplift_data(lat, lon, city=None):
+def generate_uplift_data(lat, lon, city=None, lang="en"):
     """
-    Generate narrative-driven uplift text based on location.
-    Returns cohesive paragraph and factual data for UI.
+    Generate narrative-driven uplift text based on location and language.
+    
+    Args:
+        lat: Latitude
+        lon: Longitude
+        city: City name (optional)
+        lang: Language code ('en' or 'de'), defaults to 'en'
+    
+    Returns:
+        dict with 'text', 'facts', 'highlights'
     """
+    # Validate language
+    if lang not in ["en", "de"]:
+        lang = "en"
+    
     solar = get_daylight_delta(lat, lon) or {}
     weather = fetch_daily_weather(lat, lon, days=7) or {}
     
@@ -307,7 +330,6 @@ def generate_uplift_data(lat, lon, city=None):
     
     today_weather = weather.get("today", {})
     weather_code = today_weather.get("code", 0)
-    weather_cat = _get_weather_category(weather_code)
     
     temps = []
     if weather.get("forecast"):
@@ -322,8 +344,8 @@ def generate_uplift_data(lat, lon, city=None):
     
     text_parts = []
     
-    # 1. Primary scenario narrative
-    narrative_templates = content.FORECAST_NARRATIVES.get(scenario_key, [])
+    # 1. Primary scenario narrative (localized)
+    narrative_templates = _get_localized_nested(content.FORECAST_NARRATIVES, scenario_key, lang)
     if narrative_templates:
         template = rng.choice(narrative_templates)
         try:
@@ -332,99 +354,82 @@ def generate_uplift_data(lat, lon, city=None):
             narrative = template
         text_parts.append(narrative)
     
-    # 2. Daylight fact (high probability for grounding)
-    if rng.random() > 0.3:  # 70% chance
-        daylight_facts = [
-            f"Today you have {day_len_str} of daylight, running from {sunrise_str} to {sunset_str}.",
-            f"The day runs {day_len_str}, with sunrise at {sunrise_str} and sunset at {sunset_str}.",
-            f"Daylight today: {day_len_str}. The sun is up from {sunrise_str} to {sunset_str}.",
-            f"You're working with {day_len_str} of light today, {sunrise_str} to {sunset_str}.",
-            f"Today's daylight window: {day_len_str}, from {sunrise_str} sunrise to {sunset_str} sunset.",
-        ]
-        text_parts.append(rng.choice(daylight_facts))
+    # 2. Daylight fact (localized)
+    if rng.random() > 0.3:
+        daylight_templates = _get_localized(content.DAYLIGHT_FACTS, lang)
+        if daylight_templates:
+            template = rng.choice(daylight_templates)
+            fact = template.format(day_length=day_len_str, sunrise=sunrise_str, sunset=sunset_str)
+            text_parts.append(fact)
     
-    # 3. Change from yesterday (if significant)
-    if abs(delta_d_min) >= 1 and rng.random() > 0.4:  # 60% chance
+    # 3. Change from yesterday (localized)
+    if abs(delta_d_min) >= 1 and rng.random() > 0.4:
         if delta_d_min > 0:
-            delta_phrases = [
-                f"That's {delta_d_min} minutes more than yesterday.",
-                f"You gained {delta_d_min} minutes compared to yesterday.",
-                f"+{delta_d_min} minutes versus yesterday.",
-                f"The day is {delta_d_min} minutes longer than it was yesterday.",
-            ]
+            delta_templates = _get_localized(content.DELTA_PHRASES["gaining"], lang)
         else:
-            delta_phrases = [
-                f"That's {abs(delta_d_min)} minutes less than yesterday.",
-                f"You lost {abs(delta_d_min)} minutes compared to yesterday.",
-                f"{delta_d_min} minutes versus yesterday.",
-                f"The day is {abs(delta_d_min)} minutes shorter than yesterday.",
-            ]
-        text_parts.append(rng.choice(delta_phrases))
+            delta_templates = _get_localized(content.DELTA_PHRASES["losing"], lang)
+        
+        if delta_templates:
+            template = rng.choice(delta_templates)
+            phrase = template.format(delta=abs(delta_d_min))
+            text_parts.append(phrase)
     
-    # 4. Seasonal context (medium probability)
-    if rng.random() > 0.5:  # 50% chance
+    # 4. Seasonal context (localized)
+    if rng.random() > 0.5:
         phase = _get_seasonal_phase(today.month, today.day)
-        phase_texts = content.SEASONAL_PHASE.get(phase, [])
+        phase_texts = _get_localized_nested(content.SEASONAL_PHASE, phase, lang)
         if phase_texts:
             text_parts.append(rng.choice(phase_texts))
     
-    # 5. Nature observation - HIGH PROBABILITY (this is what you wanted more of)
-    if rng.random() > 0.2:  # 80% chance
+    # 5. Nature observation (localized)
+    if rng.random() > 0.2:
         month_signs = content.NATURE_SIGNS.get(today.month, {})
-        if isinstance(month_signs, dict):
-            # Try weather-specific first
-            weather_obs = month_signs.get(weather_cat, [])
-            general_obs = month_signs.get("general", [])
-            
-            # Combine options
-            all_obs = weather_obs + general_obs
-            if all_obs:
-                text_parts.append(rng.choice(all_obs))
+        nature_texts = _get_localized(month_signs, lang)
+        if nature_texts:
+            text_parts.append(rng.choice(nature_texts))
         
-        # Maybe add a second nature observation for more content
-        if rng.random() > 0.6 and isinstance(month_signs, dict):  # 40% chance of second
-            general_obs = month_signs.get("general", [])
-            if general_obs:
-                second_obs = rng.choice(general_obs)
-                if second_obs not in text_parts:
-                    text_parts.append(second_obs)
+        # Maybe add second
+        if rng.random() > 0.6 and nature_texts:
+            second = rng.choice(nature_texts)
+            if second not in text_parts:
+                text_parts.append(second)
     
-    # 6. General nature fact (lower probability, for variety)
-    if rng.random() > 0.7:  # 30% chance
-        text_parts.append(rng.choice(content.NATURE_FACTS_GENERAL))
+    # 6. General nature fact (localized)
+    if rng.random() > 0.7:
+        general_facts = _get_localized(content.NATURE_FACTS_GENERAL, lang)
+        if general_facts:
+            text_parts.append(rng.choice(general_facts))
     
-    # 7. Closing (low probability)
-    if rng.random() > 0.8:  # 20% chance
+    # 7. Closing (localized)
+    if rng.random() > 0.8:
         closing_type = rng.choice(list(content.CLOSINGS.keys()))
-        text_parts.append(rng.choice(content.CLOSINGS[closing_type]))
+        closing_texts = _get_localized(content.CLOSINGS[closing_type], lang)
+        if closing_texts:
+            text_parts.append(rng.choice(closing_texts))
     
-    # Ensure we have at least 3 parts for longer text
+    # Ensure minimum parts
     if len(text_parts) < 3:
-        # Add more content
         phase = _get_seasonal_phase(today.month, today.day)
-        phase_texts = content.SEASONAL_PHASE.get(phase, [])
+        phase_texts = _get_localized_nested(content.SEASONAL_PHASE, phase, lang)
         if phase_texts and len(text_parts) < 3:
             addition = rng.choice(phase_texts)
             if addition not in text_parts:
                 text_parts.append(addition)
         
         month_signs = content.NATURE_SIGNS.get(today.month, {})
-        if isinstance(month_signs, dict) and len(text_parts) < 3:
-            general_obs = month_signs.get("general", [])
-            if general_obs:
-                addition = rng.choice(general_obs)
-                if addition not in text_parts:
-                    text_parts.append(addition)
+        nature_texts = _get_localized(month_signs, lang)
+        if nature_texts and len(text_parts) < 3:
+            addition = rng.choice(nature_texts)
+            if addition not in text_parts:
+                text_parts.append(addition)
     
-    # Limit to 5-6 parts for readability but aim for at least 4
     final_parts = text_parts[:6]
     text = " ".join(final_parts)
     
     while "  " in text:
         text = text.replace("  ", " ")
     
-    # Extract highlights
-    highlights = _extract_highlights(text, scenario_key, scenario_data, day_len_str, delta_d_min)
+    highlights = _extract_highlights(text, scenario_key, scenario_data, day_len_str, delta_d_min, lang)
     
     # Format delta values
     if abs(delta_s_min) >= 60:

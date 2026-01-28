@@ -31,15 +31,15 @@
                 <div class="facts-section">
                     <div class="facts-row">
                         <div class="fact">
-                            <span class="label">🌅 Sunrise</span>
+                            <span class="label" data-i18n="sunrise">🌅 Sunrise</span>
                             <span id="f-sunrise" class="val">--</span>
                         </div>
                         <div class="fact">
-                            <span class="label">🌇 Sunset</span>
+                            <span class="label" data-i18n="sunset">🌇 Sunset</span>
                             <span id="f-sunset" class="val">--</span>
                         </div>
                         <div class="fact">
-                            <span class="label">☀️ Daylight</span>
+                            <span class="label" data-i18n="daylight">☀️ Daylight</span>
                             <span id="f-length" class="val">--</span>
                         </div>
                     </div>
@@ -48,15 +48,15 @@
                 <div class="facts-section">
                     <div class="facts-row">
                         <div class="fact delta-fact">
-                            <span class="label">vs Yesterday</span>
+                            <span class="label" data-i18n="vsYesterday">vs Yesterday</span>
                             <span id="f-delta-d" class="val">--</span>
                         </div>
                         <div class="fact delta-fact">
-                            <span class="label">vs Last Week</span>
+                            <span class="label" data-i18n="vsLastWeek">vs Last Week</span>
                             <span id="f-delta-w" class="val">--</span>
                         </div>
                         <div class="fact delta-fact">
-                            <span class="label">vs Solstice</span>
+                            <span class="label" data-i18n="vsSolstice">vs Solstice</span>
                             <span id="f-delta-s" class="val">--</span>
                         </div>
                     </div>
@@ -69,7 +69,7 @@
                             <span id="f-weather" class="val">Clear</span>
                         </div>
                         <div class="fact">
-                            <span class="label">🌡️ High Today</span>
+                            <span class="label" data-i18n="highToday">🌡️ High Today</span>
                             <span id="f-temp" class="val">--</span>
                         </div>
                     </div>
@@ -78,29 +78,38 @@
         </section>
         
         <footer class="footer">
-            <p>Your daily reminder that light always returns.</p>
+            <p id="footer-text">Your daily reminder that light always returns.</p>
         </footer>
     </main>
 
     <div id="overlay" class="overlay hidden" onclick="handleOverlayClick(event)">
         <div class="overlay-box">
             <div class="overlay-header">
-                <h2>Settings</h2>
+                <h2 data-i18n="settings">Settings</h2>
                 <button class="close-btn" onclick="closeSettings()" title="Close">&times;</button>
             </div>
             
             <div class="settings-section">
-                <h3>Location</h3>
-                <label>Search for a city</label>
+                <h3 data-i18n="language">Language</h3>
+                <select id="lang-select" onchange="changeLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                </select>
+            </div>
+            
+            <div class="settings-section">
+                <h3 data-i18n="location">Location</h3>
+                <label data-i18n="searchCity">Search for a city</label>
                 <input type="text" id="city-input" placeholder="e.g. Berlin, Tokyo, New York..." autocomplete="off">
                 <ul id="city-results" class="results-list"></ul>
                 <div class="current-location" id="current-loc"></div>
             </div>
             
             <div class="version-section">
-                <span class="version-label" onclick="toggleChangelog()">v0.3</span>
+                <span class="version-label" onclick="toggleChangelog()">v0.4</span>
                 <div id="changelog" class="changelog hidden">
                     <ul>
+                        <li><strong>v0.4</strong> – Multi-language support (English/German)</li>
                         <li><strong>v0.3</strong> – Smart forecast narratives with 7-day weather analysis</li>
                         <li><strong>v0.2</strong> – Location selection and improved text generation</li>
                         <li><strong>v0.1</strong> – Initial release</li>
@@ -111,10 +120,48 @@
     </div>
 
     <script>
-        const state = {
-            city: localStorage.getItem('sh_city') || 'Zurich',
-            lat: parseFloat(localStorage.getItem('sh_lat')) || 47.37,
-            lon: parseFloat(localStorage.getItem('sh_lon')) || 8.54
+        // ===== I18N LABELS =====
+        const i18n = {
+            en: {
+                sunrise: "🌅 Sunrise",
+                sunset: "🌇 Sunset",
+                daylight: "☀️ Daylight",
+                vsYesterday: "vs Yesterday",
+                vsLastWeek: "vs Last Week",
+                vsSolstice: "vs Solstice",
+                highToday: "🌡️ High Today",
+                settings: "Settings",
+                language: "Language",
+                location: "Location",
+                searchCity: "Search for a city",
+                loading: "Reading the sky...",
+                footer: "Your daily reminder that light always returns.",
+                current: "Current",
+                searching: "Searching...",
+                noResults: "No cities found",
+                searchFailed: "Search failed. Try again.",
+                connectionError: "Connection issue. Please refresh."
+            },
+            de: {
+                sunrise: "🌅 Sonnenaufgang",
+                sunset: "🌇 Sonnenuntergang",
+                daylight: "☀️ Tageslicht",
+                vsYesterday: "vs Gestern",
+                vsLastWeek: "vs Letzte Woche",
+                vsSolstice: "vs Sonnenwende",
+                highToday: "🌡️ Höchstwert",
+                settings: "Einstellungen",
+                language: "Sprache",
+                location: "Standort",
+                searchCity: "Stadt suchen",
+                loading: "Blick in den Himmel...",
+                footer: "Deine tägliche Erinnerung daran, dass das Licht immer wiederkehrt.",
+                current: "Aktuell",
+                searching: "Suche...",
+                noResults: "Keine Städte gefunden",
+                searchFailed: "Suche fehlgeschlagen. Nochmal versuchen.",
+                connectionError: "Verbindungsproblem. Bitte neu laden."
+            }
         };
 
         const WEATHER_ICONS = {
@@ -128,33 +175,76 @@
             95: ['⛈️', 'Thunderstorm'], 96: ['⛈️', 'Hail Storm'], 99: ['⛈️', 'Severe Storm']
         };
 
-        // Global abort controllers
+        // ===== STATE =====
+        const state = {
+            city: localStorage.getItem('sh_city') || 'Zurich',
+            lat: parseFloat(localStorage.getItem('sh_lat')) || 47.37,
+            lon: parseFloat(localStorage.getItem('sh_lon')) || 8.54,
+            lang: localStorage.getItem('sh_lang') || detectLanguage()
+        };
+
         let dataController = null;
         let searchController = null;
         let searchTimer = null;
         let searchRequestId = 0;
 
-        document.getElementById('location-label').textContent = state.city;
-        fetchData();
+        // ===== INIT =====
+        function detectLanguage() {
+            const browserLang = navigator.language || navigator.userLanguage || 'en';
+            return browserLang.startsWith('de') ? 'de' : 'en';
+        }
 
+        function init() {
+            document.getElementById('location-label').textContent = state.city;
+            document.getElementById('lang-select').value = state.lang;
+            document.documentElement.lang = state.lang;
+            applyLabels();
+            fetchData();
+        }
+
+        function applyLabels() {
+            const labels = i18n[state.lang] || i18n.en;
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (labels[key]) {
+                    el.textContent = labels[key];
+                }
+            });
+            
+            document.getElementById('footer-text').textContent = labels.footer;
+            document.getElementById('loader-text').textContent = labels.loading;
+            document.getElementById('city-input').placeholder = state.lang === 'de' 
+                ? 'z.B. Berlin, Zürich, Wien...' 
+                : 'e.g. Berlin, Tokyo, New York...';
+        }
+
+        function changeLanguage(lang) {
+            state.lang = lang;
+            localStorage.setItem('sh_lang', lang);
+            document.documentElement.lang = lang;
+            applyLabels();
+            fetchData();
+        }
+
+        // ===== DATA FETCHING =====
         async function fetchData() {
-            // Abort any pending data request
             if (dataController) {
                 dataController.abort();
             }
             dataController = new AbortController();
             
             const loader = document.getElementById('loader');
-            const loaderText = document.getElementById('loader-text');
             const content = document.getElementById('content');
+            const labels = i18n[state.lang] || i18n.en;
             
             loader.classList.remove('hidden');
             content.classList.add('hidden');
-            loaderText.textContent = 'Reading the sky...';
+            document.getElementById('loader-text').textContent = labels.loading;
 
             try {
                 const res = await fetch(
-                    `/api/uplift?lat=${state.lat}&lon=${state.lon}&city=${encodeURIComponent(state.city)}`,
+                    `/api/uplift?lat=${state.lat}&lon=${state.lon}&city=${encodeURIComponent(state.city)}&lang=${state.lang}`,
                     { signal: dataController.signal }
                 );
                 
@@ -162,7 +252,6 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    // Apply highlights to text
                     const highlightedText = applyHighlights(data.text, data.highlights || []);
                     document.getElementById('uplift-text').innerHTML = highlightedText;
                     
@@ -193,7 +282,7 @@
             } catch (e) {
                 if (e.name !== 'AbortError') {
                     console.error('Fetch error:', e);
-                    document.getElementById('uplift-text').textContent = 'Connection issue. Please refresh.';
+                    document.getElementById('uplift-text').textContent = labels.connectionError;
                 }
             }
             
@@ -201,16 +290,18 @@
             content.classList.remove('hidden');
         }
 
+        // ===== SETTINGS =====
         function openSettings() {
+            const labels = i18n[state.lang] || i18n.en;
             document.getElementById('overlay').classList.remove('hidden');
             document.getElementById('city-input').value = '';
             document.getElementById('city-results').innerHTML = '';
-            document.getElementById('current-loc').innerHTML = `<small>Current: <strong>${state.city}</strong></small>`;
+            document.getElementById('current-loc').innerHTML = `<small>${labels.current}: <strong>${state.city}</strong></small>`;
+            document.getElementById('lang-select').value = state.lang;
             document.getElementById('city-input').focus();
         }
 
         function closeSettings() {
-            // Cancel any pending search
             if (searchController) {
                 searchController.abort();
                 searchController = null;
@@ -223,13 +314,15 @@
             if (e.target.id === 'overlay') closeSettings();
         }
 
+        function toggleChangelog() {
+            document.getElementById('changelog').classList.toggle('hidden');
+        }
+
+        // ===== CITY SEARCH =====
         document.getElementById('city-input').addEventListener('input', function() {
             const query = this.value.trim();
-            
-            // Clear previous timer
             clearTimeout(searchTimer);
             
-            // Cancel previous request
             if (searchController) {
                 searchController.abort();
                 searchController = null;
@@ -240,35 +333,29 @@
                 return;
             }
             
-            // Debounce
             searchTimer = setTimeout(() => searchCity(query), 300);
         });
 
         async function searchCity(q) {
             const list = document.getElementById('city-results');
+            const labels = i18n[state.lang] || i18n.en;
             const requestId = ++searchRequestId;
             
-            // Create new controller for this request
             searchController = new AbortController();
-            
-            list.innerHTML = '<li class="searching">Searching...</li>';
+            list.innerHTML = `<li class="searching">${labels.searching}</li>`;
             
             try {
                 const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
                     signal: searchController.signal
                 });
                 
-                // Check if this is still the active request
                 if (requestId !== searchRequestId) return;
-                
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
-                
-                // Double-check request is still active
                 if (requestId !== searchRequestId) return;
                 
                 if (data.length === 0) {
-                    list.innerHTML = '<li class="no-results">No cities found</li>';
+                    list.innerHTML = `<li class="no-results">${labels.noResults}</li>`;
                     return;
                 }
                 
@@ -284,8 +371,7 @@
                 });
             } catch (e) {
                 if (e.name !== 'AbortError' && requestId === searchRequestId) {
-                    console.error('Search error:', e);
-                    list.innerHTML = '<li class="error">Search failed. Try again.</li>';
+                    list.innerHTML = `<li class="error">${labels.searchFailed}</li>`;
                 }
             }
         }
@@ -306,18 +392,13 @@
             fetchData();
         }
 
-        function toggleChangelog() {
-            const changelog = document.getElementById('changelog');
-            changelog.classList.toggle('hidden');
-        }
-
+        // ===== HIGHLIGHTS =====
         function applyHighlights(text, highlights) {
             if (!highlights || highlights.length === 0) {
                 return escapeHtml(text);
             }
             
             let result = text;
-            // Sort highlights by length (longest first) to avoid partial replacements
             const sortedHighlights = [...highlights].sort((a, b) => b.length - a.length);
             
             for (const phrase of sortedHighlights) {
@@ -338,6 +419,9 @@
         function escapeRegex(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
+
+        // ===== START =====
+        init();
     </script>
 </body>
 </html>

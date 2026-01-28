@@ -453,9 +453,43 @@ h1 {
 
 /* ===== TEXT HIGHLIGHTS ===== */
 .uplift-text mark {
-    background: linear-gradient(120deg, #fef08a 0%, #fde047 100%);
+    background: transparent;
     color: inherit;
-    padding: 0.1em 0.2em;
-    border-radius: 3px;
-    font-weight: 400;
+    font-weight: 600;
+}
+
+/* ===== LANGUAGE SELECT ===== */
+.overlay-box select {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: white;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+
+.overlay-box select:hover {
+    border-color: #cbd5e0;
+}
+
+.overlay-box select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.overlay-box select option {
+    padding: 0.5rem;
+    font-size: 1rem;
 }
