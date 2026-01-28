@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
     <title>Seasonal Horizon</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,11 +112,8 @@
             <div class="version-section">
                 <span class="version-label" onclick="toggleChangelog()">v0.4</span>
                 <div id="changelog" class="changelog hidden">
-                    <ul>
-                        <li><strong>v0.4</strong> – Multi-language support (English/German)</li>
-                        <li><strong>v0.3</strong> – Smart forecast narratives with 7-day weather analysis</li>
-                        <li><strong>v0.2</strong> – Location selection and improved text generation</li>
-                        <li><strong>v0.1</strong> – Initial release</li>
+                    <ul id="changelog-list">
+                        <!-- Filled by JS -->
                     </ul>
                 </div>
             </div>
@@ -140,7 +141,13 @@
                 searching: "Searching...",
                 noResults: "No cities found",
                 searchFailed: "Search failed. Try again.",
-                connectionError: "Connection issue. Please refresh."
+                connectionError: "Connection issue. Please refresh.",
+                changelog: [
+                    { version: "v0.4", text: "Multi-language support (English/German)" },
+                    { version: "v0.3", text: "Smart forecast narratives with 7-day weather analysis" },
+                    { version: "v0.2", text: "Location selection and improved text generation" },
+                    { version: "v0.1", text: "Initial release" }
+                ]
             },
             de: {
                 sunrise: "🌅 Sonnenaufgang",
@@ -160,7 +167,13 @@
                 searching: "Suche...",
                 noResults: "Keine Städte gefunden",
                 searchFailed: "Suche fehlgeschlagen. Nochmal versuchen.",
-                connectionError: "Verbindungsproblem. Bitte neu laden."
+                connectionError: "Verbindungsproblem. Bitte neu laden.",
+                changelog: [
+                    { version: "v0.4", text: "Mehrsprachigkeit (Englisch/Deutsch)" },
+                    { version: "v0.3", text: "Intelligente Wetternarrative mit 7-Tage-Analyse" },
+                    { version: "v0.2", text: "Standortauswahl und verbesserte Textgenerierung" },
+                    { version: "v0.1", text: "Erste Version" }
+                ]
             }
         };
 
@@ -217,6 +230,15 @@
             document.getElementById('city-input').placeholder = state.lang === 'de' 
                 ? 'z.B. Berlin, Zürich, Wien...' 
                 : 'e.g. Berlin, Tokyo, New York...';
+
+            // Update changelog
+            const changelogList = document.getElementById('changelog-list');
+            changelogList.innerHTML = '';
+            labels.changelog.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${item.version}</strong> – ${item.text}`;
+                changelogList.appendChild(li);
+            });
         }
 
         function changeLanguage(lang) {
