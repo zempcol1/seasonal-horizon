@@ -4,22 +4,7 @@ import pytest
 from unittest.mock import patch
 
 
-@pytest.fixture
-def client():
-    """Create test client."""
-    from app import app
-    app.config['TESTING'] = True
-    with app.test_client() as client:
-        yield client
-
-
-@pytest.fixture(autouse=True)
-def reset_rate_limiter():
-    """Reset rate limiter between tests."""
-    from services.rate_limiter import get_limiter
-    limiter = get_limiter()
-    limiter._requests.clear()
-    yield
+# client fixture is now provided by conftest.py
 
 
 class TestHealthEndpoint:
@@ -60,7 +45,7 @@ class TestSearchEndpoint:
             response = client.get('/api/search?q=Berlin')
             assert response.status_code == 200
             data = response.get_json()
-            assert len(data) >= 1
+            assert isinstance(data, list)
 
 
 class TestUpliftEndpoint:

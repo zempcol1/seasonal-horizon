@@ -1,0 +1,841 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="33" failures="0" skipped="0" tests="49" time="0.971" timestamp="2026-01-29T21:09:28.950659+00:00" hostname="codespaces-02ec57"><testcase classname="tests.test_api.TestHealthEndpoint" name="test_health_returns_ok" time="0.001"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestSearchEndpoint" name="test_search_empty_query" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestSearchEndpoint" name="test_search_short_query" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestSearchEndpoint" name="test_search_valid_query" time="0.001"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestUpliftEndpoint" name="test_uplift_default_location" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestUpliftEndpoint" name="test_uplift_custom_location" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestUpliftEndpoint" name="test_uplift_german_language" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestUpliftEndpoint" name="test_uplift_invalid_language_fallback" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestUpliftEndpoint" name="test_uplift_coordinate_bounds" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestRateLimiting" name="test_rate_limit_not_triggered_under_limit" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestRateLimiting" name="test_rate_limit_triggered_over_limit" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestRateLimiting" name="test_rate_limit_returns_retry_after" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestInputValidation" name="test_invalid_lat_handled" time="0.001"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestInputValidation" name="test_out_of_range_lat_clamped" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_api.TestInputValidation" name="test_special_characters_in_search" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create test client."""
+        from app import app
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_api.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic" name="test_homepage_returns_200" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic" name="test_homepage_contains_title" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic" name="test_uplift_api_returns_json" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic" name="test_uplift_api_with_default_location" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic" name="test_search_api_returns_json" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic" name="test_search_api_short_query" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic" name="test_search_api_empty_query" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestNarrativeContent" name="test_text_not_empty" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestNarrativeContent" name="test_text_contains_time_references" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestNarrativeContent" name="test_highlights_are_in_text" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestNarrativeContent" name="test_highlights_reasonable_length" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestSeasonalScenarios" name="test_italian_summer_positive_tone" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestSeasonalScenarios" name="test_norwegian_winter_encouraging_tone" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestSeasonalScenarios" name="test_rainy_day_still_positive" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestSeasonalScenarios" name="test_spring_acceleration_mentioned" time="0.001"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestFactsAccuracy" name="test_day_length_format" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestFactsAccuracy" name="test_sunrise_sunset_format" time="0.001"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_basic.TestFactsAccuracy" name="test_delta_has_sign" time="0.000"><error message="failed on setup with &quot;AttributeError: module 'werkzeug' has no attribute '__version__'&quot;">@pytest.fixture
+    def client():
+        """Create a test client for the Flask application."""
+        app.config['TESTING'] = True
+&gt;       with app.test_client() as client:
+
+tests/test_basic.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/app.py:950: in test_client
+    return cls(  # type: ignore
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, args = (&lt;Flask 'app'&gt;, &lt;class 'flask.wrappers.Response'&gt;), kwargs = {'use_cookies': True}
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -&gt; None:
+        super().__init__(*args, **kwargs)
+        self.preserve_context = False
+        self._new_contexts: list[t.ContextManager[t.Any]] = []
+        self._context_stack = ExitStack()
+        self.environ_base = {
+            "REMOTE_ADDR": "127.0.0.1",
+&gt;           "HTTP_USER_AGENT": f"werkzeug/{werkzeug.__version__}",
+        }
+E       AttributeError: module 'werkzeug' has no attribute '__version__'
+
+/usr/local/python/3.12.1/lib/python3.12/site-packages/flask/testing.py:118: AttributeError</error></testcase><testcase classname="tests.test_services.TestSolarService" name="test_get_daylight_delta_caching" time="0.011" /><testcase classname="tests.test_services.TestSolarService" name="test_get_daylight_delta_handles_empty_response" time="0.001" /><testcase classname="tests.test_services.TestSolarService" name="test_get_daylight_delta_handles_missing_data" time="0.000" /><testcase classname="tests.test_services.TestWeatherService" name="test_fetch_daily_weather_caching" time="0.002" /><testcase classname="tests.test_services.TestWeatherService" name="test_is_good_weather" time="0.000" /><testcase classname="tests.test_services.TestWeatherService" name="test_analyze_forecast_temperature_trends" time="0.000" /><testcase classname="tests.test_services.TestRateLimiter" name="test_allows_requests_under_limit" time="0.000" /><testcase classname="tests.test_services.TestRateLimiter" name="test_blocks_requests_over_limit" time="0.000" /><testcase classname="tests.test_services.TestRateLimiter" name="test_different_ips_independent" time="0.000" /><testcase classname="tests.test_services.TestRateLimiter" name="test_get_remaining" time="0.000" /><testcase classname="tests.test_services.TestUpliftEngine" name="test_detect_scenario_rain_clearing" time="0.001" /><testcase classname="tests.test_services.TestUpliftEngine" name="test_generate_uplift_data_returns_expected_keys" time="0.001" /><testcase classname="tests.test_services.TestUpliftEngine" name="test_language_support" time="0.001" /><testcase classname="tests.test_services.TestEdgeCases" name="test_extreme_latitudes" time="0.001" /><testcase classname="tests.test_services.TestEdgeCases" name="test_missing_solar_data" time="0.001" /><testcase classname="tests.test_services.TestEdgeCases" name="test_invalid_language_fallback" time="0.001" /></testsuite></testsuites>
