@@ -1,21 +1,25 @@
 import requests
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
+
+from config import config
 
 # Simple in-memory cache
 _cache = {}
-_cache_ttl = 300  # 5 minutes
+
 
 def _get_cached(key):
     if key in _cache:
         data, timestamp = _cache[key]
-        if time.time() - timestamp < _cache_ttl:
+        if time.time() - timestamp < config.CACHE_TTL_WEATHER:
             return data
         del _cache[key]
     return None
 
+
 def _set_cached(key, data):
     _cache[key] = (data, time.time())
+
 
 def fetch_daily_weather(lat, lon, days=7):
     """
@@ -37,7 +41,7 @@ def fetch_daily_weather(lat, lon, days=7):
             "forecast_days": days
         }
         
-        resp = requests.get(url, params=params, timeout=8)
+        resp = requests.get(url, params=params, timeout=config.API_TIMEOUT)
         resp.raise_for_status()
         data = resp.json()
         
@@ -49,7 +53,6 @@ def fetch_daily_weather(lat, lon, days=7):
         precip = daily.get("precipitation_sum", [])
         precip_prob = daily.get("precipitation_probability_max", [])
         
-        # Build day-by-day forecast
         forecast = []
         for i in range(min(7, len(codes))):
             day_date = datetime.strptime(dates[i], "%Y-%m-%d") if i < len(dates) else None
@@ -66,7 +69,6 @@ def fetch_daily_weather(lat, lon, days=7):
                 "is_bad": _is_bad_weather(codes[i] if i < len(codes) else 0),
             })
         
-        # Analyze patterns
         result = {
             "forecast": forecast,
             "today": forecast[0] if forecast else {},
@@ -77,9 +79,9 @@ def fetch_daily_weather(lat, lon, days=7):
         _set_cached(cache_key, result)
         return result
         
-    except Exception as e:
-        print(f"Weather API error: {e}")
+    except Exception:
         return {}
+
 
 def _is_good_weather(code):
     """Check if weather code indicates good weather."""
@@ -111,7 +113,6 @@ def _analyze_forecast(forecast, temps_max):
         "week_character": "mixed",
     }
     
-    # Temperature trend
     if temps_max and len(temps_max) >= 3:
         first_half = sum(t for t in temps_max[:3] if t) / max(1, len([t for t in temps_max[:3] if t]))
         second_half = sum(t for t in temps_max[3:6] if t) / max(1, len([t for t in temps_max[3:6] if t]))
@@ -126,7 +127,6 @@ def _analyze_forecast(forecast, temps_max):
         elif diff < -2:
             analysis["temp_trend"] = "cooling"
     
-    # Find next good day (if today is bad)
     if forecast[0].get("is_bad", False):
         for i, day in enumerate(forecast[1:], 1):
             if day.get("is_good", False):
@@ -134,7 +134,6 @@ def _analyze_forecast(forecast, temps_max):
                 analysis["next_good_day_index"] = i
                 break
     
-    # Find next bad day (if today is good)
     if forecast[0].get("is_good", False):
         for i, day in enumerate(forecast[1:], 1):
             if day.get("is_bad", False):
@@ -142,7 +141,6 @@ def _analyze_forecast(forecast, temps_max):
                 analysis["next_bad_day_index"] = i
                 break
     
-    # Count current streak
     today_good = forecast[0].get("is_good", False)
     streak = 1
     for day in forecast[1:]:
@@ -156,7 +154,6 @@ def _analyze_forecast(forecast, temps_max):
     else:
         analysis["bad_streak_length"] = streak
     
-    # Weekend outlook (assuming today could be any day)
     today_date = forecast[0].get("date")
     if today_date:
         days_until_saturday = (5 - today_date.weekday()) % 7
@@ -175,7 +172,6 @@ def _analyze_forecast(forecast, temps_max):
         else:
             analysis["weekend_outlook"] = "mixed"
     
-    # Overall week character
     good_days = sum(1 for d in forecast if d.get("is_good", False))
     bad_days = sum(1 for d in forecast if d.get("is_bad", False))
     

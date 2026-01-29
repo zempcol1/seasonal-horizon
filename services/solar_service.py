@@ -3,24 +3,31 @@ from datetime import date, timedelta, datetime
 import pytz
 import time
 
+from config import config
+
 # Simple in-memory cache
 _cache = {}
-_cache_ttl = 300  # 5 minutes
+
 
 def _get_cached(key):
     if key in _cache:
         data, timestamp = _cache[key]
-        if time.time() - timestamp < _cache_ttl:
+        if time.time() - timestamp < config.CACHE_TTL_SOLAR:
             return data
         del _cache[key]
     return None
 
+
 def _set_cached(key, data):
     _cache[key] = (data, time.time())
 
-def _request_with_retry(url, params, max_retries=3, timeout=8):
+
+def _request_with_retry(url, params, max_retries=None, timeout=None):
     """Make HTTP request with retry logic."""
+    max_retries = max_retries or config.API_MAX_RETRIES
+    timeout = timeout or config.API_TIMEOUT
     last_error = None
+    
     for attempt in range(max_retries):
         try:
             resp = requests.get(url, params=params, timeout=timeout)
@@ -28,16 +35,15 @@ def _request_with_retry(url, params, max_retries=3, timeout=8):
             return resp.json()
         except requests.exceptions.Timeout:
             last_error = "timeout"
-            time.sleep(0.5 * (attempt + 1))  # Backoff
+            time.sleep(0.5 * (attempt + 1))
         except requests.exceptions.RequestException as e:
             last_error = str(e)
             time.sleep(0.3 * (attempt + 1))
-    print(f"API failed after {max_retries} retries: {last_error}")
     return None
+
 
 # try astral v3 style imports first, fallback to suntime
 try:
-	# astral v3: Observer + sun
 	from astral import Observer
 	from astral.sun import sun as astral_sun
 	_ASTRAL = True
@@ -56,14 +62,12 @@ if _ASTRAL:
 			"day_length_seconds": int((s["sunset"] - s["sunrise"]).total_seconds())
 		}
 else:
-	# fallback: use suntime (add to requirements)
 	from suntime import Sun
 
 	def get_sun_times(lat, lon, target_date=None):
 		if target_date is None:
 			target_date = date.today()
 		s = Sun(lat, lon)
-		# suntime returns datetimes in local timezone; convert to UTC
 		sunrise_local = s.get_local_sunrise_time(target_date)
 		sunset_local = s.get_local_sunset_time(target_date)
 		sunrise_utc = sunrise_local.astimezone(pytz.UTC)
@@ -74,6 +78,7 @@ else:
 			"day_length_seconds": int((sunset_utc - sunrise_utc).total_seconds())
 		}
 
+
 def _get_winter_solstice_date():
     """Return the most recent winter solstice."""
     today = date.today()
@@ -82,11 +87,11 @@ def _get_winter_solstice_date():
         solstice = date(today.year - 1, 12, 21)
     return solstice
 
+
 def get_daylight_delta(lat, lon):
     """
     Fetches solar dynamics: day length, change from yesterday, week, and solstice.
     """
-    # Check cache first
     cache_key = f"solar_{lat:.2f}_{lon:.2f}_{date.today()}"
     cached = _get_cached(cache_key)
     if cached:
@@ -149,9 +154,9 @@ def get_daylight_delta(lat, lon):
         _set_cached(cache_key, result)
         return result
         
-    except Exception as e:
-        print(f"Solar parsing error: {e}")
+    except Exception:
         return {}
+
 
 def get_daylight_stats(lat, lon):
 	"""
