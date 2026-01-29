@@ -7,6 +7,7 @@ A Flask application designed to help you stay connected with the natural rhythm 
 - Displays sunrise, sunset, and total daylight duration for your location
 - Tracks daily, weekly, and seasonal changes in daylight
 - Generates narrative messages in English and German
+- Weather-aware nature observations that adapt to current conditions
 - Uses weather forecast data for contextual observations
 - Built-in rate limiting and caching for production use
 
@@ -73,6 +74,7 @@ This application is configured for deployment on PythonAnywhere. The `wsgi.py` f
 
 ## Changelog
 
+- **v0.4.1** - Added basic logging, rate limiting and more tests. Improved highlighting, cleaner mobile layout
 - **v0.4** - Multi-language support (English/German), rate limiting, improved German translations
 - **v0.3** - Smart forecast narratives with 7-day weather analysis
 - **v0.2** - Location selection and improved text generation

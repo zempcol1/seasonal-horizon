@@ -157,21 +157,45 @@ h1 {
 .facts-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .fact { 
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .fact .label {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--muted);
-    margin-bottom: 0.35rem;
     font-weight: 500;
+    line-height: 1.3;
+}
+
+.fact .label .icon {
+    font-size: 1rem;
+    margin-bottom: 0.15rem;
+}
+
+.fact .label .text {
+    white-space: nowrap;
+}
+
+/* Delta facts - no icons, just text labels */
+.delta-fact .label {
+    flex-direction: row;
+}
+
+.delta-fact .label .text {
+    font-size: 0.6rem;
 }
 
 .fact .val { 
@@ -208,6 +232,51 @@ h1 {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-light);
+}
+
+/* Weather Section - Harmonious centered display */
+.weather-section {
+    padding: 0.75rem 0;
+}
+
+.weather-section .facts-row {
+    display: none; /* Hide old structure */
+}
+
+.weather-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.weather-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.weather-display .weather-icon {
+    font-size: 1.75rem;
+}
+
+.weather-display .weather-desc {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.weather-temp-box {
+    display: flex;
+    align-items: center;
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--border);
+}
+
+.weather-display .weather-temp {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
 }
 
 /* ===== FOOTER ===== */
@@ -459,13 +528,6 @@ h1 {
 /* Remove old h2 margin since it's now in header */
 .overlay-box h2 { 
     font-size: 1.25rem; 
-    font-weight: 600;
-}
-
-/* ===== TEXT HIGHLIGHTS ===== */
-.uplift-text mark {
-    background: transparent;
-    color: inherit;
     font-weight: 600;
 }
 

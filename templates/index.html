@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#667eea">
     <title>Seasonal Horizon</title>
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,15 +35,24 @@
                 <div class="facts-section">
                     <div class="facts-row">
                         <div class="fact">
-                            <span class="label" data-i18n="sunrise">🌅 Sunrise</span>
+                            <span class="label">
+                                <span class="icon">🌅</span>
+                                <span class="text" data-i18n="sunrise">Sunrise</span>
+                            </span>
                             <span id="f-sunrise" class="val">--</span>
                         </div>
                         <div class="fact">
-                            <span class="label" data-i18n="sunset">🌇 Sunset</span>
+                            <span class="label">
+                                <span class="icon">🌇</span>
+                                <span class="text" data-i18n="sunset">Sunset</span>
+                            </span>
                             <span id="f-sunset" class="val">--</span>
                         </div>
                         <div class="fact">
-                            <span class="label" data-i18n="daylight">☀️ Daylight</span>
+                            <span class="label">
+                                <span class="icon">☀️</span>
+                                <span class="text" data-i18n="daylight">Daylight</span>
+                            </span>
                             <span id="f-length" class="val">--</span>
                         </div>
                     </div>
@@ -52,29 +61,34 @@
                 <div class="facts-section">
                     <div class="facts-row">
                         <div class="fact delta-fact">
-                            <span class="label" data-i18n="vsYesterday">vs Yesterday</span>
+                            <span class="label">
+                                <span class="text" data-i18n="vsYesterday">vs Yesterday</span>
+                            </span>
                             <span id="f-delta-d" class="val">--</span>
                         </div>
                         <div class="fact delta-fact">
-                            <span class="label" data-i18n="vsLastWeek">vs Last Week</span>
+                            <span class="label">
+                                <span class="text" data-i18n="vsLastWeek">vs Last Week</span>
+                            </span>
                             <span id="f-delta-w" class="val">--</span>
                         </div>
                         <div class="fact delta-fact">
-                            <span class="label" data-i18n="vsSolstice">vs Solstice</span>
+                            <span class="label">
+                                <span class="text" data-i18n="vsSolstice">vs Solstice</span>
+                            </span>
                             <span id="f-delta-s" class="val">--</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="facts-section weather-section">
-                    <div class="facts-row">
-                        <div class="fact weather-fact">
+                    <div class="weather-display">
+                        <div class="weather-main">
                             <span id="weather-icon" class="weather-icon">☀️</span>
-                            <span id="f-weather" class="val">Clear</span>
+                            <span id="f-weather" class="weather-desc">Clear</span>
                         </div>
-                        <div class="fact">
-                            <span class="label" data-i18n="highToday">🌡️ High Today</span>
-                            <span id="f-temp" class="val">--</span>
+                        <div class="weather-temp-box">
+                            <span id="f-temp" class="weather-temp">--</span>
                         </div>
                     </div>
                 </div>
@@ -110,7 +124,7 @@
             </div>
             
             <div class="version-section">
-                <span class="version-label" onclick="toggleChangelog()">v0.4</span>
+                <span class="version-label" onclick="toggleChangelog()">v0.4.1</span>
                 <div id="changelog" class="changelog hidden">
                     <ul id="changelog-list">
                         <!-- Filled by JS -->
@@ -124,13 +138,12 @@
         // ===== I18N LABELS =====
         const i18n = {
             en: {
-                sunrise: "🌅 Sunrise",
-                sunset: "🌇 Sunset",
-                daylight: "☀️ Daylight",
+                sunrise: "Sunrise",
+                sunset: "Sunset",
+                daylight: "Daylight",
                 vsYesterday: "vs Yesterday",
                 vsLastWeek: "vs Last Week",
                 vsSolstice: "vs Solstice",
-                highToday: "🌡️ High Today",
                 settings: "Settings",
                 language: "Language",
                 location: "Location",
@@ -143,6 +156,7 @@
                 searchFailed: "Search failed. Try again.",
                 connectionError: "Connection issue. Please refresh.",
                 changelog: [
+                    { version: "v0.4.1", text: "Weather-aware nature observations, improved highlights, better mobile layout" },
                     { version: "v0.4", text: "Multi-language support (English/German)" },
                     { version: "v0.3", text: "Smart forecast narratives with 7-day weather analysis" },
                     { version: "v0.2", text: "Location selection and improved text generation" },
@@ -150,13 +164,12 @@
                 ]
             },
             de: {
-                sunrise: "🌅 Sonnenaufgang",
-                sunset: "🌇 Sonnenuntergang",
-                daylight: "☀️ Tageslicht",
+                sunrise: "Aufgang",
+                sunset: "Untergang",
+                daylight: "Tageslicht",
                 vsYesterday: "vs Gestern",
-                vsLastWeek: "vs Letzte Woche",
-                vsSolstice: "vs Sonnenwende",
-                highToday: "🌡️ Höchstwert",
+                vsLastWeek: "vs Vorwoche",
+                vsSolstice: "vs Wende",
                 settings: "Einstellungen",
                 language: "Sprache",
                 location: "Standort",
@@ -169,6 +182,7 @@
                 searchFailed: "Suche fehlgeschlagen. Nochmal versuchen.",
                 connectionError: "Verbindungsproblem. Bitte neu laden.",
                 changelog: [
+                    { version: "v0.4.1", text: "Wetterabhängige Naturbeobachtungen, bessere Highlights, optimiertes Layout" },
                     { version: "v0.4", text: "Mehrsprachigkeit (Englisch/Deutsch)" },
                     { version: "v0.3", text: "Intelligente Wetternarrative mit 7-Tage-Analyse" },
                     { version: "v0.2", text: "Standortauswahl und verbesserte Textgenerierung" },
@@ -231,6 +245,9 @@
                 ? 'z.B. Berlin, Zürich, Wien...' 
                 : 'e.g. Berlin, Tokyo, New York...';
 
+            // Update version label
+            document.querySelector('.version-label').textContent = 'v0.4.1';
+
             // Update changelog
             const changelogList = document.getElementById('changelog-list');
             changelogList.innerHTML = '';
@@ -274,8 +291,8 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    const highlightedText = applyHighlights(data.text, data.highlights || []);
-                    document.getElementById('uplift-text').innerHTML = highlightedText;
+                    // No more highlights - just display text
+                    document.getElementById('uplift-text').textContent = data.text;
                     
                     document.getElementById('f-sunrise').textContent = data.facts.sunrise;
                     document.getElementById('f-sunset').textContent = data.facts.sunset;
@@ -412,34 +429,6 @@
             document.getElementById('location-label').textContent = fullName;
             closeSettings();
             fetchData();
-        }
-
-        // ===== HIGHLIGHTS =====
-        function applyHighlights(text, highlights) {
-            if (!highlights || highlights.length === 0) {
-                return escapeHtml(text);
-            }
-            
-            let result = text;
-            const sortedHighlights = [...highlights].sort((a, b) => b.length - a.length);
-            
-            for (const phrase of sortedHighlights) {
-                const escaped = escapeHtml(phrase);
-                const regex = new RegExp(escapeRegex(phrase), 'gi');
-                result = result.replace(regex, `<mark>${escaped}</mark>`);
-            }
-            
-            return escapeHtml(result).replace(/&lt;mark&gt;/g, '<mark>').replace(/&lt;\/mark&gt;/g, '</mark>');
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function escapeRegex(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
         // ===== START =====

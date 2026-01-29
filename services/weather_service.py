@@ -111,13 +111,23 @@ def _analyze_forecast(forecast, temps_max):
         "bad_streak_length": 0,
         "weekend_outlook": "mixed",
         "week_character": "mixed",
+        "warming_days_ahead": 0,  # New: count of days warmer than today
     }
     
+    # Temperature trend analysis
     if temps_max and len(temps_max) >= 3:
+        today_temp = temps_max[0] if temps_max[0] else 0
+        
+        # Count how many of next days are warmer
+        warmer_count = sum(1 for t in temps_max[1:5] if t and t > today_temp + 1)
+        analysis["warming_days_ahead"] = warmer_count
+        
+        # Calculate trend from first half to second half
         first_half = sum(t for t in temps_max[:3] if t) / max(1, len([t for t in temps_max[:3] if t]))
         second_half = sum(t for t in temps_max[3:6] if t) / max(1, len([t for t in temps_max[3:6] if t]))
         diff = second_half - first_half
         analysis["temp_change"] = round(diff, 1)
+        
         if diff > 4:
             analysis["temp_trend"] = "warming_strong"
         elif diff > 2:
@@ -126,6 +136,9 @@ def _analyze_forecast(forecast, temps_max):
             analysis["temp_trend"] = "cooling_strong"
         elif diff < -2:
             analysis["temp_trend"] = "cooling"
+        # Also check if consistently warming day-over-day
+        elif warmer_count >= 3:
+            analysis["temp_trend"] = "warming"
     
     if forecast[0].get("is_bad", False):
         for i, day in enumerate(forecast[1:], 1):
