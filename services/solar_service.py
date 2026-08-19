@@ -1,45 +1,10 @@
-import requests
 from datetime import date, timedelta, datetime
 import pytz
-import time
 
 from config import config
+from services.api_client import TTLCache, request_json
 
-# Simple in-memory cache
-_cache = {}
-
-
-def _get_cached(key):
-    if key in _cache:
-        data, timestamp = _cache[key]
-        if time.time() - timestamp < config.CACHE_TTL_SOLAR:
-            return data
-        del _cache[key]
-    return None
-
-
-def _set_cached(key, data):
-    _cache[key] = (data, time.time())
-
-
-def _request_with_retry(url, params, max_retries=None, timeout=None):
-    """Make HTTP request with retry logic."""
-    max_retries = max_retries or config.API_MAX_RETRIES
-    timeout = timeout or config.API_TIMEOUT
-    last_error = None
-    
-    for attempt in range(max_retries):
-        try:
-            resp = requests.get(url, params=params, timeout=timeout)
-            resp.raise_for_status()
-            return resp.json()
-        except requests.exceptions.Timeout:
-            last_error = "timeout"
-            time.sleep(0.5 * (attempt + 1))
-        except requests.exceptions.RequestException as e:
-            last_error = str(e)
-            time.sleep(0.3 * (attempt + 1))
-    return None
+_cache = TTLCache(config.CACHE_TTL_SOLAR)
 
 
 # try astral v3 style imports first, fallback to suntime
@@ -93,7 +58,7 @@ def get_daylight_delta(lat, lon):
     Fetches solar dynamics: day length, change from yesterday, week, and solstice.
     """
     cache_key = f"solar_{lat:.2f}_{lon:.2f}_{date.today()}"
-    cached = _get_cached(cache_key)
+    cached = _cache.get(cache_key)
     if cached:
         return cached
 
@@ -113,7 +78,7 @@ def get_daylight_delta(lat, lon):
             "forecast_days": 1
         }
         
-        data = _request_with_retry(url, params)
+        data = request_json(url, params)
         if not data:
             return {}
 
@@ -151,7 +116,7 @@ def get_daylight_delta(lat, lon):
             "sunset": datetime.strptime(sunset_str, fmt) if sunset_str else None
         }
         
-        _set_cached(cache_key, result)
+        _cache.set(cache_key, result)
         return result
         
     except Exception:

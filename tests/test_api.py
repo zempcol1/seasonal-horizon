@@ -35,7 +35,7 @@ class TestSearchEndpoint:
     
     def test_search_valid_query(self, client):
         """Valid query returns results."""
-        with patch('app._request_with_retry') as mock_req:
+        with patch('app.request_json') as mock_req:
             mock_req.return_value = {
                 'results': [
                     {'name': 'Berlin', 'country': 'Germany', 'latitude': 52.52, 'longitude': 13.40}

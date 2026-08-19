@@ -1,24 +1,9 @@
-import requests
-import time
 from datetime import date, datetime
 
 from config import config
+from services.api_client import TTLCache, request_json
 
-# Simple in-memory cache
-_cache = {}
-
-
-def _get_cached(key):
-    if key in _cache:
-        data, timestamp = _cache[key]
-        if time.time() - timestamp < config.CACHE_TTL_WEATHER:
-            return data
-        del _cache[key]
-    return None
-
-
-def _set_cached(key, data):
-    _cache[key] = (data, time.time())
+_cache = TTLCache(config.CACHE_TTL_WEATHER)
 
 
 def fetch_daily_weather(lat, lon, days=7):
@@ -26,7 +11,7 @@ def fetch_daily_weather(lat, lon, days=7):
     Fetches 7-day weather data with detailed analysis for narrative generation.
     """
     cache_key = f"weather_{lat:.2f}_{lon:.2f}_{date.today()}"
-    cached = _get_cached(cache_key)
+    cached = _cache.get(cache_key)
     if cached:
         return cached
 
@@ -41,10 +26,10 @@ def fetch_daily_weather(lat, lon, days=7):
             "forecast_days": days
         }
         
-        resp = requests.get(url, params=params, timeout=config.API_TIMEOUT)
-        resp.raise_for_status()
-        data = resp.json()
-        
+        data = request_json(url, params)
+        if not data:
+            return {}
+
         daily = data.get("daily", {})
         dates = daily.get("time", [])
         codes = daily.get("weathercode", [])
@@ -76,7 +61,7 @@ def fetch_daily_weather(lat, lon, days=7):
             "analysis": _analyze_forecast(forecast, temps_max)
         }
         
-        _set_cached(cache_key, result)
+        _cache.set(cache_key, result)
         return result
         
     except Exception:

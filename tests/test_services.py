@@ -16,7 +16,7 @@ class TestSolarService:
         # Clear cache
         solar_service._cache.clear()
         
-        with patch.object(solar_service, '_request_with_retry') as mock_req:
+        with patch.object(solar_service, 'request_json') as mock_req:
             mock_req.return_value = {
                 "daily": {
                     "daylight_duration": [28800, 29000, 29200],
@@ -40,7 +40,7 @@ class TestSolarService:
         from services import solar_service
         solar_service._cache.clear()
         
-        with patch.object(solar_service, '_request_with_retry') as mock_req:
+        with patch.object(solar_service, 'request_json') as mock_req:
             mock_req.return_value = None
             result = solar_service.get_daylight_delta(47.37, 8.54)
             assert result == {}
@@ -50,7 +50,7 @@ class TestSolarService:
         from services import solar_service
         solar_service._cache.clear()
         
-        with patch.object(solar_service, '_request_with_retry') as mock_req:
+        with patch.object(solar_service, 'request_json') as mock_req:
             mock_req.return_value = {"daily": {}}
             result = solar_service.get_daylight_delta(47.37, 8.54)
             assert result == {}
@@ -64,9 +64,8 @@ class TestWeatherService:
         from services import weather_service
         weather_service._cache.clear()
         
-        with patch('services.weather_service.requests.get') as mock_get:
-            mock_response = MagicMock()
-            mock_response.json.return_value = {
+        with patch.object(weather_service, 'request_json') as mock_req:
+            mock_req.return_value = {
                 "daily": {
                     "time": ["2024-01-15", "2024-01-16"],
                     "weathercode": [0, 3],
@@ -76,13 +75,12 @@ class TestWeatherService:
                     "precipitation_probability_max": [0, 10]
                 }
             }
-            mock_get.return_value = mock_response
-            
+
             result1 = weather_service.fetch_daily_weather(47.37, 8.54)
-            assert mock_get.call_count == 1
-            
+            assert mock_req.call_count == 1
+
             result2 = weather_service.fetch_daily_weather(47.37, 8.54)
-            assert mock_get.call_count == 1  # Cached
+            assert mock_req.call_count == 1  # Cached
     
     def test_is_good_weather(self):
         """Test weather classification."""
