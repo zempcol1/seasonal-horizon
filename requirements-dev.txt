@@ -1,0 +1,6 @@
+# Development and test dependencies.
+# Installs the runtime deps too, so this is the only file you need locally.
+-r requirements.txt
+
+pytest>=9.1.1
+pytest-cov>=7.1.0
