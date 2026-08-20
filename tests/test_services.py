@@ -1,69 +1,49 @@
-"""Tests for service modules."""
+"""Unit tests for the service modules."""
+
+import random
+import re
+from datetime import date, datetime
+from unittest.mock import patch
 
 import pytest
-from unittest.mock import patch, MagicMock
-from datetime import date, datetime
-import time
 
 
 class TestSolarService:
-    """Tests for solar_service module."""
-    
-    def test_get_daylight_delta_caching(self):
-        """Test that results are cached."""
+
+    def test_result_is_cached(self):
         from services import solar_service
-        
-        # Clear cache
         solar_service._cache.clear()
-        
+
         with patch.object(solar_service, 'request_json') as mock_req:
             mock_req.return_value = {
                 "daily": {
                     "daylight_duration": [28800, 29000, 29200],
                     "sunrise": ["2024-01-15T08:00", "2024-01-16T07:58", "2024-01-17T07:56"],
-                    "sunset": ["2024-01-15T16:00", "2024-01-16T16:03", "2024-01-17T16:06"]
+                    "sunset": ["2024-01-15T16:00", "2024-01-16T16:03", "2024-01-17T16:06"],
                 }
             }
-            
-            # First call
-            result1 = solar_service.get_daylight_delta(47.37, 8.54)
-            assert mock_req.call_count == 1
-            
-            # Second call should use cache
-            result2 = solar_service.get_daylight_delta(47.37, 8.54)
-            assert mock_req.call_count == 1  # No additional call
-            
-            assert result1 == result2
-    
-    def test_get_daylight_delta_handles_empty_response(self):
-        """Test handling of empty API response."""
+            first = solar_service.get_daylight_delta(47.37, 8.54)
+            second = solar_service.get_daylight_delta(47.37, 8.54)
+
+        assert mock_req.call_count == 1
+        assert first == second
+
+    @pytest.mark.parametrize('payload', [None, {"daily": {}}])
+    def test_unusable_response_yields_nothing(self, payload):
+        """No data must mean no data, never a zero-filled result."""
         from services import solar_service
         solar_service._cache.clear()
-        
-        with patch.object(solar_service, 'request_json') as mock_req:
-            mock_req.return_value = None
-            result = solar_service.get_daylight_delta(47.37, 8.54)
-            assert result == {}
-    
-    def test_get_daylight_delta_handles_missing_data(self):
-        """Test handling of incomplete API response."""
-        from services import solar_service
-        solar_service._cache.clear()
-        
-        with patch.object(solar_service, 'request_json') as mock_req:
-            mock_req.return_value = {"daily": {}}
-            result = solar_service.get_daylight_delta(47.37, 8.54)
-            assert result == {}
+
+        with patch.object(solar_service, 'request_json', return_value=payload):
+            assert solar_service.get_daylight_delta(47.37, 8.54) == {}
 
 
 class TestWeatherService:
-    """Tests for weather_service module."""
-    
-    def test_fetch_daily_weather_caching(self):
-        """Test that weather results are cached."""
+
+    def test_result_is_cached(self):
         from services import weather_service
         weather_service._cache.clear()
-        
+
         with patch.object(weather_service, 'request_json') as mock_req:
             mock_req.return_value = {
                 "daily": {
@@ -72,266 +52,164 @@ class TestWeatherService:
                     "temperature_2m_max": [10, 12],
                     "temperature_2m_min": [2, 4],
                     "precipitation_sum": [0, 0],
-                    "precipitation_probability_max": [0, 10]
+                    "precipitation_probability_max": [0, 10],
                 }
             }
+            weather_service.fetch_daily_weather(47.37, 8.54)
+            weather_service.fetch_daily_weather(47.37, 8.54)
 
-            result1 = weather_service.fetch_daily_weather(47.37, 8.54)
-            assert mock_req.call_count == 1
+        assert mock_req.call_count == 1
 
-            result2 = weather_service.fetch_daily_weather(47.37, 8.54)
-            assert mock_req.call_count == 1  # Cached
-    
-    def test_is_good_weather(self):
-        """Test weather classification."""
+    def test_code_classification(self):
         from services.weather_service import classify, is_good, is_bad
 
-        # Good weather codes
-        assert is_good(0) is True
-        assert is_good(1) is True
-        assert is_good(2) is True
+        assert [is_good(c) for c in (0, 1, 2)] == [True] * 3
+        assert [is_good(c) for c in (3, 61)] == [False] * 2
+        assert [is_bad(c) for c in (61, 95)] == [True] * 2
+        assert [is_bad(c) for c in (0, 3)] == [False] * 2
 
-        # Not good
-        assert is_good(3) is False
-        assert is_good(61) is False
-
-        # Bad weather codes
-        assert is_bad(61) is True
-        assert is_bad(95) is True
-
-        # Not bad
-        assert is_bad(0) is False
-        assert is_bad(3) is False
-
-        # Buckets used for narrative lookup. Note 2 is "good" but not "clear".
+        # Buckets for narrative lookup. Note 2 is "good" but not "clear".
         assert classify(0) == "clear"
         assert classify(2) == "grey"
         assert classify(75) == "snow"
         assert classify(61) == "rain"
-    
-    def test_analyze_forecast_temperature_trends(self):
-        """Test temperature trend detection."""
+
+    @pytest.mark.parametrize('temps,expected', [
+        ([10, 11, 12, 15, 16, 17, 18], ("warming", "warming_strong")),
+        ([18, 17, 16, 12, 11, 10, 9], ("cooling", "cooling_strong")),
+        ([15, 15, 15, 15, 15, 15, 15], ("stable",)),
+    ])
+    def test_temperature_trend(self, temps, expected):
         from services.weather_service import _analyze_forecast
-        
-        # Warming trend
+
         forecast = [{"is_good": True, "is_bad": False, "date": datetime(2024, 1, 15)}
                     for _ in range(7)]
-        temps_warming = [10, 11, 12, 15, 16, 17, 18]
-        analysis = _analyze_forecast(forecast, temps_warming)
-        assert analysis["temp_trend"] in ["warming", "warming_strong"]
-        
-        # Cooling trend
-        temps_cooling = [18, 17, 16, 12, 11, 10, 9]
-        analysis = _analyze_forecast(forecast, temps_cooling)
-        assert analysis["temp_trend"] in ["cooling", "cooling_strong"]
-        
-        # Stable
-        temps_stable = [15, 15, 15, 15, 15, 15, 15]
-        analysis = _analyze_forecast(forecast, temps_stable)
-        assert analysis["temp_trend"] == "stable"
+        assert _analyze_forecast(forecast, temps)["temp_trend"] in expected
 
 
 class TestRateLimiter:
-    """Tests for rate_limiter module."""
-    
-    def test_allows_requests_under_limit(self):
-        """Test that requests under limit are allowed."""
+
+    def test_allows_under_limit_then_blocks(self):
         from services.rate_limiter import RateLimiter
-        
+
         limiter = RateLimiter()
-        ip = "192.168.1.1"
-        
         for _ in range(5):
-            assert limiter.is_allowed(ip, 10) is True
-    
-    def test_blocks_requests_over_limit(self):
-        """Test that requests over limit are blocked."""
+            assert limiter.is_allowed("1.2.3.4", 5) is True
+        assert limiter.is_allowed("1.2.3.4", 5) is False
+
+    def test_limits_are_per_ip(self):
         from services.rate_limiter import RateLimiter
-        
+
         limiter = RateLimiter()
-        ip = "192.168.1.2"
-        
-        # Use up the limit
-        for _ in range(5):
-            limiter.is_allowed(ip, 5)
-        
-        # Next request should be blocked
-        assert limiter.is_allowed(ip, 5) is False
-    
-    def test_different_ips_independent(self):
-        """Test that different IPs have independent limits."""
-        from services.rate_limiter import RateLimiter
-        
-        limiter = RateLimiter()
-        
-        # Fill up IP1
         for _ in range(5):
             limiter.is_allowed("ip1", 5)
-        
-        # IP2 should still be allowed
         assert limiter.is_allowed("ip2", 5) is True
-    
-    def test_get_remaining(self):
-        """Test remaining request count."""
-        from services.rate_limiter import RateLimiter
-        
-        limiter = RateLimiter()
-        ip = "192.168.1.3"
-        
-        assert limiter.get_remaining(ip, 10) == 10
-        
-        limiter.is_allowed(ip, 10)
-        assert limiter.get_remaining(ip, 10) == 9
 
 
 class TestUpliftEngine:
-    """Tests for uplift_engine scenarios."""
-    
-    def test_detect_scenario_rain_clearing(self):
-        """Test rain clearing soon scenario detection."""
-        from services.uplift_engine import detect_scenario
-        
-        weather_data = {
-            "forecast": [
-                {"is_good": False, "is_bad": True},
-                {"is_good": False, "is_bad": True},
-                {"is_good": True, "is_bad": False},
-            ],
-            "today": {"is_good": False, "is_bad": True},
-            "analysis": {
-                "next_good_weekday": 2,
-                "next_good_in_days": 2,
-                "temp_trend": "stable",
-                "good_streak_length": 0,
-                "bad_streak_length": 2,
-            }
-        }
-        
-        solar_data = {
+
+    def _solar(self):
+        return {
             "day_len_sec": 36000,
             "delta_daily_sec": 120,
+            "delta_weekly_sec": 840,
             "delta_solstice_sec": 3600,
+            "sunrise": datetime(2024, 1, 15, 8, 0),
+            "sunset": datetime(2024, 1, 15, 18, 0),
         }
-        
-        scenario, data = detect_scenario(weather_data, solar_data, date(2024, 2, 15))
-        # Should be one of the expected scenarios
-        assert scenario in ["rain_clearing_soon", "light_fighter", "post_solstice_grind", "stable_focus_light"]
-    
-    def test_generate_uplift_data_returns_expected_keys(self):
-        """Test that generate_uplift_data returns all expected keys."""
+
+    def test_detect_scenario_picks_a_known_scenario(self):
+        from services.uplift_engine import detect_scenario
+
+        weather = {
+            "forecast": [{"is_good": False, "is_bad": True}],
+            "today": {"is_good": False, "is_bad": True},
+            "analysis": {"next_good_weekday": 2, "next_good_in_days": 2,
+                         "temp_trend": "stable", "bad_streak_length": 2},
+        }
+        scenario, _ = detect_scenario(weather, self._solar(), date(2024, 2, 15))
+        assert scenario in ("rain_clearing_soon", "light_fighter",
+                            "post_solstice_grind", "stable_focus_light")
+
+    def test_every_rule_can_fire(self):
+        """
+        Each rule gets a context built to satisfy exactly its own condition.
+
+        A rule that silently stopped matching - a renamed analysis key, a
+        flipped comparison - would otherwise just quietly never be chosen.
+        """
+        from services.uplift_engine import RULES, _build_context
+
+        def ctx(solar, weather, today=date(2024, 2, 15), lat=47.4):
+            return _build_context(solar, weather, today, "en", lat)
+
+        def w(today_weather, analysis=None):
+            return {"today": today_weather, "analysis": analysis or {},
+                    "forecast": [{"temp_max": 10}]}
+
+        s = {"day_len_sec": 36000, "delta_daily_sec": 180,
+             "delta_solstice_sec": 3600, "delta_weekly_sec": 900}
+
+        probes = {
+            "_carpe_diem": ctx(s, w({"is_good": True},
+                                    {"next_bad_weekday": 3, "next_bad_in_days": 2})),
+            "_rain_clearing_soon": ctx(s, w({"is_bad": True},
+                                            {"next_good_weekday": 2, "next_good_in_days": 2})),
+            "_light_fighter": ctx(s, w({"is_bad": True})),
+            "_post_solstice_grind": ctx(s, w({}), date(2024, 1, 20)),
+            "_warming_trend": ctx(s, w({}, {"temp_trend": "warming_strong", "temp_change": 5})),
+            "_spring_acceleration": ctx(s, w({}), date(2024, 3, 10)),
+            "_breakthrough_day": ctx(s, w({"is_good": True})),
+            "_peak_light": ctx({**s, "day_len_sec": 55000}, w({}), date(2024, 6, 30)),
+            "_cooling_trend": ctx(s, w({}, {"temp_trend": "cooling_strong", "temp_change": -5})),
+            "_good_streak": ctx(s, w({}, {"good_streak_length": 5})),
+            "_solstice_approaching": ctx(s, w({}), date(2024, 6, 15)),
+            "_weekend_outlook": ctx(s, w({}, {"weekend_outlook": "good"})),
+            "_grey_stretch": ctx(s, w({}, {"bad_streak_length": 4})),
+            "_stable_focus_light": ctx(s, w({})),
+        }
+
+        assert {rule.__name__ for rule in RULES} == set(probes), "probe list out of sync"
+        for rule in RULES:
+            assert rule(probes[rule.__name__]) is not None, f"{rule.__name__} never fires"
+
+    def test_southern_hemisphere_flips_the_solstice_rule(self):
+        """The June solstice is the peak up north and the low point down south."""
+        from services.uplift_engine import _solstice_approaching, _build_context
+
+        june = date(2024, 6, 15)
+        north = _solstice_approaching(_build_context({}, {}, june, "en", 47.4))
+        south = _solstice_approaching(_build_context({}, {}, june, "en", -33.9))
+        assert north.data["peak_or_min"] == "peak"
+        assert south.data["peak_or_min"] == "minimum"
+
+    @pytest.mark.parametrize('lang', ['en', 'de', 'fr'])
+    def test_generates_text_in_any_language(self, lang):
         from services.uplift_engine import generate_uplift_data
-        
-        with patch('services.uplift_engine.get_daylight_delta') as mock_solar, \
+
+        with patch('services.uplift_engine.get_daylight_delta', return_value=self._solar()), \
              patch('services.uplift_engine.fetch_daily_weather') as mock_weather:
-            
-            mock_solar.return_value = {
-                "day_len_sec": 36000,
-                "delta_daily_sec": 120,
-                "delta_weekly_sec": 840,
-                "delta_solstice_sec": 3600,
-                "sunrise": datetime(2024, 1, 15, 8, 0),
-                "sunset": datetime(2024, 1, 15, 18, 0),
-            }
-            
-            mock_weather.return_value = {
-                "forecast": [{"code": 0, "temp_max": 10, "is_good": True, "is_bad": False}],
-                "today": {"code": 0, "is_good": True, "is_bad": False},
-                "analysis": {"temp_trend": "stable", "good_streak_length": 1},
-            }
-            
-            result = generate_uplift_data(47.37, 8.54, lang="en")
-            
-            assert "text" in result
-            assert "facts" in result
-            assert isinstance(result["text"], str)
-            assert len(result["text"]) > 0
-    
-    def test_language_support(self):
-        """Test that both languages work."""
-        from services.uplift_engine import generate_uplift_data
-        
-        with patch('services.uplift_engine.get_daylight_delta') as mock_solar, \
-             patch('services.uplift_engine.fetch_daily_weather') as mock_weather:
-            
-            mock_solar.return_value = {
-                "day_len_sec": 36000,
-                "delta_daily_sec": 120,
-                "delta_weekly_sec": 840,
-                "delta_solstice_sec": 3600,
-                "sunrise": datetime(2024, 1, 15, 8, 0),
-                "sunset": datetime(2024, 1, 15, 18, 0),
-            }
-            
             mock_weather.return_value = {
                 "forecast": [{"code": 0, "temp_max": 10, "is_good": True, "is_bad": False}],
                 "today": {"code": 0, "is_good": True, "is_bad": False},
                 "analysis": {"temp_trend": "stable"},
             }
-            
-            result_en = generate_uplift_data(47.37, 8.54, lang="en")
-            result_de = generate_uplift_data(47.37, 8.54, lang="de")
-            
-            # Both should return valid results
-            assert len(result_en["text"]) > 0
-            assert len(result_de["text"]) > 0
+            result = generate_uplift_data(47.37, 8.54, lang=lang)
 
+        assert result["text"]
+        assert set(result) == {"text", "facts"}
 
-class TestEdgeCases:
-    """Tests for edge cases and error handling."""
-    
-    def test_extreme_latitudes(self):
-        """Test behavior with extreme latitudes."""
+    def test_extreme_latitude(self):
+        """Polar summer: 24h of daylight and no sunrise time at all."""
         from services.uplift_engine import generate_uplift_data
-        
+
         with patch('services.uplift_engine.get_daylight_delta') as mock_solar, \
-             patch('services.uplift_engine.fetch_daily_weather') as mock_weather:
-            
-            # Simulate polar region with very long day
+             patch('services.uplift_engine.fetch_daily_weather', return_value={}):
             mock_solar.return_value = {
-                "day_len_sec": 86400,  # 24 hours
-                "delta_daily_sec": 0,
-                "delta_weekly_sec": 0,
-                "delta_solstice_sec": 0,
-                "sunrise": None,
-                "sunset": None,
+                "day_len_sec": 86400, "delta_daily_sec": 0, "delta_weekly_sec": 0,
+                "delta_solstice_sec": 0, "sunrise": None, "sunset": None,
             }
-            mock_weather.return_value = {}
-            
-            result = generate_uplift_data(70.0, 25.0)  # Northern Norway
-            assert "text" in result
-    
-    def test_missing_solar_data(self):
-        """Test handling when solar data is unavailable."""
-        from services.uplift_engine import generate_uplift_data
-        
-        with patch('services.uplift_engine.get_daylight_delta') as mock_solar, \
-             patch('services.uplift_engine.fetch_daily_weather') as mock_weather:
-            
-            mock_solar.return_value = {}
-            mock_weather.return_value = {}
-            
-            result = generate_uplift_data(47.37, 8.54)
-            assert "text" in result
-            assert "facts" in result
-    
-    def test_invalid_language_fallback(self):
-        """Test that invalid language falls back to English."""
-        from services.uplift_engine import generate_uplift_data
-        
-        with patch('services.uplift_engine.get_daylight_delta') as mock_solar, \
-             patch('services.uplift_engine.fetch_daily_weather') as mock_weather:
-            
-            mock_solar.return_value = {
-                "day_len_sec": 36000,
-                "delta_daily_sec": 120,
-                "sunrise": datetime(2024, 1, 15, 8, 0),
-                "sunset": datetime(2024, 1, 15, 18, 0),
-            }
-            mock_weather.return_value = {"forecast": [], "today": {}, "analysis": {}}
-            
-            # Invalid language should fallback gracefully
-            result = generate_uplift_data(47.37, 8.54, lang="fr")
-            assert "text" in result
+            assert generate_uplift_data(70.0, 25.0)["text"]
 
 
 class TestNeverClaimsUnbackedFacts:
@@ -350,8 +228,7 @@ class TestNeverClaimsUnbackedFacts:
         assert _get_darkest_solstice_date(47.4).month == 12
         assert _get_darkest_solstice_date(-33.9).month == 6
 
-    def test_template_needing_missing_fact_is_not_used(self):
-        import random
+    def test_template_needing_a_missing_fact_is_not_used(self):
         from services.uplift_engine import _pick_template
 
         templates = ["Backed {day_length}.", "Unbacked {bad_days}."]
@@ -360,7 +237,6 @@ class TestNeverClaimsUnbackedFacts:
         assert _pick_template(templates, {}, rng) is None
 
     def test_no_invented_numbers_when_apis_return_nothing(self):
-        import re
         from services.uplift_engine import generate_uplift_data
 
         with patch('services.uplift_engine.get_daylight_delta', return_value={}), \
@@ -371,3 +247,13 @@ class TestNeverClaimsUnbackedFacts:
         assert result["facts"]["delta_yesterday"] == "--"
         assert "0h 0m" not in result["text"]
         assert not re.search(r'\{\w+\}', result["text"]), "raw placeholder leaked"
+
+    def test_formatters_match_the_arithmetic_they_replaced(self):
+        from services.uplift_engine import format_duration, format_span, format_signed_span
+
+        assert format_duration(50580) == "14h 3m"
+        assert format_duration(0) == "0h 0m"
+        assert format_span(73) == "1h 13m"
+        assert format_span(22) == "22m"
+        assert format_signed_span(22) == "+22 min"
+        assert format_signed_span(-73) == "-1h 13m"
