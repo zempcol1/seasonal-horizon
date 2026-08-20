@@ -4,6 +4,14 @@ Multilingual support: English (en) and German (de).
 """
 
 # ===== FORECAST NARRATIVES =====
+WEEKDAYS = {
+    "en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+           "Saturday", "Sunday"],
+    "de": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag",
+           "Samstag", "Sonntag"],
+}
+
+
 FORECAST_NARRATIVES = {
     "rain_clearing_soon": {
         "en": [

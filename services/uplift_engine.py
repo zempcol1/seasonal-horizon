@@ -7,7 +7,7 @@ import random
 import hashlib
 from datetime import date, datetime, timedelta
 from services.solar_service import get_daylight_delta
-from services.weather_service import fetch_daily_weather
+from services.weather_service import classify, fetch_daily_weather
 from services import uplift_content as content
 
 
@@ -22,6 +22,14 @@ def _get_localized(data, lang, fallback="en"):
     return data  # Already a list
 
 
+def _weekday_name(index, lang):
+    """Localized weekday name for a 0=Monday index."""
+    if index is None:
+        return ""
+    names = content.WEEKDAYS.get(lang) or content.WEEKDAYS["en"]
+    return names[index]
+
+
 def _get_localized_nested(data, key, lang, fallback="en"):
     """Get nested content by key and language."""
     if key not in data:
@@ -31,7 +39,7 @@ def _get_localized_nested(data, key, lang, fallback="en"):
 
 # ===== SCENARIO DETECTION =====
 
-def detect_scenario(weather_data, solar_data, today):
+def detect_scenario(weather_data, solar_data, today, lang="en"):
     """
     Analyze weather and solar data to identify the primary narrative scenario.
     Returns a tuple: (scenario_key, scenario_data)
@@ -60,22 +68,24 @@ def detect_scenario(weather_data, solar_data, today):
     is_cold_season = today.month in [11, 12, 1, 2, 3]
     
     # 1. Rain clearing soon
-    if today_weather.get("is_bad", False) and analysis.get("next_good_day"):
-        days_until = analysis.get("next_good_day_index", 0)
+    if today_weather.get("is_bad", False) and analysis.get("next_good_weekday") is not None:
+        days_until = analysis.get("next_good_in_days", 0)
         if 1 <= days_until <= 4:
             scenarios.append((
                 "rain_clearing_soon",
-                {"clear_day": analysis["next_good_day"], "days_until": days_until},
+                {"clear_day": _weekday_name(analysis["next_good_weekday"], lang),
+                 "days_until": days_until},
                 85 if days_until <= 2 else 70
             ))
     
     # 2. Carpe Diem
-    if today_weather.get("is_good", False) and analysis.get("next_bad_day"):
-        days_until = analysis.get("next_bad_day_index", 0)
+    if today_weather.get("is_good", False) and analysis.get("next_bad_weekday") is not None:
+        days_until = analysis.get("next_bad_in_days", 0)
         if 1 <= days_until <= 3:
             scenarios.append((
                 "carpe_diem",
-                {"rain_day": analysis["next_bad_day"], "days_until": days_until},
+                {"rain_day": _weekday_name(analysis["next_bad_weekday"], lang),
+                 "days_until": days_until},
                 90
             ))
     
@@ -113,7 +123,7 @@ def detect_scenario(weather_data, solar_data, today):
         scenarios.append(("grey_stretch", {"streak_days": bad_streak}, 50))
     
     # 8. Breakthrough day
-    if today_weather.get("is_good", False) and not analysis.get("next_good_day"):
+    if today_weather.get("is_good", False) and analysis.get("next_good_weekday") is None:
         scenarios.append(("breakthrough_day", {"bad_days": 3}, 70))
     
     # 9. Peak light
@@ -206,18 +216,6 @@ def _get_seasonal_phase(month, day):
         return "late_autumn"
 
 
-def _get_weather_category(code):
-    """Convert weather code to category for nature observations."""
-    if code in [0, 1]:
-        return "clear"
-    elif code in [71, 73, 75, 77, 85, 86]:
-        return "snow"
-    elif code in [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99]:
-        return "rain"
-    else:
-        return "grey"
-
-
 def _get_visit_hash(lat, lon):
     """Generate a hash that changes periodically for variety."""
     time_bucket = datetime.now().hour // 6
@@ -257,7 +255,7 @@ def generate_uplift_data(lat, lon, city=None, lang="en"):
     
     today_weather = weather.get("today", {})
     weather_code = today_weather.get("code", 0)
-    weather_category = _get_weather_category(weather_code)
+    weather_category = classify(weather_code)
     analysis = weather.get("analysis", {})
     
     temps = []
@@ -269,7 +267,7 @@ def generate_uplift_data(lat, lon, city=None, lang="en"):
     seed = f"{today}|{lat:.2f}|{lon:.2f}|{weather_code}|{visit_hash}|{random_factor}"
     rng = random.Random(seed)
     
-    scenario_key, scenario_data = detect_scenario(weather, solar, today)
+    scenario_key, scenario_data = detect_scenario(weather, solar, today, lang)
     
     text_parts = []
     used_topics = set()
