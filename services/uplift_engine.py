@@ -5,7 +5,7 @@ Supports multiple languages (en, de).
 
 import random
 import hashlib
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from services.solar_service import get_daylight_delta
 from services.weather_service import classify, fetch_daily_weather
 from services import uplift_content as content

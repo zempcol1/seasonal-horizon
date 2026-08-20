@@ -4,10 +4,3 @@ Werkzeug>=3.1.8
 
 # HTTP requests
 requests>=2.34.2
-
-# Timezone handling
-pytz>=2026.3
-
-# Solar calculations (try astral first, fallback to suntime)
-astral>=3.2
-suntime>=1.3.2
