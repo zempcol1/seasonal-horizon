@@ -58,7 +58,6 @@ def api_uplift():
     try:
         lat = float(request.args.get('lat', config.DEFAULT_LAT))
         lon = float(request.args.get('lon', config.DEFAULT_LON))
-        city = request.args.get('city', '')
         lang = request.args.get('lang', 'en')
         
         # Validate inputs
@@ -67,7 +66,7 @@ def api_uplift():
         if lang not in ['en', 'de']:
             lang = 'en'
         
-        data = generate_uplift_data(lat, lon, city, lang=lang)
+        data = generate_uplift_data(lat, lon, lang=lang)
         return jsonify({"success": True, **data})
     except Exception as e:
         log_event('error', f'uplift:{str(e)[:50]}')

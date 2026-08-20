@@ -306,7 +306,6 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    // No more highlights - just display text
                     document.getElementById('uplift-text').textContent = data.text;
                     
                     document.getElementById('f-sunrise').textContent = data.facts.sunrise;

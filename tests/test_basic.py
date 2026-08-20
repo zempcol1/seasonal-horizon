@@ -38,10 +38,8 @@ def test_uplift_api_returns_json(client):
     if data['success']:
         assert 'text' in data
         assert 'facts' in data
-        assert 'highlights' in data
         assert isinstance(data['text'], str)
         assert isinstance(data['facts'], dict)
-        assert isinstance(data['highlights'], list)
         
         expected_keys = ['sunrise', 'sunset', 'day_length', 'delta_yesterday']
         for key in expected_keys:
