@@ -5,6 +5,33 @@ from services.api_client import TTLCache, request_json
 
 _cache = TTLCache(config.CACHE_TTL_WEATHER)
 
+# Open-Meteo weather codes, grouped for narrative lookup.
+CLEAR_CODES = frozenset([0, 1])
+GOOD_CODES = frozenset([0, 1, 2])  # clear, mainly clear, partly cloudy
+SNOW_CODES = frozenset([71, 73, 75, 77, 85, 86])
+RAIN_CODES = frozenset([51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99])
+
+
+def classify(code):
+    """Bucket a code as clear / snow / rain / grey for narrative lookup."""
+    if code in CLEAR_CODES:
+        return "clear"
+    if code in SNOW_CODES:
+        return "snow"
+    if code in RAIN_CODES:
+        return "rain"
+    return "grey"
+
+
+def is_good(code):
+    """Clear enough to be worth going outside."""
+    return code in GOOD_CODES
+
+
+def is_bad(code):
+    """Rain or storms."""
+    return code in RAIN_CODES
+
 
 def fetch_daily_weather(lat, lon, days=7):
     """
@@ -41,23 +68,22 @@ def fetch_daily_weather(lat, lon, days=7):
         forecast = []
         for i in range(min(7, len(codes))):
             day_date = datetime.strptime(dates[i], "%Y-%m-%d") if i < len(dates) else None
+            code = codes[i]
             forecast.append({
                 "date": day_date,
-                "weekday": day_date.strftime("%A") if day_date else f"Day {i+1}",
-                "weekday_short": day_date.strftime("%a") if day_date else f"D{i+1}",
-                "code": codes[i] if i < len(codes) else 0,
+                "weekday_index": day_date.weekday() if day_date else None,
+                "code": code,
                 "temp_max": temps_max[i] if i < len(temps_max) else None,
                 "temp_min": temps_min[i] if i < len(temps_min) else None,
                 "precip": precip[i] if i < len(precip) else 0,
                 "precip_prob": precip_prob[i] if i < len(precip_prob) else 0,
-                "is_good": _is_good_weather(codes[i] if i < len(codes) else 0),
-                "is_bad": _is_bad_weather(codes[i] if i < len(codes) else 0),
+                "is_good": is_good(code),
+                "is_bad": is_bad(code),
             })
-        
+
         result = {
             "forecast": forecast,
             "today": forecast[0] if forecast else {},
-            "tomorrow": forecast[1] if len(forecast) > 1 else {},
             "analysis": _analyze_forecast(forecast, temps_max)
         }
         
@@ -68,18 +94,6 @@ def fetch_daily_weather(lat, lon, days=7):
         return {}
 
 
-def _is_good_weather(code):
-    """Check if weather code indicates good weather."""
-    return code in [0, 1, 2]  # Clear, mainly clear, partly cloudy
-
-def _is_bad_weather(code):
-    """Check if weather code indicates bad/rainy weather."""
-    return code in [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99]  # Rain/storms
-
-def _is_snow(code):
-    """Check if weather code indicates snow."""
-    return code in [71, 73, 75, 77, 85, 86]
-
 def _analyze_forecast(forecast, temps_max):
     """Analyze the 7-day forecast for narrative patterns."""
     if not forecast:
@@ -88,15 +102,13 @@ def _analyze_forecast(forecast, temps_max):
     analysis = {
         "temp_trend": "stable",
         "temp_change": 0,
-        "next_good_day": None,
-        "next_good_day_index": -1,
-        "next_bad_day": None,
-        "next_bad_day_index": -1,
+        "next_good_weekday": None,
+        "next_good_in_days": -1,
+        "next_bad_weekday": None,
+        "next_bad_in_days": -1,
         "good_streak_length": 0,
         "bad_streak_length": 0,
         "weekend_outlook": "mixed",
-        "week_character": "mixed",
-        "warming_days_ahead": 0,  # New: count of days warmer than today
     }
     
     # Temperature trend analysis
@@ -105,8 +117,7 @@ def _analyze_forecast(forecast, temps_max):
         
         # Count how many of next days are warmer
         warmer_count = sum(1 for t in temps_max[1:5] if t and t > today_temp + 1)
-        analysis["warming_days_ahead"] = warmer_count
-        
+
         # Calculate trend from first half to second half
         first_half = sum(t for t in temps_max[:3] if t) / max(1, len([t for t in temps_max[:3] if t]))
         second_half = sum(t for t in temps_max[3:6] if t) / max(1, len([t for t in temps_max[3:6] if t]))
@@ -128,15 +139,15 @@ def _analyze_forecast(forecast, temps_max):
     if forecast[0].get("is_bad", False):
         for i, day in enumerate(forecast[1:], 1):
             if day.get("is_good", False):
-                analysis["next_good_day"] = day.get("weekday", f"Day {i+1}")
-                analysis["next_good_day_index"] = i
+                analysis["next_good_weekday"] = day.get("weekday_index")
+                analysis["next_good_in_days"] = i
                 break
     
     if forecast[0].get("is_good", False):
         for i, day in enumerate(forecast[1:], 1):
             if day.get("is_bad", False):
-                analysis["next_bad_day"] = day.get("weekday", f"Day {i+1}")
-                analysis["next_bad_day_index"] = i
+                analysis["next_bad_weekday"] = day.get("weekday_index")
+                analysis["next_bad_in_days"] = i
                 break
     
     today_good = forecast[0].get("is_good", False)
@@ -169,17 +180,5 @@ def _analyze_forecast(forecast, temps_max):
             analysis["weekend_outlook"] = "bad"
         else:
             analysis["weekend_outlook"] = "mixed"
-    
-    good_days = sum(1 for d in forecast if d.get("is_good", False))
-    bad_days = sum(1 for d in forecast if d.get("is_bad", False))
-    
-    if good_days >= 5:
-        analysis["week_character"] = "mostly_good"
-    elif bad_days >= 5:
-        analysis["week_character"] = "mostly_bad"
-    elif good_days >= 3 and bad_days <= 2:
-        analysis["week_character"] = "good_stretch"
-    elif bad_days >= 3 and good_days <= 2:
-        analysis["week_character"] = "grey_stretch"
-    
+
     return analysis

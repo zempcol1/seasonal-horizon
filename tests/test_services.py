@@ -84,24 +84,30 @@ class TestWeatherService:
     
     def test_is_good_weather(self):
         """Test weather classification."""
-        from services.weather_service import _is_good_weather, _is_bad_weather
-        
+        from services.weather_service import classify, is_good, is_bad
+
         # Good weather codes
-        assert _is_good_weather(0) is True
-        assert _is_good_weather(1) is True
-        assert _is_good_weather(2) is True
-        
+        assert is_good(0) is True
+        assert is_good(1) is True
+        assert is_good(2) is True
+
         # Not good
-        assert _is_good_weather(3) is False
-        assert _is_good_weather(61) is False
-        
+        assert is_good(3) is False
+        assert is_good(61) is False
+
         # Bad weather codes
-        assert _is_bad_weather(61) is True
-        assert _is_bad_weather(95) is True
-        
+        assert is_bad(61) is True
+        assert is_bad(95) is True
+
         # Not bad
-        assert _is_bad_weather(0) is False
-        assert _is_bad_weather(3) is False
+        assert is_bad(0) is False
+        assert is_bad(3) is False
+
+        # Buckets used for narrative lookup. Note 2 is "good" but not "clear".
+        assert classify(0) == "clear"
+        assert classify(2) == "grey"
+        assert classify(75) == "snow"
+        assert classify(61) == "rain"
     
     def test_analyze_forecast_temperature_trends(self):
         """Test temperature trend detection."""
@@ -192,8 +198,8 @@ class TestUpliftEngine:
             ],
             "today": {"is_good": False, "is_bad": True},
             "analysis": {
-                "next_good_day": "Wednesday",
-                "next_good_day_index": 2,
+                "next_good_weekday": 2,
+                "next_good_in_days": 2,
                 "temp_trend": "stable",
                 "good_streak_length": 0,
                 "bad_streak_length": 2,
