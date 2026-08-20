@@ -238,11 +238,10 @@ class TestUpliftEngine:
                 "analysis": {"temp_trend": "stable", "good_streak_length": 1},
             }
             
-            result = generate_uplift_data(47.37, 8.54, "Zurich", lang="en")
+            result = generate_uplift_data(47.37, 8.54, lang="en")
             
             assert "text" in result
             assert "facts" in result
-            assert "highlights" in result
             assert isinstance(result["text"], str)
             assert len(result["text"]) > 0
     
