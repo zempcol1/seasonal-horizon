@@ -60,13 +60,6 @@ class RateLimiter:
         self._requests[ip].append(now)
         return True
     
-    def get_remaining(self, ip: str, limit: int) -> int:
-        """Get remaining requests for this IP."""
-        cutoff = time.time() - 60
-        recent = [t for t in self._requests[ip] if t > cutoff]
-        return max(0, limit - len(recent))
-
-
 # Global instance
 _limiter = RateLimiter()
 
