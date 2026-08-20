@@ -1,51 +1,37 @@
 from flask import Flask, render_template, request, jsonify
 
 from config import config
-from services.api_client import TTLCache, request_json
+from services.geocoding import search_cities
 from services.logging_service import get_logger, log_event
 from services.rate_limiter import rate_limit
+from services.uplift_engine import generate_uplift_data
 
 app = Flask(__name__)
-
-# Configuration
 app.config['DEBUG'] = config.DEBUG
 
-# Logger
 logger = get_logger()
-
-# Log startup
 log_event('startup', f'debug={config.DEBUG}')
 
-# Simple cache for geocoding
-_geo_cache = TTLCache(config.CACHE_TTL_GEO)
+LANGUAGES = ('en', 'de')
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Defaults come from config so the client does not hardcode its own.
+    return render_template(
+        'index.html',
+        version=config.VERSION,
+        default_city=config.DEFAULT_CITY,
+        default_lat=config.DEFAULT_LAT,
+        default_lon=config.DEFAULT_LON,
+    )
 
 
 @app.route('/api/search')
 @rate_limit(config.RATE_LIMIT_SEARCH)
 def search_city():
-    query = request.args.get('q', '').strip()
-    if len(query) < 2:
-        return jsonify([])
-    
-    cache_key = query.lower()
-    cached = _geo_cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-
     try:
-        url = "https://geocoding-api.open-meteo.com/v1/search"
-        data = request_json(url, {"name": query, "count": 8, "language": "en"})
-        if not data:
-            return jsonify([])
-
-        results = data.get('results', [])
-        _geo_cache.set(cache_key, results)
-        return jsonify(results)
+        return jsonify(search_cities(request.args.get('q', '')))
     except Exception as e:
         log_event('error', f'search:{str(e)[:50]}')
         return jsonify([])
@@ -54,18 +40,13 @@ def search_city():
 @app.route('/api/uplift')
 @rate_limit(config.RATE_LIMIT_UPLIFT)
 def api_uplift():
-    from services.uplift_engine import generate_uplift_data
     try:
-        lat = float(request.args.get('lat', config.DEFAULT_LAT))
-        lon = float(request.args.get('lon', config.DEFAULT_LON))
+        lat = max(-90, min(90, float(request.args.get('lat', config.DEFAULT_LAT))))
+        lon = max(-180, min(180, float(request.args.get('lon', config.DEFAULT_LON))))
         lang = request.args.get('lang', 'en')
-        
-        # Validate inputs
-        lat = max(-90, min(90, lat))
-        lon = max(-180, min(180, lon))
-        if lang not in ['en', 'de']:
+        if lang not in LANGUAGES:
             lang = 'en'
-        
+
         data = generate_uplift_data(lat, lon, lang=lang)
         return jsonify({"success": True, **data})
     except Exception as e:
