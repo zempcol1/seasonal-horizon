@@ -74,7 +74,8 @@ This application is configured for deployment on PythonAnywhere. The `wsgi.py` f
 
 ## Changelog
 
-- **v0.4.1** - Added basic logging, rate limiting and more tests. Improved highlighting, cleaner mobile layout
+- **v0.5** - Winter leads with the returning light: spring signs by region, suggestions for using the sun, hemisphere-aware seasons, a short mode for the tropics, and a guarantee that nothing is stated that was not measured
+- **v0.4.1** - Added basic logging, rate limiting and more tests. Cleaner mobile layout
 - **v0.4** - Multi-language support (English/German), rate limiting, improved German translations
 - **v0.3** - Smart forecast narratives with 7-day weather analysis
 - **v0.2** - Location selection and improved text generation
