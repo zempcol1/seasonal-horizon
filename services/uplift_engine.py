@@ -5,6 +5,7 @@ Supports multiple languages (en, de).
 
 import random
 import hashlib
+import re
 from datetime import date, datetime
 from services.solar_service import get_daylight_delta
 from services.weather_service import classify, fetch_daily_weather
@@ -20,6 +21,35 @@ def _get_localized(data, lang, fallback="en"):
             return data[lang]
         return data.get(fallback, [])
     return data  # Already a list
+
+
+_PLACEHOLDER = re.compile(r"\{(\w+)")
+
+
+def _pick_template(templates, data, rng):
+    """
+    Choose a template whose every placeholder is backed by real data.
+
+    Templates asking for a fact we could not measure are dropped rather than
+    rendered, so the app never shows an unbacked claim or a raw "{placeholder}".
+    Returns None when nothing qualifies, which means: say nothing here.
+    """
+    usable = [t for t in templates
+              if all(k in data for k in _PLACEHOLDER.findall(t))]
+    return rng.choice(usable) if usable else None
+
+
+def _effective_month(month, lat):
+    """
+    Month translated to its northern-hemisphere equivalent.
+
+    Everything seasonal below is written from a northern point of view, so for
+    southern latitudes we shift half a year and reuse it. Deliberately crude:
+    no equinox dates, just the six-month flip.
+    """
+    if lat < 0:
+        return (month + 5) % 12 + 1
+    return month
 
 
 def _weekday_name(index, lang):
@@ -39,7 +69,7 @@ def _get_localized_nested(data, key, lang, fallback="en"):
 
 # ===== SCENARIO DETECTION =====
 
-def detect_scenario(weather_data, solar_data, today, lang="en"):
+def detect_scenario(weather_data, solar_data, today, lang="en", lat=0.0):
     """
     Analyze weather and solar data to identify the primary narrative scenario.
     Returns a tuple: (scenario_key, scenario_data)
@@ -50,22 +80,30 @@ def detect_scenario(weather_data, solar_data, today, lang="en"):
     analysis = weather_data.get("analysis", {})
     today_weather = weather_data.get("today", {})
     
+    has_solar = bool(solar_data)
+
     delta_daily = solar_data.get("delta_daily_sec", 0)
     delta_daily_min = abs(int(delta_daily // 60))
     delta_solstice = solar_data.get("delta_solstice_sec", 0)
     delta_solstice_min = int(delta_solstice // 60)
     day_len_sec = solar_data.get("day_len_sec", 0)
-    
+
     hours = int(day_len_sec // 3600)
     mins = int((day_len_sec % 3600) // 60)
-    day_length = f"{hours}h {mins}m"
-    
+    day_length = f"{hours}h {mins}m" if has_solar else None
+
     solstice_hours = abs(delta_solstice_min) // 60
     solstice_mins = abs(delta_solstice_min) % 60
     hours_gained = f"{solstice_hours}h {solstice_mins}m" if solstice_hours > 0 else f"{solstice_mins}m"
-    
-    # Check if we're in winter/early spring (warmer temps are extra motivating)
-    is_cold_season = today.month in [11, 12, 1, 2, 3]
+    if not has_solar:
+        hours_gained = None
+
+    # Seasonal tests below are written for the north; south gets the same
+    # phases half a year offset.
+    season_month = _effective_month(today.month, lat)
+
+    # Warmer temps are extra motivating in winter/early spring
+    is_cold_season = season_month in [11, 12, 1, 2, 3]
     
     # 1. Rain clearing soon
     if today_weather.get("is_bad", False) and analysis.get("next_good_weekday") is not None:
@@ -124,14 +162,14 @@ def detect_scenario(weather_data, solar_data, today, lang="en"):
     
     # 8. Breakthrough day
     if today_weather.get("is_good", False) and analysis.get("next_good_weekday") is None:
-        scenarios.append(("breakthrough_day", {"bad_days": 3}, 70))
+        scenarios.append(("breakthrough_day", {}, 70))
     
     # 9. Peak light
-    if today.month in [6, 7] and day_len_sec > 50000:
+    if season_month in [6, 7] and day_len_sec > 50000:
         scenarios.append(("peak_light", {"day_length": day_length}, 65))
     
     # 10. Post-solstice grind
-    if today.month in [1, 2] and delta_solstice_min > 10:
+    if season_month in [1, 2] and delta_solstice_min > 10:
         scenarios.append(("post_solstice_grind", {"hours_gained": hours_gained}, 75))
     
     # 11. Weekend outlook
@@ -143,13 +181,15 @@ def detect_scenario(weather_data, solar_data, today, lang="en"):
             scenarios.append(("weekend_bad", {}, 45))
     
     # 12. Spring acceleration
-    if today.month in [2, 3, 4] and delta_daily_min >= 2:
+    if season_month in [2, 3, 4] and delta_daily_min >= 2:
         scenarios.append(("spring_acceleration", {"delta_min": delta_daily_min}, 70))
     
     # 13. Solstice approaching
-    days_to_summer = _days_to_date(today, date(today.year, 6, 21))
-    days_to_winter = _days_to_date(today, date(today.year, 12, 21))
-    
+    peak_month = 6 if lat >= 0 else 12
+    dark_month = 12 if lat >= 0 else 6
+    days_to_summer = _days_to_date(today, date(today.year, peak_month, 21))
+    days_to_winter = _days_to_date(today, date(today.year, dark_month, 21))
+
     if 0 < days_to_summer <= 14:
         scenarios.append((
             "solstice_approaching",
@@ -166,12 +206,10 @@ def detect_scenario(weather_data, solar_data, today, lang="en"):
     # 14. Default
     scenarios.append((
         "stable_focus_light",
-        {"day_length": day_length, "delta_min": delta_daily_min if delta_daily > 0 else abs(delta_daily_min)},
+        {"day_length": day_length,
+         "delta_min": delta_daily_min if has_solar else None},
         30
     ))
-    
-    if not scenarios:
-        return "stable_focus_light", {"day_length": day_length, "delta_min": 0}
     
     scenarios.sort(key=lambda x: x[2], reverse=True)
     top_scenarios = scenarios[:3]
@@ -181,12 +219,15 @@ def detect_scenario(weather_data, solar_data, today, lang="en"):
     roll = rng.random() * total_weight
     
     cumulative = 0
-    for scenario_key, scenario_data, weight in top_scenarios:
-        cumulative += weight
+    chosen = scenarios[0]
+    for scenario in top_scenarios:
+        cumulative += scenario[2]
         if roll <= cumulative:
-            return scenario_key, scenario_data
-    
-    return scenarios[0][0], scenarios[0][1]
+            chosen = scenario
+            break
+
+    key, data = chosen[0], chosen[1]
+    return key, {k: v for k, v in data.items() if v is not None}
 
 
 def _days_to_date(from_date, to_date):
@@ -196,8 +237,9 @@ def _days_to_date(from_date, to_date):
     return (to_date - from_date).days
 
 
-def _get_seasonal_phase(month, day):
-    """Determine seasonal phase based on date."""
+def _get_seasonal_phase(month, day, lat=0.0):
+    """Determine seasonal phase based on date and hemisphere."""
+    month = _effective_month(month, lat)
     if (month == 12 and day >= 21) or month == 1:
         return "deep_winter"
     elif month == 2 or (month == 3 and day < 20):
@@ -243,9 +285,11 @@ def generate_uplift_data(lat, lon, city=None, lang="en"):
     sunrise = solar.get("sunrise")
     sunset = solar.get("sunset")
     
+    has_solar = bool(solar)
+    season_month = _effective_month(today.month, lat)
     hours = int(day_sec // 3600)
     mins = int((day_sec % 3600) // 60)
-    day_len_str = f"{hours}h {mins}m"
+    day_len_str = f"{hours}h {mins}m" if has_solar else "--"
     sunrise_str = sunrise.strftime("%H:%M") if sunrise else "--:--"
     sunset_str = sunset.strftime("%H:%M") if sunset else "--:--"
     
@@ -253,9 +297,10 @@ def generate_uplift_data(lat, lon, city=None, lang="en"):
     delta_w_min = int(delta_weekly // 60)
     delta_s_min = int(delta_solstice // 60)
     
+    has_weather = bool(weather)
     today_weather = weather.get("today", {})
     weather_code = today_weather.get("code", 0)
-    weather_category = classify(weather_code)
+    weather_category = classify(weather_code) if has_weather else None
     analysis = weather.get("analysis", {})
     
     temps = []
@@ -267,20 +312,16 @@ def generate_uplift_data(lat, lon, city=None, lang="en"):
     seed = f"{today}|{lat:.2f}|{lon:.2f}|{weather_code}|{visit_hash}|{random_factor}"
     rng = random.Random(seed)
     
-    scenario_key, scenario_data = detect_scenario(weather, solar, today, lang)
+    scenario_key, scenario_data = detect_scenario(weather, solar, today, lang, lat)
     
     text_parts = []
     used_topics = set()
     
     # 1. Primary scenario narrative (localized)
     narrative_templates = _get_localized_nested(content.FORECAST_NARRATIVES, scenario_key, lang)
-    if narrative_templates:
-        template = rng.choice(narrative_templates)
-        try:
-            narrative = template.format(**scenario_data)
-        except KeyError:
-            narrative = template
-        text_parts.append(narrative)
+    template = _pick_template(narrative_templates, scenario_data, rng)
+    if template:
+        text_parts.append(template.format(**scenario_data))
         
         if scenario_key in ["warming_trend", "cooling_trend"]:
             used_topics.add("temperature")
@@ -290,75 +331,69 @@ def generate_uplift_data(lat, lon, city=None, lang="en"):
             used_topics.add("day_length")
     
     # 2. Daylight fact (localized) - skip if day_length already mentioned
-    if rng.random() > 0.3 and "day_length" not in used_topics:
-        daylight_templates = _get_localized(content.DAYLIGHT_FACTS, lang)
-        if daylight_templates:
-            template = rng.choice(daylight_templates)
-            fact = template.format(day_length=day_len_str, sunrise=sunrise_str, sunset=sunset_str)
-            text_parts.append(fact)
+    if has_solar and rng.random() > 0.3 and "day_length" not in used_topics:
+        facts_data = {"day_length": day_len_str, "sunrise": sunrise_str,
+                      "sunset": sunset_str}
+        template = _pick_template(_get_localized(content.DAYLIGHT_FACTS, lang),
+                                  facts_data, rng)
+        if template:
+            text_parts.append(template.format(**facts_data))
             used_topics.add("day_length")
     
     # 3. Change from yesterday (localized) - skip if delta already mentioned
-    if abs(delta_d_min) >= 1 and rng.random() > 0.4 and "delta_daily" not in used_topics:
+    if has_solar and abs(delta_d_min) >= 1 and rng.random() > 0.4 \
+            and "delta_daily" not in used_topics:
         if delta_d_min > 0:
             delta_templates = _get_localized(content.DELTA_PHRASES["gaining"], lang)
         else:
             delta_templates = _get_localized(content.DELTA_PHRASES["losing"], lang)
         
-        if delta_templates:
-            template = rng.choice(delta_templates)
-            phrase = template.format(delta=abs(delta_d_min))
-            text_parts.append(phrase)
+        delta_data = {"delta": abs(delta_d_min)}
+        template = _pick_template(delta_templates, delta_data, rng)
+        if template:
+            text_parts.append(template.format(**delta_data))
             used_topics.add("delta_daily")
     
     # 4. Seasonal context (localized)
     if rng.random() > 0.5:
-        phase = _get_seasonal_phase(today.month, today.day)
+        phase = _get_seasonal_phase(today.month, today.day, lat)
         phase_texts = _get_localized_nested(content.SEASONAL_PHASE, phase, lang)
         if phase_texts:
             text_parts.append(rng.choice(phase_texts))
     
     # 5. Temperature outlook - add if warming and not already covered
-    is_cold_season = today.month in [11, 12, 1, 2, 3]
+    is_cold_season = season_month in [11, 12, 1, 2, 3]
     temp_trend = analysis.get("temp_trend", "stable")
     if is_cold_season and temp_trend in ["warming", "warming_strong"] and "temperature" not in used_topics:
         if rng.random() > 0.4:
             if scenario_key != "warming_trend":
                 narrative_templates = _get_localized_nested(content.FORECAST_NARRATIVES, "warming_trend", lang)
-                if narrative_templates:
-                    temp_change = abs(analysis.get("temp_change", 0))
-                    template = rng.choice(narrative_templates)
-                    try:
-                        temp_narrative = template.format(temp_change=f"+{temp_change:.0f}")
-                        text_parts.append(temp_narrative)
-                        used_topics.add("temperature")
-                    except KeyError:
-                        pass
+                temp_change = abs(analysis.get("temp_change", 0))
+                temp_data = {"temp_change": f"+{temp_change:.0f}"}
+                template = _pick_template(narrative_templates, temp_data, rng)
+                if template:
+                    text_parts.append(template.format(**temp_data))
+                    used_topics.add("temperature")
     
     # 6. Weather-dependent nature observation
-    if rng.random() > 0.35 and hasattr(content, 'NATURE_WEATHER'):
-        weather_nature = content.NATURE_WEATHER.get(weather_category, {})
-        weather_nature_texts = _get_localized(weather_nature, lang)
-        if weather_nature_texts:
-            text_parts.append(rng.choice(weather_nature_texts))
-    
-    # 7. Month-based nature observation (localized)
-    elif rng.random() > 0.3:
-        month_signs = content.NATURE_SIGNS.get(today.month, {})
-        nature_texts = _get_localized(month_signs, lang)
-        if nature_texts:
-            text_parts.append(rng.choice(nature_texts))
+    if rng.random() > 0.35:
+        weather_nature = _get_localized(
+            content.NATURE_WEATHER.get(weather_category, {}), lang) if has_weather else []
+        month_signs = _get_localized(content.NATURE_SIGNS.get(season_month, {}), lang)
+        observations = weather_nature or month_signs
+        if observations:
+            text_parts.append(rng.choice(observations))
     
     # Ensure minimum parts
     if len(text_parts) < 3:
-        phase = _get_seasonal_phase(today.month, today.day)
+        phase = _get_seasonal_phase(today.month, today.day, lat)
         phase_texts = _get_localized_nested(content.SEASONAL_PHASE, phase, lang)
         if phase_texts and len(text_parts) < 3:
             addition = rng.choice(phase_texts)
             if addition not in text_parts:
                 text_parts.append(addition)
         
-        month_signs = content.NATURE_SIGNS.get(today.month, {})
+        month_signs = content.NATURE_SIGNS.get(season_month, {})
         nature_texts = _get_localized(month_signs, lang)
         if nature_texts and len(text_parts) < 3:
             addition = rng.choice(nature_texts)
@@ -384,9 +419,9 @@ def generate_uplift_data(lat, lon, city=None, lang="en"):
         "sunrise": sunrise_str,
         "sunset": sunset_str,
         "day_length": day_len_str,
-        "delta_yesterday": f"{delta_d_min:+d} min",
-        "delta_week": f"{delta_w_min:+d} min",
-        "delta_solstice": delta_s_str,
+        "delta_yesterday": f"{delta_d_min:+d} min" if has_solar else "--",
+        "delta_week": f"{delta_w_min:+d} min" if has_solar else "--",
+        "delta_solstice": delta_s_str if has_solar else "--",
         "weather_code": weather_code,
         "temp_max": f"{temps[0]:.0f}°C" if temps else "--"
     }

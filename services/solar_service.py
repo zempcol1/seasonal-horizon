@@ -6,12 +6,18 @@ from services.api_client import TTLCache, request_json
 _cache = TTLCache(config.CACHE_TTL_SOLAR)
 
 
-def _get_winter_solstice_date():
-    """Return the most recent winter solstice."""
+def _get_darkest_solstice_date(lat):
+    """
+    Most recent solstice with the shortest day, for this hemisphere.
+
+    December in the north, June in the south. Getting this wrong would make
+    every "gained since the solstice" figure meaningless below the equator.
+    """
     today = date.today()
-    solstice = date(today.year, 12, 21)
+    month, day = (12, 21) if lat >= 0 else (6, 21)
+    solstice = date(today.year, month, day)
     if today < solstice:
-        solstice = date(today.year - 1, 12, 21)
+        solstice = date(today.year - 1, month, day)
     return solstice
 
 
@@ -25,7 +31,7 @@ def get_daylight_delta(lat, lon):
         return cached
 
     try:
-        solstice = _get_winter_solstice_date()
+        solstice = _get_darkest_solstice_date(lat)
         today = date.today()
         days_since_solstice = (today - solstice).days
         past_days = min(days_since_solstice, 92)
