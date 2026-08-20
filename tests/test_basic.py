@@ -35,15 +35,15 @@ def test_uplift_api_returns_json(client):
     data = response.get_json()
     assert 'success' in data
     
-    if data['success']:
-        assert 'text' in data
-        assert 'facts' in data
-        assert isinstance(data['text'], str)
-        assert isinstance(data['facts'], dict)
-        
-        expected_keys = ['sunrise', 'sunset', 'day_length', 'delta_yesterday']
-        for key in expected_keys:
-            assert key in data['facts'], f"Missing key: {key}"
+    assert data['success']
+    assert 'text' in data
+    assert 'facts' in data
+    assert isinstance(data['text'], str)
+    assert isinstance(data['facts'], dict)
+    
+    expected_keys = ['sunrise', 'sunset', 'day_length', 'delta_yesterday']
+    for key in expected_keys:
+        assert key in data['facts'], f"Missing key: {key}"
 
 
 def test_uplift_api_with_default_location(client):
@@ -90,20 +90,20 @@ class TestNarrativeContent:
         response = client.get('/api/uplift?lat=47.37&lon=8.54')
         data = response.get_json()
         
-        if data['success']:
-            assert len(data['text']) > 50, "Text should be meaningful, not just a few words"
+        assert data['success']
+        assert len(data['text']) > 50, "Text should be meaningful, not just a few words"
     
     def test_text_contains_time_references(self, client):
         """Text should contain time-related information."""
         response = client.get('/api/uplift?lat=47.37&lon=8.54')
         data = response.get_json()
         
-        if data['success']:
-            text = data['text'].lower()
-            time_words = ['day', 'light', 'sun', 'minute', 'hour', 'morning', 'evening', 
-                         'sunrise', 'sunset', 'daylight', 'tag', 'sonne', 'licht']
-            has_time_reference = any(word in text for word in time_words)
-            assert has_time_reference, "Text should reference time/light concepts"
+        assert data['success']
+        text = data['text'].lower()
+        time_words = ['day', 'light', 'sun', 'minute', 'hour', 'morning', 'evening', 
+                     'sunrise', 'sunset', 'daylight', 'tag', 'sonne', 'licht']
+        has_time_reference = any(word in text for word in time_words)
+        assert has_time_reference, "Text should reference time/light concepts"
 
 
 # ===== GEOGRAPHIC/SEASONAL SCENARIO TESTS =====
@@ -204,32 +204,32 @@ class TestFactsAccuracy:
         response = client.get('/api/uplift?lat=47.37&lon=8.54')
         data = response.get_json()
         
-        if data['success']:
-            day_length = data['facts']['day_length']
-            assert 'h' in day_length and 'm' in day_length
+        assert data['success']
+        day_length = data['facts']['day_length']
+        assert 'h' in day_length and 'm' in day_length
     
     def test_sunrise_sunset_format(self, client):
         """Times should be in HH:MM format."""
         response = client.get('/api/uplift?lat=47.37&lon=8.54')
         data = response.get_json()
         
-        if data['success']:
-            sunrise = data['facts']['sunrise']
-            sunset = data['facts']['sunset']
-            
-            if sunrise != "--:--":
-                assert ':' in sunrise
-                assert len(sunrise) == 5
-            
-            if sunset != "--:--":
-                assert ':' in sunset
-                assert len(sunset) == 5
+        assert data['success']
+        sunrise = data['facts']['sunrise']
+        sunset = data['facts']['sunset']
+        
+        if sunrise != "--:--":
+            assert ':' in sunrise
+            assert len(sunrise) == 5
+        
+        if sunset != "--:--":
+            assert ':' in sunset
+            assert len(sunset) == 5
     
     def test_delta_has_sign(self, client):
         """Delta values should have + or - prefix."""
         response = client.get('/api/uplift?lat=47.37&lon=8.54')
         data = response.get_json()
         
-        if data['success']:
-            delta_yesterday = data['facts']['delta_yesterday']
-            assert delta_yesterday.startswith('+') or delta_yesterday.startswith('-') or '0' in delta_yesterday
+        assert data['success']
+        delta_yesterday = data['facts']['delta_yesterday']
+        assert delta_yesterday.startswith('+') or delta_yesterday.startswith('-') or '0' in delta_yesterday
