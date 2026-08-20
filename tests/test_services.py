@@ -114,7 +114,8 @@ class TestWeatherService:
         from services.weather_service import _analyze_forecast
         
         # Warming trend
-        forecast = [{"is_good": True, "is_bad": False, "date": datetime(2024, 1, 15)}] * 7
+        forecast = [{"is_good": True, "is_bad": False, "date": datetime(2024, 1, 15)}
+                    for _ in range(7)]
         temps_warming = [10, 11, 12, 15, 16, 17, 18]
         analysis = _analyze_forecast(forecast, temps_warming)
         assert analysis["temp_trend"] in ["warming", "warming_strong"]
