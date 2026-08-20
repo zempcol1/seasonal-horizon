@@ -21,21 +21,21 @@ FORECAST_NARRATIVES = {
             "This wet stretch has an end date: {clear_day}. Mark your calendar.",
             "Today's drizzle is just weather passing through. {clear_day}'s sunshine is coming.",
             "The clouds are visitors, not residents. They leave by {clear_day}.",
-            "Patience pays: {days_until} days of grey, then {clear_day} delivers clear skies.",
+            "Patience pays: {days_until} {days} of grey, then {clear_day} delivers clear skies.",
             "Rain now, but I can see {clear_day} on the forecast—good conditions are coming.",
             "Every rainy streak has its last day. This one ends before {clear_day}.",
             "Wet windows today, but {clear_day} is circled on the weather chart.",
         ],
         "de": [
-            "Heute noch grau, aber die Aussichten bessern sich: Am {clear_day} kommt die Sonne durch – nur noch {days_until} Tage.",
+            "Heute noch grau, aber die Aussichten bessern sich: Am {clear_day} kommt die Sonne durch – nur noch {days_until} {days}.",
             "Regen ist kein Dauerzustand. Bis {clear_day} verziehen sich die Wolken und machen Platz für Sonne.",
             "Halt durch bei dem Grau. Der {clear_day} bringt die Aufhellung, auf die du wartest.",
             "Diese Regenphase hat ein Ablaufdatum: {clear_day}. Den Tag kannst du dir schon mal markieren.",
             "Wolken sind nur Besucher, keine Dauergäste. Spätestens am {clear_day} sind sie weg.",
-            "Geduld lohnt sich: noch {days_until} Tage Grau, dann liefert der {clear_day} blauen Himmel.",
+            "Geduld lohnt sich: noch {days_until} {days} Grau, dann liefert der {clear_day} blauen Himmel.",
             "Aktuell noch nass, aber der {clear_day} sieht auf der Karte schon richtig gut aus.",
             "Lass den Kopf nicht hängen – das Wetter dreht sich. Am {clear_day} ist Besserung in Sicht.",
-            "Nur noch ein kurzes Durchhalten: In {days_until} Tagen, am {clear_day}, übernimmt wieder die Sonne.",
+            "Nur noch ein kurzes Durchhalten: In {days_until} {days_dat}, am {clear_day}, übernimmt wieder die Sonne.",
             "Der Blick auf die Vorhersage tröstet: Am {clear_day} ist Schluss mit dem Grau.",
             "Zieh die Schultern hoch und geh da durch – am {clear_day} wartet die Belohnung.",
             "Streich die Tage ab: Noch {days_until} mal schlafen, dann wird es am {clear_day} schön.",
@@ -132,34 +132,34 @@ FORECAST_NARRATIVES = {
     
     "light_fighter": {
         "en": [
-            "The clouds are grey, but behind them the sun just got {delta_min} minutes stronger. The light is gaining even when you can't see it.",
+            "The clouds are grey, but behind them the sun just got {delta_min} {minutes} stronger. The light is gaining even when you can't see it.",
             "Grey skies, but here's the reality: you have {delta_min} more minutes of daylight than yesterday. Progress continues regardless of clouds.",
-            "Don't let the overcast fool you. The light gained {delta_min} minutes since yesterday—the trend doesn't stop for weather.",
-            "The clouds block the view but not the progress: +{delta_min} minutes of daylight today compared to yesterday.",
+            "Don't let the overcast fool you. The light gained {delta_min} {minutes} since yesterday—the trend doesn't stop for weather.",
+            "The clouds block the view but not the progress: +{delta_min} {minutes} of daylight today compared to yesterday.",
             "It looks grey out there, but the data shows {delta_min} more minutes of light. The days are lengthening regardless.",
-            "Grey today, but the light doesn't stop for clouds. It added {delta_min} minutes anyway.",
-            "Behind all that grey, the daylight increased by {delta_min} minutes. The clock keeps moving in your favor.",
-            "Overcast skies can't change the astronomy: the day stretched {delta_min} minutes longer than yesterday.",
-            "Clouds are temporary. The {delta_min} minutes you gained today are permanent progress.",
-            "The sky forgot to be sunny, but it didn't forget to be longer. +{delta_min} minutes.",
+            "Grey today, but the light doesn't stop for clouds. It added {delta_min} {minutes} anyway.",
+            "Behind all that grey, the daylight increased by {delta_min} {minutes}. The clock keeps moving in your favor.",
+            "Overcast skies can't change the astronomy: the day stretched {delta_min} {minutes} longer than yesterday.",
+            "Clouds are temporary. The {delta_min} {minutes} you gained today are permanent progress.",
+            "The sky forgot to be sunny, but it didn't forget to be longer. +{delta_min} {minutes}.",
         ],
         "de": [
-            "Graue Wolken, aber dahinter hat die Sonne {delta_min} Minuten Kraft gewonnen. Das Licht arbeitet für dich, auch unsichtbar.",
-            "Der Himmel ist grau, aber Fakt ist: Du hast {delta_min} Minuten mehr Licht als gestern. Der Fortschritt lässt sich nicht aufhalten.",
-            "Lass dich vom Grau nicht täuschen. Das Tageslicht hat {delta_min} Minuten zugelegt – der Trend wartet nicht auf schönes Wetter.",
-            "Die Wolken versperren die Sicht, aber nicht den Weg: +{delta_min} Minuten Helligkeit im Vergleich zu gestern.",
-            "Draußen sieht's trüb aus, aber die Daten lügen nicht: {delta_min} Minuten mehr Licht. Die Tage werden länger, egal was das Wetter macht.",
-            "Heute grau, aber das Licht macht keine Pause. Es sind trotzdem {delta_min} Minuten dazugekommen.",
-            "Hinter der grauen Fassade ist der Tag um {delta_min} Minuten gewachsen. Die Zeit spielt dir in die Karten.",
-            "Wolken können die Astronomie nicht bremsen: Der Tag ist heute {delta_min} Minuten länger.",
-            "Wolken sind vergänglich, aber die {delta_min} Minuten Gewinn von heute bleiben dir erhalten.",
-            "Der Himmel hat vergessen sonnig zu sein, aber nicht, länger hell zu bleiben. +{delta_min} Minuten für dich.",
-            "Das Wetter ist mies, aber die Astronomie ist gut: {delta_min} Minuten mehr Licht als gestern.",
+            "Graue Wolken, aber dahinter hat die Sonne {delta_min} {minutes} Kraft gewonnen. Das Licht arbeitet für dich, auch unsichtbar.",
+            "Der Himmel ist grau, aber Fakt ist: Du hast {delta_min} {minutes} mehr Licht als gestern. Der Fortschritt lässt sich nicht aufhalten.",
+            "Lass dich vom Grau nicht täuschen. Das Tageslicht hat {delta_min} {minutes} zugelegt – der Trend wartet nicht auf schönes Wetter.",
+            "Die Wolken versperren die Sicht, aber nicht den Weg: +{delta_min} {minutes} Helligkeit im Vergleich zu gestern.",
+            "Draußen sieht's trüb aus, aber die Daten lügen nicht: {delta_min} {minutes} mehr Licht. Die Tage werden länger, egal was das Wetter macht.",
+            "Heute grau, aber das Licht macht keine Pause. Es sind trotzdem {delta_min} {minutes} dazugekommen.",
+            "Hinter der grauen Fassade ist der Tag um {delta_min} {minutes} gewachsen. Die Zeit spielt dir in die Karten.",
+            "Wolken können die Astronomie nicht bremsen: Der Tag ist heute {delta_min} {minutes} länger.",
+            "Wolken sind vergänglich, aber die {delta_min} {minutes} Gewinn von heute bleiben dir erhalten.",
+            "Der Himmel hat vergessen sonnig zu sein, aber nicht, länger hell zu bleiben. +{delta_min} {minutes} für dich.",
+            "Das Wetter ist mies, aber die Astronomie ist gut: {delta_min} {minutes} mehr Licht als gestern.",
             "Auch wenn man die Sonne nicht sieht – sie arbeitet im Hintergrund und schenkt dir {delta_min} extra Minuten.",
-            "Konzentrier dich auf das Positive: Es bleibt abends {delta_min} Minuten länger hell als gestern.",
-            "Die Dunkelheit verliert heute wieder {delta_min} Minuten an Boden, Wolken hin oder her.",
-            "Vergiss das Grau, feiere das Plus: {delta_min} Minuten mehr Tageslicht.",
-            "Lass es regnen, das Licht gewinnt trotzdem: +{delta_min} Minuten heute.",
+            "Konzentrier dich auf das Positive: Es bleibt abends {delta_min} {minutes} länger hell als gestern.",
+            "Die Dunkelheit verliert heute wieder {delta_min} {minutes} an Boden, Wolken hin oder her.",
+            "Vergiss das Grau, feiere das Plus: {delta_min} {minutes} mehr Tageslicht.",
+            "Lass es regnen, das Licht gewinnt trotzdem: +{delta_min} {minutes} heute.",
         ],
     },
     
@@ -223,70 +223,74 @@ FORECAST_NARRATIVES = {
     
     "good_streak": {
         "en": [
-            "Clear skies today, tomorrow, and beyond—{streak_days} days of good weather ahead. The forecast is cooperating.",
-            "This is a genuine stretch of good weather. {streak_days} days of decent conditions ahead.",
+            "Clear skies today, tomorrow, and beyond—{streak_days} {days} of good weather ahead. The forecast is cooperating.",
+            "This is a genuine stretch of good weather. {streak_days} {days} of decent conditions ahead.",
             "The forecast shows {streak_days} consecutive good days. That's worth planning around.",
-            "A proper run of good weather: {streak_days} days. Streaks like this deserve action.",
-            "Day after day of good conditions ahead. {streak_days} days of cooperative weather.",
-            "The forecast is consistent: good, good, good. {streak_days} days to work with.",
+            "A proper run of good weather: {streak_days} {days}. Streaks like this deserve action.",
+            "Day after day of good conditions ahead. {streak_days} {days} of cooperative weather.",
+            "The forecast is consistent: good, good, good. {streak_days} {days} to work with.",
         ],
         "de": [
-            "Klarer Himmel heute, morgen und darüber hinaus – {streak_days} Tage Schönwetter am Stück.",
-            "Das ist eine echte Glückssträhne. {streak_days} Tage gute Bedingungen warten auf dich.",
+            "Klarer Himmel heute, morgen und darüber hinaus – {streak_days} {days} Schönwetter am Stück.",
+            "Das ist eine echte Glückssträhne. {streak_days} {days} gute Bedingungen warten auf dich.",
             "Die Vorhersage zeigt {streak_days} gute Tage in Folge. Da kann man was planen.",
-            "Eine stabile Schönwetterphase: {streak_days} Tage. So eine Serie muss man nutzen.",
-            "Ein Tag schöner als der andere. Das Wetter kooperiert für ganze {streak_days} Tage.",
-            "Endlich mal Beständigkeit: Freu dich auf {streak_days} Tage Sonne.",
-            "Das Wetter meint es ernst – im positiven Sinne. {streak_days} Tage lang.",
+            "Eine stabile Schönwetterphase: {streak_days} {days}. So eine Serie muss man nutzen.",
+            "Ein Tag schöner als der andere. Das Wetter kooperiert für ganze {streak_days} {days}.",
+            "Endlich mal Beständigkeit: Freu dich auf {streak_days} {days} Sonne.",
+            "Das Wetter meint es ernst – im positiven Sinne. {streak_days} {days} lang.",
             "Rausgehen ist jetzt Pflicht: Eine Serie von {streak_days} schönen Tagen startet.",
-            "Keine Ausreden mehr: {streak_days} Tage Top-Wetter liegen vor dir.",
-            "Genieß die Serie: {streak_days} Tage ohne Sorgen beim Blick in den Himmel.",
+            "Keine Ausreden mehr: {streak_days} {days} Top-Wetter liegen vor dir.",
+            "Genieß die Serie: {streak_days} {days} ohne Sorgen beim Blick in den Himmel.",
         ],
     },
     
     "grey_stretch": {
         "en": [
-            "The week looks grey throughout—{streak_days} days of clouds ahead. Time to embrace indoor activities.",
-            "A stretch of overcast: {streak_days} days. The weather wants you to slow down.",
-            "{streak_days} days of grey ahead. Good time for indoor projects.",
-            "The forecast is consistent: clouds, clouds, clouds for {streak_days} days.",
+            "The week looks grey throughout—{streak_days} {days} of clouds ahead. Time to embrace indoor activities.",
+            "A stretch of overcast: {streak_days} {days}. The weather wants you to slow down.",
+            "{streak_days} {days} of grey ahead. Good time for indoor projects.",
+            "The forecast is consistent: clouds, clouds, clouds for {streak_days} {days}.",
             "An extended grey period. Books, projects, and indoor activities.",
-            "The sky is taking a break from blue. {streak_days} days of grey ahead.",
+            "The sky is taking a break from blue. {streak_days} {days} of grey ahead.",
         ],
         "de": [
-            "Die Woche zeigt sich grau in grau – {streak_days} Tage Wolken. Mach's dir drinnen gemütlich.",
-            "Eine echte Grauphase: {streak_days} Tage am Stück. Das Wetter lädt zum Entschleunigen ein.",
-            "{streak_days} Tage Grau voraus. Die perfekte Zeit für Projekte in den eigenen vier Wänden.",
-            "Die Vorhersage ist leider konstant: Wolken für {streak_days} Tage.",
+            "Die Woche zeigt sich grau in grau – {streak_days} {days} Wolken. Mach's dir drinnen gemütlich.",
+            "Eine echte Grauphase: {streak_days} {days} am Stück. Das Wetter lädt zum Entschleunigen ein.",
+            "{streak_days} {days} Grau voraus. Die perfekte Zeit für Projekte in den eigenen vier Wänden.",
+            "Die Vorhersage ist leider konstant: Wolken für {streak_days} {days}.",
             "Das Grau bleibt uns erhalten. Zeit für Bücher, Tee und Sofa.",
-            "Nimm's gelassen: Es folgen {streak_days} Tage Couch-Wetter.",
-            "Die Sonne macht Urlaub, und zwar für {streak_days} Tage.",
-            "Stell dich auf {streak_days} Tage Einheitsgrau ein.",
-            "Perfektes Wetter, um Dinge zu erledigen: {streak_days} Tage Wolken.",
-            "Kuscheldecke raus: Es bleiben {streak_days} Tage grau.",
+            "Nimm's gelassen: Es folgen {streak_days} {days} Couch-Wetter.",
+            "Die Sonne macht Urlaub, und zwar für {streak_days} {days}.",
+            "Stell dich auf {streak_days} {days} Einheitsgrau ein.",
+            "Perfektes Wetter, um Dinge zu erledigen: {streak_days} {days} Wolken.",
+            "Kuscheldecke raus: Es bleiben {streak_days} {days} grau.",
         ],
     },
     
     "breakthrough_day": {
         "en": [
-            "Today breaks the streak. After {bad_days} days of grey, the sun finally shows up.",
-            "The waiting paid off. Today is the day the weather remembered to cooperate.",
-            "After {bad_days} days of grey, today delivers. The sun is out.",
-            "The clouds finally moved on. Today is the breakthrough after {bad_days} grey days.",
-            "This is the day the pattern broke. Sun after {bad_days} days of overcast.",
-            "The grey streak ends today. After {bad_days} days, the sun returns.",
+            "The grey has broken. Today is the clear one - the forecast has nothing better lined up.",
+            "Today is the good day this week gets. Worth arranging something around.",
+            "The clouds stepped aside. Nothing else in the forecast looks like this.",
+            "This is the opening. The rest of the week goes back to grey.",
+            "Clear today, and the forecast does not repeat itself. Take it while it is here.",
+            "The sky finally cooperated. It is a one-day offer, going by the forecast.",
+            "Today stands alone in this forecast. Bright, and not repeated.",
+            "After the grey, a clear one. The forecast suggests making the most of it.",
+            "The weather remembered how to be clear. Just for today, by the look of it.",
+            "One clear day in an otherwise unremarkable week. This is it.",
         ],
         "de": [
-            "Heute bricht die Serie. Nach {bad_days} grauen Tagen lässt sich endlich die Sonne blicken.",
-            "Das Warten hat ein Ende. Heute spielt das Wetter endlich wieder mit.",
-            "Nach {bad_days} Tagen Grau liefert der heutige Tag ab: Sonne satt.",
-            "Die Wolken haben aufgegeben. Heute ist der Durchbruch nach {bad_days} Tagen Trübsal.",
-            "Endlich ein Musterwechsel. Sonne nach {bad_days} Tagen Bewölkung.",
-            "Die Grauphase ist vorbei. Nach {bad_days} Tagen kehrt das Licht zurück.",
-            "Atme auf: Die {bad_days} Tage Dunkelheit sind Geschichte.",
-            "Belohnung für deine Geduld: Der erste schöne Tag nach {bad_days} miesen.",
-            "Schluss mit Grau: Heute ändert sich alles.",
-            "Endlich wieder Farbe draußen nach {bad_days} Tagen Schwarz-Weiß.",
+            "Das Grau ist aufgebrochen. Heute ist der klare Tag - die Vorhersage hat nichts Besseres im Angebot.",
+            "Heute ist der gute Tag dieser Woche. Lohnt sich, etwas darum herum zu legen.",
+            "Die Wolken sind zur Seite getreten. Nichts sonst in der Vorhersage sieht so aus.",
+            "Das ist das Fenster. Danach geht es zurück ins Grau.",
+            "Heute klar, und die Vorhersage wiederholt sich nicht. Nimm es mit, solange es da ist.",
+            "Der Himmel hat endlich mitgespielt. Ein Ein-Tages-Angebot, den Daten nach.",
+            "Heute steht allein in dieser Vorhersage. Hell, und ohne Wiederholung.",
+            "Nach dem Grau ein klarer Tag. Die Vorhersage legt nahe, ihn auszunutzen.",
+            "Das Wetter hat sich erinnert, wie klar geht. Offenbar nur für heute.",
+            "Ein klarer Tag in einer sonst unauffälligen Woche. Das ist er.",
         ],
     },
     
@@ -340,7 +344,7 @@ FORECAST_NARRATIVES = {
         ],
         "de": [
             "Das Wetter ist unspektakulär – umso mehr rückt das Licht in den Fokus: {day_length} heute.",
-            "Nichts Dramatisches in der Vorhersage. Nur der stille Fortschritt von {delta_min} Minuten täglich.",
+            "Nichts Dramatisches in der Vorhersage. Nur der stille Fortschritt von {delta_min} {minutes} täglich.",
             "Stabiles Wetter heißt: Die eigentliche Story ist das Tageslicht ({day_length}).",
             "Das Wetter ist Nebensache. Das Licht – satte {day_length} – ist die eigentliche News.",
             "Ruhiger Himmel. Das gibt Raum zu bemerken: Du hast heute {day_length} Licht.",
@@ -352,21 +356,21 @@ FORECAST_NARRATIVES = {
     
     "spring_acceleration": {
         "en": [
-            "This is the fast phase. The light is gaining {delta_min} minutes daily—the steepest climb of the year.",
-            "The daylight is increasing quickly now: +{delta_min} minutes per day. You can see the evenings stretching.",
-            "The acceleration is measurable. {delta_min} minutes daily means visible change week to week.",
-            "This is when waiting turns to momentum. +{delta_min} minutes each day adds up fast.",
-            "The daylight gains are at their maximum now: {delta_min} minutes daily.",
+            "This is the fast phase. The light is gaining {delta_min} {minutes} daily—the steepest climb of the year.",
+            "The daylight is increasing quickly now: +{delta_min} {minutes} per day. You can see the evenings stretching.",
+            "The acceleration is measurable. {delta_min} {minutes} daily means visible change week to week.",
+            "This is when waiting turns to momentum. +{delta_min} {minutes} each day adds up fast.",
+            "The daylight gains are at their maximum now: {delta_min} {minutes} daily.",
         ],
         "de": [
-            "Das ist die Überholspur. Das Licht gewinnt täglich {delta_min} Minuten – steiler geht's nicht.",
-            "Es geht rasant aufwärts: +{delta_min} Minuten pro Tag. Die Abende werden förmlich länger gezogen.",
-            "Die Beschleunigung ist enorm. {delta_min} Minuten täglich bedeuten sichtbare Veränderung jede Woche.",
-            "Jetzt kommt Schwung in die Sache. +{delta_min} Minuten jeden Tag summieren sich schnell.",
-            "Vollgas Richtung Sommer: Wir gewinnen {delta_min} Minuten jeden einzelnen Tag.",
-            "Spürst du das Tempo? Jeden Tag {delta_min} Minuten mehr Licht.",
-            "Das ist der Turbo-Gang des Jahres: +{delta_min} Minuten.",
-            "Schneller werden die Tage nicht mehr länger: {delta_min} Minuten Zuwachs.",
+            "Das ist die Überholspur. Das Licht gewinnt täglich {delta_min} {minutes} – steiler geht's nicht.",
+            "Es geht rasant aufwärts: +{delta_min} {minutes} pro Tag. Die Abende werden förmlich länger gezogen.",
+            "Die Beschleunigung ist enorm. {delta_min} {minutes} täglich bedeuten sichtbare Veränderung jede Woche.",
+            "Jetzt kommt Schwung in die Sache. +{delta_min} {minutes} jeden Tag summieren sich schnell.",
+            "Vollgas Richtung Sommer: Wir gewinnen {delta_min} {minutes} jeden einzelnen Tag.",
+            "Spürst du das Tempo? Jeden Tag {delta_min} {minutes} mehr Licht.",
+            "Das ist der Turbo-Gang des Jahres: +{delta_min} {minutes}.",
+            "Schneller werden die Tage nicht mehr länger: {delta_min} {minutes} Zuwachs.",
         ],
     },
     
@@ -389,6 +393,58 @@ FORECAST_NARRATIVES = {
             "Merk dir das Datum, in {days_to_solstice} Tagen ändert sich die Richtung.",
         ],
     },
+
+    "fog_day": {
+        "en": [
+            "Fog today. The light is still there, just filtered through a few hundred metres of cloud sitting on the ground.",
+            "Everything is soft-edged today. Fog does that, and it usually burns off by midday.",
+            "Grey right down to street level. Worth checking whether the hills above you are in sunshine - often they are.",
+            "Fog flattens the world for a day. It also tends to mean calm air and no wind.",
+            "Visibility is short today. If you are near higher ground, the top of this often sits in clear sun.",
+            "A fog day. Quiet, close, and usually thinner by the afternoon.",
+        ],
+        "de": [
+            "Heute Nebel. Das Licht ist trotzdem da, nur gefiltert durch ein paar hundert Meter Wolke am Boden.",
+            "Alles hat heute weiche Kanten. Das macht der Nebel, und meist löst er sich bis Mittag auf.",
+            "Grau bis auf Strassenhöhe. Lohnt sich zu schauen, ob die Höhen über dir in der Sonne liegen - oft ist es so.",
+            "Nebel macht die Welt für einen Tag flach. Dafür ist die Luft ruhig und es geht kein Wind.",
+            "Die Sicht ist heute kurz. Wenn Erhöhungen in der Nähe sind: obendrüber steht oft die Sonne.",
+            "Ein Nebeltag. Still, nah, und am Nachmittag meistens dünner.",
+        ],
+    },
+    "first_frost": {
+        "en": [
+            "It is dropping to {temp_low} tonight. First real frost changes how the morning smells.",
+            "Frost tonight - down to {temp_low}. Scrape the windscreen, and expect the grass to crunch.",
+            "{temp_low} overnight. Cold enough to finish the tender plants and start the proper season.",
+            "Clear and freezing tonight, around {temp_low}. Those two usually arrive together.",
+            "Down to {temp_low} tonight. Frost mornings are cold, but they are also the bright ones.",
+        ],
+        "de": [
+            "Heute Nacht geht es auf {temp_low} runter. Der erste richtige Frost verändert, wie der Morgen riecht.",
+            "Frost heute Nacht - bis {temp_low}. Scheibe kratzen, und das Gras wird knirschen.",
+            "{temp_low} über Nacht. Kalt genug, um die empfindlichen Pflanzen zu beenden und die Saison zu eröffnen.",
+            "Klar und frostig heute Nacht, um {temp_low}. Die beiden kommen meistens zusammen.",
+            "Bis {temp_low} heute Nacht. Frostmorgen sind kalt, aber es sind auch die hellen.",
+        ],
+    },
+    "heat_day": {
+        "en": [
+            "{temp_high} today. The early morning and the late evening are the usable parts.",
+            "It reaches {temp_high} today. Shade and water, and save anything strenuous for after seven.",
+            "Heat of {temp_high} coming. The long evenings are the compensation - use them.",
+            "{temp_high} at the peak. Worth being somewhere near water if you can manage it.",
+            "A proper hot one, up to {temp_high}. The light lasts late, so there is no rush.",
+        ],
+        "de": [
+            "Heute {temp_high}. Der frühe Morgen und der späte Abend sind die brauchbaren Teile.",
+            "Es wird {temp_high} heute. Schatten und Wasser, und alles Anstrengende auf nach sieben legen.",
+            "Hitze bis {temp_high}. Die langen Abende sind die Entschädigung - nutz sie.",
+            "{temp_high} in der Spitze. Lohnt sich, in der Nähe von Wasser zu sein, wenn es geht.",
+            "Ein richtig heisser Tag, bis {temp_high}. Das Licht bleibt lange, es eilt also nicht.",
+        ],
+    },
+
 }
 
 
@@ -849,28 +905,302 @@ DAYLIGHT_FACTS = {
 DELTA_PHRASES = {
     "gaining": {
         "en": [
-            "That's {delta} minutes more than yesterday.",
-            "You gained {delta} minutes compared to yesterday.",
-            "+{delta} minutes versus yesterday.",
+            "That's {delta} {minutes} more than yesterday.",
+            "You gained {delta} {minutes} compared to yesterday.",
+            "+{delta} {minutes} versus yesterday.",
         ],
         "de": [
-            "Das sind {delta} Minuten mehr als gestern.",
-            "Du hast {delta} Minuten im Vergleich zu gestern gewonnen.",
-            "+{delta} Minuten gegenüber gestern.",
-            "Der Tag ist um {delta} Minuten gewachsen.",
+            "Das sind {delta} {minutes} mehr als gestern.",
+            "Du hast {delta} {minutes} im Vergleich zu gestern gewonnen.",
+            "+{delta} {minutes} gegenüber gestern.",
+            "Der Tag ist um {delta} {minutes} gewachsen.",
         ],
     },
     "losing": {
         "en": [
-            "That's {delta} minutes less than yesterday.",
-            "You lost {delta} minutes compared to yesterday.",
-            "{delta} minutes shorter than yesterday.",
+            "That's {delta} {minutes} less than yesterday.",
+            "You lost {delta} {minutes} compared to yesterday.",
+            "{delta} {minutes} shorter than yesterday.",
         ],
         "de": [
-            "Das sind {delta} Minuten weniger als gestern.",
-            "Du hast {delta} Minuten im Vergleich zu gestern verloren.",
-            "{delta} Minuten kürzer als gestern.",
-            "Der Tag ist um {delta} Minuten geschrumpft.",
+            "Das sind {delta} {minutes} weniger als gestern.",
+            "Du hast {delta} {minutes} im Vergleich zu gestern verloren.",
+            "{delta} {minutes} kürzer als gestern.",
+            "Der Tag ist um {delta} {minutes} geschrumpft.",
         ],
     },
+}
+
+
+# ===== Winter =====
+#
+# From November to March the message is about the light coming back rather
+# than about the weather. These entries are written as complete thoughts,
+# usually two sentences, so the text reads as one piece instead of a handful
+# of unrelated observations stitched together.
+#
+# Placeholders resolve only when the fact behind them was actually measured:
+#   {day_length} {sunrise} {sunset}   - today's figures
+#   {delta} {minutes}                 - gain against yesterday, only if positive
+#   {hours_gained}                    - gain since the solstice, only if positive
+#   {milestone_time} {milestone_days} {days_dat}
+#                                     - the next half-hour mark the sunset
+#                                       crosses, straight from the forecast
+# Anything unavailable simply removes the templates that mentioned it.
+
+WINTER_ANTICIPATION = {
+    "en": [
+        # -- measurable gain since the solstice
+        "The light has already turned. Since the solstice the day has grown by {hours_gained}, whether or not it feels like it yet.",
+        "You are {hours_gained} past the shortest day. That is not nothing, even if the mornings still argue otherwise.",
+        "Quietly, without ceremony, the year has handed back {hours_gained} of daylight since the solstice.",
+        "The darkest day is behind you by {hours_gained} of light. The direction of travel is settled now.",
+        "Since the solstice: {hours_gained} more light. It accumulates whether you notice it or not.",
+        "{hours_gained} of daylight have come back since the turn of the year. The rest arrives on its own schedule.",
+
+        # -- daily gain
+        "Today is {delta} {minutes} longer than yesterday. Small, but it happens again tomorrow.",
+        "Another {delta} {minutes} of light today. The gain is small enough to miss and steady enough to count on.",
+        "The day gained {delta} {minutes} overnight. That is roughly a whole extra hour every month at this rate.",
+        "{delta} more {minutes} than yesterday. Winter is being dismantled one of these at a time.",
+        "Yesterday's day was {delta} {minutes} shorter than this one. The trend only goes one way from here.",
+
+        # -- the sunset milestone, straight from the forecast
+        "In {milestone_days} {days} the sun sets after {milestone_time} again. Something to look forward to on the way home.",
+        "Mark it: {milestone_days} {days} from now the sunset moves past {milestone_time}. Evenings start feeling different around then.",
+        "The sun currently sets at {sunset}. In {milestone_days} {days_dat} that becomes {milestone_time}, and the afternoon stretches out a little.",
+        "{milestone_days} {days_dat} until sunset passes {milestone_time}. The evenings are being handed back to you.",
+
+        # -- today's figures, framed forward
+        "Sunrise {sunrise}, sunset {sunset} - {day_length} of daylight, and more of it tomorrow.",
+        "{day_length} of light today. Every one of the coming weeks adds to that.",
+        "The day runs {day_length} at the moment. By spring you will barely recognise that number.",
+        "Light from {sunrise} to {sunset} today. Both ends of that are still moving in your favour.",
+
+        # -- pure anticipation, no figures required
+        "The cold is still doing its thing, but the light has already changed its mind.",
+        "Winter is loud right now and the light is quiet about it. The light is the one that wins.",
+        "Nothing about today needs to feel like spring for spring to be on its way.",
+        "This is the part of the year that asks for patience. It has never failed to pay it back.",
+        "The hardest stretch of the year is also the one that is already improving.",
+        "Somewhere under all this, the ground is keeping time. It knows what comes next.",
+        "The year has turned. Everything from here is a slow argument in favour of the light.",
+        "It is still dark early, and it is already less dark than it was.",
+        "The season is not over, but it has stopped growing. That counts for something.",
+        "Grey days are easier to sit with when the light behind them is lengthening.",
+        "You are on the returning side of the year now. That is worth knowing on a morning like this.",
+        "Cold and bright is a fair trade in February. Cold and lengthening is a better one.",
+    ],
+    "de": [
+        # -- messbarer Zuwachs seit der Sonnenwende
+        "Das Licht hat schon gedreht. Seit der Sonnenwende ist der Tag um {hours_gained} gewachsen, auch wenn es sich noch nicht so anfühlt.",
+        "Du bist {hours_gained} über den kürzesten Tag hinaus. Das ist nicht nichts, selbst wenn die Morgen noch dagegenhalten.",
+        "Ganz ohne Aufhebens hat das Jahr seit der Sonnenwende {hours_gained} Tageslicht zurückgegeben.",
+        "Der dunkelste Tag liegt {hours_gained} Licht hinter dir. Die Richtung steht inzwischen fest.",
+        "Seit der Sonnenwende: {hours_gained} mehr Licht. Das sammelt sich an, ob man es bemerkt oder nicht.",
+        "{hours_gained} Tageslicht sind seit der Jahreswende zurückgekommen. Der Rest kommt in seinem eigenen Tempo.",
+
+        # -- täglicher Zuwachs
+        "Heute ist {delta} {minutes} länger als gestern. Wenig, aber morgen passiert es wieder.",
+        "Wieder {delta} {minutes} mehr Licht heute. Klein genug, um es zu übersehen, und stetig genug, sich darauf zu verlassen.",
+        "Der Tag hat über Nacht {delta} {minutes} gewonnen. In dem Tempo ist das ungefähr eine ganze Stunde pro Monat.",
+        "{delta} {minutes} mehr als gestern. So wird der Winter abgebaut, Stück für Stück.",
+        "Gestern war der Tag {delta} {minutes} kürzer als heute. Von hier aus geht es nur noch in eine Richtung.",
+
+        # -- der Sonnenuntergangs-Meilenstein, direkt aus der Vorhersage
+        "In {milestone_days} {days_dat} geht die Sonne wieder nach {milestone_time} unter. Etwas, worauf man sich auf dem Heimweg freuen kann.",
+        "Merk dir das: in {milestone_days} {days_dat} wandert der Sonnenuntergang hinter {milestone_time}. Ab dann fühlen sich die Abende anders an.",
+        "Die Sonne geht gerade um {sunset} unter. In {milestone_days} {days_dat} ist es {milestone_time}, und der Nachmittag wird spürbar länger.",
+        "Noch {milestone_days} {days_dat}, bis der Sonnenuntergang {milestone_time} überschreitet. Die Abende kommen zurück.",
+
+        # -- heutige Zahlen, nach vorn gedacht
+        "Aufgang {sunrise}, Untergang {sunset} - {day_length} Tageslicht, und morgen etwas mehr.",
+        "{day_length} Licht heute. Jede der kommenden Wochen legt darauf noch etwas drauf.",
+        "Der Tag dauert im Moment {day_length}. Im Frühling wirst du diese Zahl kaum wiedererkennen.",
+        "Licht von {sunrise} bis {sunset} heute. Beide Enden verschieben sich weiter zu deinen Gunsten.",
+
+        # -- reine Vorfreude, ohne Zahlen
+        "Die Kälte macht noch ihr Ding, aber das Licht hat es sich bereits anders überlegt.",
+        "Der Winter ist gerade laut und das Licht ist still dabei. Gewinnen wird das Licht.",
+        "Nichts an heute muss sich nach Frühling anfühlen, damit der Frühling unterwegs ist.",
+        "Das ist der Teil des Jahres, der Geduld verlangt. Zurückgezahlt hat er sie noch immer.",
+        "Der härteste Abschnitt des Jahres ist zugleich der, der sich schon bessert.",
+        "Irgendwo unter alldem hält der Boden die Zeit. Er weiß, was als Nächstes kommt.",
+        "Das Jahr hat gewendet. Alles ab hier ist ein langsames Argument für das Licht.",
+        "Es wird noch früh dunkel, und es ist schon weniger dunkel als es war.",
+        "Die Jahreszeit ist nicht vorbei, aber sie wächst nicht mehr. Das zählt.",
+        "Graue Tage lassen sich leichter aushalten, wenn das Licht dahinter länger wird.",
+        "Du bist jetzt auf der zurückkehrenden Seite des Jahres. Das ist an so einem Morgen etwas wert.",
+        "Kalt und hell ist im Februar ein fairer Tausch. Kalt und länger werdend ist ein besserer.",
+    ],
+}
+
+
+# Suggestions for actually using the light when it is there. Kept concrete and
+# small enough to act on the same day.
+SUN_ENJOYMENT = {
+    "en": [
+        "If the sun is out at lunch, take it outside. Twenty minutes does more than it sounds like.",
+        "Worth stepping out while it is bright - the light does its work through your eyes, not your skin.",
+        "A short walk while the sun is up beats a long one after dark. Take it if you can.",
+        "Sit by the window if you cannot get out. It is a fraction of the dose, but it is not nothing.",
+        "Morning light counts double in winter. Get some in the first hour you are awake if you can.",
+        "The brightest part of the day is short right now. Spending some of it outside is rarely regretted.",
+        "If there is a south-facing bench anywhere near you, this is its moment.",
+        "Coffee outside instead of at the desk - small trade, noticeable difference.",
+        "Clear and cold beats grey and mild for this. Wrap up and take the light while it is offered.",
+        "Even ten minutes out there resets something. It does not need to be a proper walk.",
+    ],
+    "de": [
+        "Wenn mittags die Sonne da ist, nimm sie mit nach draußen. Zwanzig Minuten bringen mehr, als es klingt.",
+        "Lohnt sich, rauszugehen solange es hell ist - das Licht wirkt über die Augen, nicht über die Haut.",
+        "Ein kurzer Spaziergang bei Sonne schlägt einen langen nach Einbruch der Dunkelheit.",
+        "Wenn du nicht rauskommst, setz dich ans Fenster. Ein Bruchteil der Dosis, aber besser als nichts.",
+        "Morgenlicht zählt im Winter doppelt. Hol dir etwas davon in der ersten Stunde nach dem Aufstehen.",
+        "Der hellste Teil des Tages ist gerade kurz. Ihn draußen zu verbringen bereut man selten.",
+        "Falls irgendwo in deiner Nähe eine Bank nach Süden zeigt: jetzt ist ihr Moment.",
+        "Kaffee draußen statt am Schreibtisch - kleiner Tausch, spürbarer Unterschied.",
+        "Klar und kalt ist dafür besser als grau und mild. Warm anziehen und das Licht mitnehmen.",
+        "Auch zehn Minuten draußen setzen etwas zurück. Es muss kein richtiger Spaziergang sein.",
+    ],
+}
+
+
+# Early signs of spring, by coarse region and month. Regions come from
+# _region() in uplift_engine: "alpine" covers Switzerland and the pre-alpine
+# foothills, which is where most users are; "central_europe" is the wider
+# lowland band; "generic" avoids naming any species that might be absent.
+#
+# Everything here has to hold for an ordinary year in that region. Where
+# timing varies, the wording hedges ("about now", "any week") rather than
+# claiming a date it cannot know.
+
+SPRING_SIGNS = {
+    "alpine": {
+        "en": {
+            1: ["Snowdrops are already pushing up in sheltered gardens down in the valleys.",
+                "Hazel catkins are lengthening on the warmer slopes - the first pollen of the year.",
+                "On south-facing hillsides the snow is starting to pull back around the rocks.",
+                "Great tits have begun their two-note call on mild mornings. That is a spring sound."],
+            2: ["Hazel and alder are in flower in the lowlands; the first pollen is already moving.",
+                "Snowdrops and winter aconite are out wherever the ground has thawed.",
+                "Blackbirds start singing again from the rooftops around now.",
+                "Down by the lakes the willows are showing their first silver catkins.",
+                "The high snowpack is settling. Below about a thousand metres it is losing ground fast."],
+            3: ["Crocuses are opening across the lawns and the bees have found them.",
+                "Cherry and blackthorn buds are swelling in the orchards.",
+                "The first bumblebee queens are out looking for nest sites.",
+                "Alpine pastures below the treeline are turning green from the bottom up.",
+                "Cranes and the first migrants are moving back north over the plateau."],
+            4: ["The valley orchards are in blossom - the couple of weeks worth planning around.",
+                "Meadows are filling with dandelion and the first cowslips.",
+                "Marmots are coming out of hibernation up on the alps.",
+                "Beech woods are going that particular green that only lasts a fortnight."],
+        },
+        "de": {
+            1: ["In geschützten Gärten im Tal schieben die Schneeglöckchen schon.",
+                "An den wärmeren Hängen strecken sich die Haselkätzchen - der erste Pollen des Jahres.",
+                "An Südhängen zieht sich der Schnee rund um die Felsen langsam zurück.",
+                "Die Kohlmeise ruft an milden Morgen wieder zweisilbig. Das ist ein Frühlingsgeräusch."],
+            2: ["Hasel und Erle blühen im Flachland, der erste Pollen ist unterwegs.",
+                "Schneeglöckchen und Winterlinge stehen überall dort, wo der Boden aufgetaut ist.",
+                "Die Amseln singen um diese Zeit wieder von den Dächern.",
+                "Unten an den Seen zeigen die Weiden ihre ersten silbrigen Kätzchen.",
+                "Die Schneedecke setzt sich. Unterhalb von etwa tausend Metern verliert sie schnell."],
+            3: ["Krokusse öffnen sich auf den Wiesen und die Bienen haben sie gefunden.",
+                "In den Obstgärten schwellen die Knospen von Kirsche und Schlehe.",
+                "Die ersten Hummelköniginnen suchen nach Nistplätzen.",
+                "Die Alpweiden unterhalb der Waldgrenze werden von unten herauf grün.",
+                "Kraniche und die ersten Zugvögel ziehen wieder über das Mittelland nach Norden."],
+            4: ["Die Obstgärten im Tal blühen - die zwei Wochen, um die herum man planen sollte.",
+                "Die Wiesen füllen sich mit Löwenzahn und den ersten Schlüsselblumen.",
+                "Oben auf den Alpen kommen die Murmeltiere aus dem Winterschlaf.",
+                "Die Buchenwälder nehmen dieses bestimmte Grün an, das nur vierzehn Tage hält."],
+        },
+    },
+    "central_europe": {
+        "en": {
+            1: ["Snowdrops are up in the sheltered corners of gardens and parks.",
+                "Hazel catkins are lengthening - the first pollen of the year is on its way.",
+                "Great tits have started their two-note call on the milder mornings."],
+            2: ["Hazel and alder are flowering; the first pollen is already in the air.",
+                "Blackbirds are singing from the rooftops again around now.",
+                "Winter aconite and snowdrops are out wherever the ground has thawed.",
+                "Rooks and jackdaws are pairing up and inspecting last year's nests."],
+            3: ["Crocuses are open across the parks and the first bees are on them.",
+                "Blackthorn is coming into flower along the field edges.",
+                "The first bumblebee queens are out hunting for nest sites.",
+                "Migrating birds are moving back through - cranes on the high routes."],
+            4: ["The orchards are in blossom, which is a short and worthwhile window.",
+                "Dandelions are taking over the verges and the meadows are thickening.",
+                "Beech and birch are unfolding that brief, particular green.",
+                "Swallows are arriving back at last year's nesting sites."],
+        },
+        "de": {
+            1: ["In geschützten Ecken von Gärten und Parks stehen die Schneeglöckchen.",
+                "Die Haselkätzchen strecken sich - der erste Pollen des Jahres ist unterwegs.",
+                "An milderen Morgen ruft die Kohlmeise wieder zweisilbig."],
+            2: ["Hasel und Erle blühen, der erste Pollen liegt schon in der Luft.",
+                "Die Amseln singen um diese Zeit wieder von den Dächern.",
+                "Winterlinge und Schneeglöckchen stehen überall, wo der Boden aufgetaut ist.",
+                "Saatkrähen und Dohlen finden sich paarweise und begutachten die alten Nester."],
+            3: ["In den Parks sind die Krokusse offen und die ersten Bienen sitzen darauf.",
+                "An den Feldrändern fängt die Schlehe an zu blühen.",
+                "Die ersten Hummelköniginnen suchen nach Nistplätzen.",
+                "Der Vogelzug geht wieder nach Norden - Kraniche auf den hohen Routen."],
+            4: ["Die Obstgärten blühen. Ein kurzes Fenster, das sich lohnt.",
+                "Der Löwenzahn übernimmt die Ränder und die Wiesen werden dichter.",
+                "Buche und Birke entfalten dieses kurze, besondere Grün.",
+                "Die Schwalben kommen an den Nistplätzen vom Vorjahr wieder an."],
+        },
+    },
+    "generic": {
+        "en": {
+            1: ["The first buds are already sitting on the branches, waiting.",
+                "Birdsong starts earlier in the morning than it did a month ago."],
+            2: ["Buds are visibly swelling on the bare branches.",
+                "The dawn chorus is filling out again, a little earlier each week."],
+            3: ["Green is coming back at ground level, ahead of the trees.",
+                "Insects are about again on the warmer afternoons."],
+            4: ["The trees are coming into leaf and the light through them changes everything.",
+                "Everything that overwintered is moving again."],
+        },
+        "de": {
+            1: ["Die ersten Knospen sitzen schon an den Zweigen und warten.",
+                "Der Vogelgesang beginnt morgens früher als noch vor einem Monat."],
+            2: ["An den kahlen Zweigen schwellen die Knospen sichtbar.",
+                "Der Morgenchor wird wieder voller, jede Woche etwas früher."],
+            3: ["Am Boden kommt das Grün zurück, noch vor den Bäumen.",
+                "An den wärmeren Nachmittagen sind wieder Insekten unterwegs."],
+            4: ["Die Bäume treiben aus, und das Licht dazwischen verändert alles.",
+                "Alles, was überwintert hat, ist wieder in Bewegung."],
+        },
+    },
+}
+
+
+# Near the equator the day barely changes length all year, so the returning
+# light has nothing to say. This mode stays short and talks about the day
+# itself instead.
+TROPICS = {
+    "en": [
+        "The day runs close to twelve hours here, as it does most of the year. The rhythm comes from the sky, not the calendar.",
+        "Sunrise and sunset barely move this close to the equator. What changes is the weather, not the light.",
+        "Around twelve hours of daylight, near enough all year. The seasons here are wet and dry rather than light and dark.",
+        "The sun keeps to its schedule here. {day_length} today, much the same tomorrow.",
+        "Light from {sunrise} to {sunset} - and roughly the same next month, and the month after.",
+        "No long evenings to wait for here, and no dark mornings to endure either. An even trade.",
+        "The length of the day is settled at this latitude. Everything interesting happens in the clouds.",
+        "{day_length} of daylight, steady as it goes. Worth using while the weather cooperates.",
+    ],
+    "de": [
+        "Der Tag dauert hier nahe an zwölf Stunden, wie fast das ganze Jahr. Der Rhythmus kommt vom Himmel, nicht vom Kalender.",
+        "So nah am Äquator bewegen sich Auf- und Untergang kaum. Was wechselt, ist das Wetter, nicht das Licht.",
+        "Rund zwölf Stunden Tageslicht, praktisch das ganze Jahr. Die Jahreszeiten heißen hier nass und trocken statt hell und dunkel.",
+        "Die Sonne hält sich hier an ihren Fahrplan. Heute {day_length}, morgen so ziemlich dasselbe.",
+        "Licht von {sunrise} bis {sunset} - und nächsten Monat ungefähr genauso, und den Monat darauf auch.",
+        "Keine langen Abende, auf die man warten muss, aber auch keine dunklen Morgen. Ein fairer Tausch.",
+        "Auf dieser Breite ist die Tageslänge eine feste Größe. Alles Interessante passiert in den Wolken.",
+        "{day_length} Tageslicht, gleichmäßig wie immer. Lohnt sich zu nutzen, solange das Wetter mitspielt.",
+    ],
 }

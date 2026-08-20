@@ -28,7 +28,8 @@ const i18n = {
             99: "Severe Storm"
         },
         changelog: [
-            { version: "v0.4.1", text: "Weather-aware nature observations, improved highlights, better mobile layout" },
+            { version: "v0.5", text: "Winter now leads with the returning light: spring signs, sun tips, and only facts we actually measured" },
+            { version: "v0.4.1", text: "Weather-aware nature observations, better mobile layout" },
             { version: "v0.4", text: "Multi-language support (English/German)" },
             { version: "v0.3", text: "Smart forecast narratives with 7-day weather analysis" },
             { version: "v0.2", text: "Location selection and improved text generation" },
@@ -64,7 +65,8 @@ const i18n = {
             96: "Hagelgewitter", 99: "Schweres Gewitter"
         },
         changelog: [
-            { version: "v0.4.1", text: "Wetterabhängige Naturbeobachtungen, bessere Highlights, optimiertes Layout" },
+            { version: "v0.5", text: "Im Winter steht das zurückkehrende Licht im Vordergrund: Frühlingsboten, Sonnentipps, und nur noch belegte Angaben" },
+            { version: "v0.4.1", text: "Wetterabhängige Naturbeobachtungen, optimiertes Layout" },
             { version: "v0.4", text: "Mehrsprachigkeit (Englisch/Deutsch)" },
             { version: "v0.3", text: "Intelligente Wetternarrative mit 7-Tage-Analyse" },
             { version: "v0.2", text: "Standortauswahl und verbesserte Textgenerierung" },

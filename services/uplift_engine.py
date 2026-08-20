@@ -24,6 +24,18 @@ from services import uplift_content as content
 
 COLD_MONTHS = frozenset([11, 12, 1, 2, 3])
 
+# Within this band the day barely changes length all year, so the whole
+# "the light is coming back" idea means nothing there.
+TROPICS_LAT = 10.0
+
+# In the cold months the message is meant to be about the returning light
+# rather than the weather. This is how often it takes over completely.
+WINTER_TAKEOVER_CHANCE = 0.85
+
+# Shrinking daylight is true but disheartening, so it is mentioned rarely and
+# never on its own initiative in the cold half of the year.
+SHRINKING_MENTION_CHANCE = 0.15
+
 
 # ===== Formatting =====
 
@@ -43,6 +55,29 @@ def format_signed_span(minutes):
     if abs(minutes) < 60:
         return f"{minutes:+d} min"
     return f"{'+' if minutes >= 0 else '-'}{format_span(minutes)}"
+
+
+# Nouns that follow a number. Templates take the word as a placeholder so a
+# count of one does not read as "1 minutes".
+_NOUNS = {
+    "en": {"minutes": ("minute", "minutes"),
+           "days": ("day", "days"),
+           "days_dat": ("day", "days")},
+    "de": {"minutes": ("Minute", "Minuten"),
+           "days": ("Tag", "Tage"),
+           "days_dat": ("Tag", "Tagen")},   # "in 1 Tag" / "in 3 Tagen"
+}
+
+
+def _noun(count, kind, lang):
+    """The right form of a counted noun - "1 Minute" but "4 Minuten"."""
+    forms = _NOUNS.get(lang, _NOUNS["en"])[kind]
+    return forms[0] if abs(count) == 1 else forms[1]
+
+
+def _counted(count, kind, lang):
+    """A count plus its noun, ready to drop into a template."""
+    return {kind: _noun(count, kind, lang)}
 
 
 # ===== Localized content =====
@@ -102,6 +137,23 @@ def _effective_month(month, lat):
     return month
 
 
+def _region(lat, lon):
+    """
+    Coarse region, used to pick nature observations that are plausible there.
+
+    Deliberately crude boxes rather than real geography: most users are in
+    Switzerland, and being roughly right elsewhere beats being precisely
+    wrong. Anything unrecognised falls back to observations that hold widely.
+    """
+    if abs(lat) <= TROPICS_LAT:
+        return "tropics"
+    if 45.5 <= lat <= 48.0 and 5.5 <= lon <= 11.0:
+        return "alpine"          # Switzerland, Vorarlberg, Bavarian foothills
+    if 45.0 <= lat <= 55.0 and -5.0 <= lon <= 20.0:
+        return "central_europe"
+    return "generic"
+
+
 def _get_seasonal_phase(month, day, lat=0.0):
     """Determine seasonal phase based on date and hemisphere."""
     month = _effective_month(month, lat)
@@ -142,7 +194,10 @@ class Context:
     """
     today: date
     lat: float
+    lon: float
     lang: str
+    region: str
+    is_tropical: bool
 
     has_solar: bool
     day_len_sec: int
@@ -154,10 +209,13 @@ class Context:
     hours_gained: str
     sunrise: str
     sunset: str
+    sunset_milestone: dict
 
     has_weather: bool
     weather_code: int
     weather_category: str
+    temp_low: float
+    temp_high: float
     today_weather: dict
     analysis: dict
     temps: list
@@ -166,7 +224,7 @@ class Context:
     is_cold_season: bool
 
 
-def _build_context(solar, weather, today, lang, lat):
+def _build_context(solar, weather, today, lang, lat, lon=0.0):
     """Derive every value the rules and the composer need, exactly once."""
     has_solar = bool(solar)
     has_weather = bool(weather)
@@ -181,10 +239,14 @@ def _build_context(solar, weather, today, lang, lat):
     forecast = weather.get("forecast") or []
     season_month = _effective_month(today.month, lat)
 
+    region = _region(lat, lon)
     return Context(
         today=today,
         lat=lat,
+        lon=lon,
         lang=lang,
+        region=region,
+        is_tropical=region == "tropics",
         has_solar=has_solar,
         day_len_sec=day_len_sec,
         delta_daily_sec=delta_daily_sec,
@@ -195,12 +257,15 @@ def _build_context(solar, weather, today, lang, lat):
         hours_gained=format_span(delta_solstice_min) if has_solar else None,
         sunrise=sunrise.strftime("%H:%M") if sunrise else "--:--",
         sunset=sunset.strftime("%H:%M") if sunset else "--:--",
+        sunset_milestone=solar.get("sunset_milestone"),
         has_weather=has_weather,
         weather_code=weather_code,
         # Without a forecast the code defaults to 0, which reads as "clear" -
         # so the category has to stay unknown rather than promise blue sky.
         weather_category=classify(weather_code) if has_weather else None,
         today_weather=weather.get("today", {}),
+        temp_low=weather.get("today", {}).get("temp_min"),
+        temp_high=weather.get("today", {}).get("temp_max"),
         analysis=weather.get("analysis", {}),
         temps=[d.get("temp_max") for d in forecast if d.get("temp_max") is not None],
         season_month=season_month,
@@ -227,6 +292,8 @@ def _carpe_diem(ctx):
     return Scenario("carpe_diem", {
         "rain_day": _weekday_name(ctx.analysis["next_bad_weekday"], ctx.lang),
         "days_until": days,
+        **_counted(days, "days", ctx.lang),
+        **_counted(days, "days_dat", ctx.lang),
     }, 90)
 
 
@@ -240,6 +307,8 @@ def _rain_clearing_soon(ctx):
     return Scenario("rain_clearing_soon", {
         "clear_day": _weekday_name(ctx.analysis["next_good_weekday"], ctx.lang),
         "days_until": days,
+        **_counted(days, "days", ctx.lang),
+        **_counted(days, "days_dat", ctx.lang),
     }, 85 if days <= 2 else 70)
 
 
@@ -250,6 +319,7 @@ def _light_fighter(ctx):
     return Scenario("light_fighter", {
         "delta_min": ctx.delta_daily_min,
         "day_length": ctx.day_length,
+        **_counted(ctx.delta_daily_min, "minutes", ctx.lang),
     }, 80)
 
 
@@ -276,7 +346,10 @@ def _spring_acceleration(ctx):
     """Late winter into spring, gaining two minutes a day or more."""
     if ctx.season_month not in (2, 3, 4) or ctx.delta_daily_min < 2:
         return None
-    return Scenario("spring_acceleration", {"delta_min": ctx.delta_daily_min}, 70)
+    return Scenario("spring_acceleration", {
+        "delta_min": ctx.delta_daily_min,
+        **_counted(ctx.delta_daily_min, "minutes", ctx.lang),
+    }, 70)
 
 
 def _breakthrough_day(ctx):
@@ -298,6 +371,27 @@ def _peak_light(ctx):
     return Scenario("peak_light", {"day_length": ctx.day_length}, 65)
 
 
+def _first_frost(ctx):
+    """A freezing night in the cold half of the year - the season announcing itself."""
+    if ctx.temp_low is None or ctx.temp_low > 0 or not ctx.is_cold_season:
+        return None
+    return Scenario("first_frost", {"temp_low": f"{ctx.temp_low:.0f}°C"}, 72)
+
+
+def _heat_day(ctx):
+    """Hot enough that the day is best used at its edges."""
+    if ctx.temp_high is None or ctx.temp_high < 28:
+        return None
+    return Scenario("heat_day", {"temp_high": f"{ctx.temp_high:.0f}°C"}, 78)
+
+
+def _fog_day(ctx):
+    """Fog and freezing fog - codes 45 and 48, which nothing else covered."""
+    if ctx.weather_code not in (45, 48) or not ctx.has_weather:
+        return None
+    return Scenario("fog_day", {}, 68)
+
+
 def _cooling_trend(ctx):
     trend = ctx.analysis.get("temp_trend")
     if trend not in ("cooling", "cooling_strong"):
@@ -311,7 +405,9 @@ def _good_streak(ctx):
     streak = ctx.analysis.get("good_streak_length", 0)
     if streak < 3:
         return None
-    return Scenario("good_streak", {"streak_days": streak}, 60)
+    return Scenario("good_streak", {
+        "streak_days": streak, **_counted(streak, "days", ctx.lang),
+    }, 60)
 
 
 def _solstice_approaching(ctx):
@@ -326,8 +422,10 @@ def _solstice_approaching(ctx):
         days, which = to_dark, "minimum"
     else:
         return None
-    return Scenario("solstice_approaching",
-                    {"days_to_solstice": days, "peak_or_min": which}, 60)
+    return Scenario("solstice_approaching", {
+        "days_to_solstice": days, "peak_or_min": which,
+        **_counted(days, "days", ctx.lang), **_counted(days, "days_dat", ctx.lang),
+    }, 60)
 
 
 def _weekend_outlook(ctx):
@@ -346,7 +444,9 @@ def _grey_stretch(ctx):
     streak = ctx.analysis.get("bad_streak_length", 0)
     if streak < 3:
         return None
-    return Scenario("grey_stretch", {"streak_days": streak}, 50)
+    return Scenario("grey_stretch", {
+        "streak_days": streak, **_counted(streak, "days", ctx.lang),
+    }, 50)
 
 
 def _stable_focus_light(ctx):
@@ -354,6 +454,7 @@ def _stable_focus_light(ctx):
     return Scenario("stable_focus_light", {
         "day_length": ctx.day_length,
         "delta_min": ctx.delta_daily_min if ctx.has_solar else None,
+        "minutes": _noun(ctx.delta_daily_min, "minutes", ctx.lang) if ctx.has_solar else None,
     }, 30)
 
 
@@ -364,7 +465,10 @@ RULES = (
     _post_solstice_grind,   # 75
     _warming_trend,         # 55-90
     _spring_acceleration,   # 70
+    _heat_day,              # 78
+    _first_frost,           # 72
     _breakthrough_day,      # 70
+    _fog_day,               # 68
     _peak_light,            # 65
     _cooling_trend,         # 45 / 65
     _good_streak,           # 60
@@ -396,12 +500,12 @@ def _select_scenario(ctx, rng):
     return chosen.key, {k: v for k, v in chosen.data.items() if v is not None}
 
 
-def detect_scenario(weather_data, solar_data, today, lang="en", lat=0.0):
+def detect_scenario(weather_data, solar_data, today, lang="en", lat=0.0, lon=0.0):
     """
     Analyze weather and solar data to identify the primary narrative scenario.
     Returns a tuple: (scenario_key, scenario_data)
     """
-    ctx = _build_context(solar_data, weather_data, today, lang, lat)
+    ctx = _build_context(solar_data, weather_data, today, lang, lat, lon)
     return _select_scenario(ctx, random.Random())
 
 
@@ -418,8 +522,10 @@ _SCENARIO_TOPICS = {
     "stable_focus_light": "day_length",
 }
 
-MAX_PARTS = 6
-MIN_PARTS = 3
+# Kept deliberately low: every extra fragment is drawn independently, so the
+# more of them there are, the more likely two of them sit oddly together.
+MAX_PARTS = 3
+MIN_PARTS = 2
 
 
 def _seasonal_texts(ctx):
@@ -435,6 +541,86 @@ def _weather_texts(ctx):
     if not ctx.has_weather:
         return []
     return _get_localized(content.NATURE_WEATHER.get(ctx.weather_category, {}), ctx.lang)
+
+
+def _spring_sign_texts(ctx):
+    """Early signs of spring for this region, in the run-up months only."""
+    by_region = content.SPRING_SIGNS.get(ctx.region) or content.SPRING_SIGNS["generic"]
+    return _get_localized(by_region, ctx.lang).get(ctx.season_month, [])
+
+
+def _light_data(ctx):
+    """
+    The light facts available right now, and only those.
+
+    A key is present only when it was genuinely measured, so any template
+    mentioning it is dropped when it was not. Shrinking figures are left out
+    entirely: they would be true, but this pool is about the light returning.
+    """
+    if not ctx.has_solar:
+        return {}
+
+    data = {"day_length": ctx.day_length, "sunrise": ctx.sunrise, "sunset": ctx.sunset}
+
+    delta = int(ctx.delta_daily_sec // 60)
+    if delta > 0:
+        data["delta"] = delta
+        data["minutes"] = _noun(delta, "minutes", ctx.lang)
+
+    if ctx.delta_solstice_min > 0:
+        data["hours_gained"] = ctx.hours_gained
+
+    milestone = ctx.sunset_milestone
+    if milestone:
+        data["milestone_time"] = milestone["time"]
+        data["milestone_days"] = milestone["days"]
+        data["days_dat"] = _noun(milestone["days"], "days_dat", ctx.lang)
+
+    return data
+
+
+def _compose_tropics(ctx, rng):
+    """Near the equator the changing-light story does not apply."""
+    data = _light_data(ctx)
+    parts = []
+
+    template = _pick_template(_get_localized(content.TROPICS, ctx.lang), data, rng)
+    if template:
+        parts.append(template.format(**data))
+
+    observations = _weather_texts(ctx)
+    if observations and rng.random() > 0.4:
+        parts.append(rng.choice(observations))
+
+    return " ".join(parts)
+
+
+def _compose_winter(ctx, rng):
+    """
+    The cold months, told as the light coming back rather than as weather.
+
+    Entries in WINTER_ANTICIPATION are written as complete thoughts, so at
+    most two short additions are appended - a spring sign and, when the sun
+    is actually out, something to do with it. Everything stays on one theme,
+    which is what keeps the result reading as a single message.
+    """
+    data = _light_data(ctx)
+    parts = []
+
+    template = _pick_template(_get_localized(content.WINTER_ANTICIPATION, ctx.lang), data, rng)
+    if template:
+        parts.append(template.format(**data))
+
+    signs = _spring_sign_texts(ctx)
+    if signs and rng.random() > 0.3:
+        parts.append(rng.choice(signs))
+
+    if ctx.weather_category == "clear" and rng.random() > 0.45:
+        suggestions = _get_localized(content.SUN_ENJOYMENT, ctx.lang)
+        if suggestions:
+            parts.append(rng.choice(suggestions))
+
+    return " ".join(parts) if parts else ""
 
 
 def _compose_text(ctx, scenario_key, scenario_data, rng):
@@ -461,10 +647,13 @@ def _compose_text(ctx, scenario_key, scenario_data, rng):
 
     # 3. Change against yesterday.
     delta_min = int(ctx.delta_daily_sec // 60)
-    if ctx.has_solar and abs(delta_min) >= 1 and rng.random() > 0.4 \
+    # Losing daylight is true but dispiriting, so it is raised far less often
+    # than a gain - and the wording pool for it stays small on purpose.
+    delta_chance = 0.4 if delta_min > 0 else (1 - SHRINKING_MENTION_CHANCE)
+    if ctx.has_solar and abs(delta_min) >= 1 and rng.random() > delta_chance \
             and "delta_daily" not in used:
         pool = content.DELTA_PHRASES["gaining" if delta_min > 0 else "losing"]
-        data = {"delta": abs(delta_min)}
+        data = {"delta": abs(delta_min), "minutes": _noun(delta_min, "minutes", ctx.lang)}
         template = _pick_template(_get_localized(pool, ctx.lang), data, rng)
         if template:
             parts.append(template.format(**data))
@@ -534,11 +723,33 @@ def generate_uplift_data(lat, lon, lang="en"):
     solar = get_daylight_delta(lat, lon) or {}
     weather = fetch_daily_weather(lat, lon, days=7) or {}
 
-    ctx = _build_context(solar, weather, date.today(), lang, lat)
+    ctx = _build_context(solar, weather, date.today(), lang, lat, lon)
     rng = random.Random()
 
-    scenario_key, scenario_data = _select_scenario(ctx, rng)
     return {
-        "text": _compose_text(ctx, scenario_key, scenario_data, rng),
+        "text": _compose(ctx, rng),
         "facts": _format_facts(ctx),
     }
+
+
+def _compose(ctx, rng):
+    """
+    Pick the composer that fits where and when the reader is.
+
+    Winter takes over most of the time because that is the whole point of the
+    app; the weather narrative can wait until the light no longer needs
+    arguing for. Both special modes fall back to the general composer if they
+    come up empty.
+    """
+    if ctx.is_tropical:
+        text = _compose_tropics(ctx, rng)
+        if text:
+            return text
+
+    if ctx.is_cold_season and rng.random() < WINTER_TAKEOVER_CHANCE:
+        text = _compose_winter(ctx, rng)
+        if text:
+            return text
+
+    scenario_key, scenario_data = _select_scenario(ctx, rng)
+    return _compose_text(ctx, scenario_key, scenario_data, rng)

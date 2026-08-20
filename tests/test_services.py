@@ -144,6 +144,8 @@ class TestUpliftEngine:
             return _build_context(solar, weather, today, "en", lat)
 
         def w(today_weather, analysis=None):
+            today_weather.setdefault("temp_max", 10)
+            today_weather.setdefault("temp_min", 3)
             return {"today": today_weather, "analysis": analysis or {},
                     "forecast": [{"temp_max": 10}]}
 
@@ -160,6 +162,9 @@ class TestUpliftEngine:
             "_warming_trend": ctx(s, w({}, {"temp_trend": "warming_strong", "temp_change": 5})),
             "_spring_acceleration": ctx(s, w({}), date(2024, 3, 10)),
             "_breakthrough_day": ctx(s, w({"is_good": True})),
+            "_heat_day": ctx(s, w({"temp_max": 31})),
+            "_first_frost": ctx(s, w({"temp_min": -3}), date(2024, 11, 20)),
+            "_fog_day": ctx(s, w({"code": 45})),
             "_peak_light": ctx({**s, "day_len_sec": 55000}, w({}), date(2024, 6, 30)),
             "_cooling_trend": ctx(s, w({}, {"temp_trend": "cooling_strong", "temp_change": -5})),
             "_good_streak": ctx(s, w({}, {"good_streak_length": 5})),
