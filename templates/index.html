@@ -155,6 +155,15 @@
                 noResults: "No cities found",
                 searchFailed: "Search failed. Try again.",
                 connectionError: "Connection issue. Please refresh.",
+                weather: {
+                    0: "Clear", 1: "Mostly Clear", 2: "Partly Cloudy", 3: "Overcast",
+                    45: "Foggy", 48: "Icy Fog", 51: "Light Drizzle", 53: "Drizzle",
+                    55: "Heavy Drizzle", 61: "Light Rain", 63: "Rain", 65: "Heavy Rain",
+                    71: "Light Snow", 73: "Snow", 75: "Heavy Snow", 77: "Snow Grains",
+                    80: "Light Showers", 81: "Showers", 82: "Heavy Showers",
+                    85: "Snow Showers", 86: "Heavy Snow", 95: "Thunderstorm", 96: "Hail Storm",
+                    99: "Severe Storm"
+                },
                 changelog: [
                     { version: "v0.4.1", text: "Weather-aware nature observations, improved highlights, better mobile layout" },
                     { version: "v0.4", text: "Multi-language support (English/German)" },
@@ -181,6 +190,16 @@
                 noResults: "Keine Städte gefunden",
                 searchFailed: "Suche fehlgeschlagen. Nochmal versuchen.",
                 connectionError: "Verbindungsproblem. Bitte neu laden.",
+                weather: {
+                    0: "Klar", 1: "Überwiegend klar", 2: "Teils bewölkt", 3: "Bedeckt",
+                    45: "Neblig", 48: "Eisnebel", 51: "Leichter Nieselregen",
+                    53: "Nieselregen", 55: "Starker Nieselregen", 61: "Leichter Regen",
+                    63: "Regen", 65: "Starker Regen", 71: "Leichter Schneefall",
+                    73: "Schneefall", 75: "Starker Schneefall", 77: "Schneegriesel",
+                    80: "Leichte Schauer", 81: "Schauer", 82: "Starke Schauer",
+                    85: "Schneeschauer", 86: "Starker Schneefall", 95: "Gewitter",
+                    96: "Hagelgewitter", 99: "Schweres Gewitter"
+                },
                 changelog: [
                     { version: "v0.4.1", text: "Wetterabhängige Naturbeobachtungen, bessere Highlights, optimiertes Layout" },
                     { version: "v0.4", text: "Mehrsprachigkeit (Englisch/Deutsch)" },
@@ -192,14 +211,10 @@
         };
 
         const WEATHER_ICONS = {
-            0: ['☀️', 'Clear'], 1: ['🌤️', 'Mostly Clear'], 2: ['⛅', 'Partly Cloudy'],
-            3: ['☁️', 'Overcast'], 45: ['🌫️', 'Foggy'], 48: ['🌫️', 'Icy Fog'],
-            51: ['🌦️', 'Light Drizzle'], 53: ['🌦️', 'Drizzle'], 55: ['🌧️', 'Heavy Drizzle'],
-            61: ['🌧️', 'Light Rain'], 63: ['🌧️', 'Rain'], 65: ['🌧️', 'Heavy Rain'],
-            71: ['🌨️', 'Light Snow'], 73: ['🌨️', 'Snow'], 75: ['❄️', 'Heavy Snow'],
-            77: ['🌨️', 'Snow Grains'], 80: ['🌦️', 'Light Showers'], 81: ['🌧️', 'Showers'],
-            82: ['⛈️', 'Heavy Showers'], 85: ['🌨️', 'Snow Showers'], 86: ['❄️', 'Heavy Snow'],
-            95: ['⛈️', 'Thunderstorm'], 96: ['⛈️', 'Hail Storm'], 99: ['⛈️', 'Severe Storm']
+            0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️',
+            51: '🌦️', 53: '🌦️', 55: '🌧️', 61: '🌧️', 63: '🌧️', 65: '🌧️',
+            71: '🌨️', 73: '🌨️', 75: '❄️', 77: '🌨️', 80: '🌦️', 81: '🌧️',
+            82: '⛈️', 85: '🌨️', 86: '❄️', 95: '⛈️', 96: '⛈️', 99: '⛈️'
         };
 
         // ===== STATE =====
@@ -311,9 +326,10 @@
                     deltaS.className = 'val ' + (data.facts.delta_solstice.includes('+') ? 'positive' : (data.facts.delta_solstice.includes('-') ? 'negative' : ''));
 
                     const weatherCode = data.facts.weather_code || 0;
-                    const weatherInfo = WEATHER_ICONS[weatherCode] || WEATHER_ICONS[0];
-                    document.getElementById('weather-icon').textContent = weatherInfo[0];
-                    document.getElementById('f-weather').textContent = weatherInfo[1];
+                    document.getElementById('weather-icon').textContent =
+                        WEATHER_ICONS[weatherCode] || WEATHER_ICONS[0];
+                    document.getElementById('f-weather').textContent =
+                        labels.weather[weatherCode] || i18n.en.weather[weatherCode] || '';
                     document.getElementById('f-temp').textContent = data.facts.temp_max;
                 } else {
                     document.getElementById('uplift-text').textContent = data.error || 'Could not load data.';

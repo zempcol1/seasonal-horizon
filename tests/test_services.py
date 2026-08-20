@@ -332,3 +332,42 @@ class TestEdgeCases:
             # Invalid language should fallback gracefully
             result = generate_uplift_data(47.37, 8.54, lang="fr")
             assert "text" in result
+
+
+class TestNeverClaimsUnbackedFacts:
+    """The app must never state something it did not measure."""
+
+    def test_southern_hemisphere_seasons_are_flipped(self):
+        from services.uplift_engine import _get_seasonal_phase
+
+        assert _get_seasonal_phase(1, 15, lat=47.4) == "deep_winter"
+        assert _get_seasonal_phase(1, 15, lat=-33.9) == "peak_summer"
+        assert _get_seasonal_phase(7, 15, lat=-33.9) == "deep_winter"
+
+    def test_darkest_solstice_follows_hemisphere(self):
+        from services.solar_service import _get_darkest_solstice_date
+
+        assert _get_darkest_solstice_date(47.4).month == 12
+        assert _get_darkest_solstice_date(-33.9).month == 6
+
+    def test_template_needing_missing_fact_is_not_used(self):
+        import random
+        from services.uplift_engine import _pick_template
+
+        templates = ["Backed {day_length}.", "Unbacked {bad_days}."]
+        rng = random.Random(0)
+        assert _pick_template(templates, {"day_length": "8h"}, rng) == "Backed {day_length}."
+        assert _pick_template(templates, {}, rng) is None
+
+    def test_no_invented_numbers_when_apis_return_nothing(self):
+        import re
+        from services.uplift_engine import generate_uplift_data
+
+        with patch('services.uplift_engine.get_daylight_delta', return_value={}), \
+             patch('services.uplift_engine.fetch_daily_weather', return_value={}):
+            result = generate_uplift_data(47.37, 8.54, lang="en")
+
+        assert result["facts"]["day_length"] == "--"
+        assert result["facts"]["delta_yesterday"] == "--"
+        assert "0h 0m" not in result["text"]
+        assert not re.search(r'\{\w+\}', result["text"]), "raw placeholder leaked"
