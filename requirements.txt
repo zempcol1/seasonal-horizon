@@ -4,3 +4,6 @@ Werkzeug>=3.1.8
 
 # HTTP requests
 requests>=2.34.2
+
+# Timezone data; Windows has none built in
+tzdata
