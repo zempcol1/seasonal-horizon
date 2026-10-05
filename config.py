@@ -25,7 +25,6 @@ class Config:
     
     # Cache TTL (seconds)
     CACHE_TTL_WEATHER: int = int(os.environ.get('CACHE_TTL_WEATHER', '300'))  # 5 min
-    CACHE_TTL_SOLAR: int = int(os.environ.get('CACHE_TTL_SOLAR', '300'))  # 5 min
     CACHE_TTL_GEO: int = int(os.environ.get('CACHE_TTL_GEO', '3600'))  # 1 hour
     
     # Rate Limiting (requests per minute)
