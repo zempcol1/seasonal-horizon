@@ -27,9 +27,14 @@ Nature observations differ between lowland and alpine locations (from about 800 
 
 Each message is a **lead** plus a **companion** line.
 
-- The lead comes from the strongest **signal** of the day: one true, good thing about today. Light signals are calculated (minutes gained, the next sunset milestone, the first later sunsets in December, the sun standing higher at noon). Weather signals come from the forecast's sunshine hours, not its weather codes (sun in two days, a sunny day, fresh snow, fog with sun above it). When nothing stands out, a line about the phase of the year leads.
-- The companion is a nature sign for the month and region, or, on a sunny winter day, a suggestion for getting out into it.
-- The message stays the same all day for one place. "Another thought" asks for a different one.
+- The lead comes from the strongest **signal** of the day: one true, good thing about today.
+  - **Light**, calculated: minutes gained, sunset and sunrise milestones, the day passing a whole hour, the autumn day it is now as long as, usable light until dusk, the sun higher at noon, the first later sunsets in December.
+  - **Weather**, from sunshine hours rather than weather codes, and from the past month: sun in two days, the first sun after a grey stretch, the warmest day in weeks, a brighter week ahead, UV strength, fresh snow, Hochnebel with sun above it.
+  - **Nature tied to measurements**: bees above ten degrees, toads on mild wet nights, pollen - the last only on one day in seven, out of consideration for hay fever.
+  - **Customs**, around Zurich and Aargau only: Sechseläuten, Knabenschiessen, Samichlaus, the Christmas markets in Advent.
+  - The day of an event (the solstice, the equinox, Sechseläuten) always leads. When nothing stands out, a line about the phase of the year does.
+- The companion is a nature line for the month and region (lowland or alpine), tagged by weather so a frost line only appears on a frosty day. On a sunny winter day it is a suggestion for getting out into the sun instead.
+- The message stays the same all day for one place, and each pool steps through its lines day by day, so nothing repeats until the pool is used up. "Another thought" asks for a different one.
 
 ## Local Development
 
