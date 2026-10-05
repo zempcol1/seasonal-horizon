@@ -11,18 +11,6 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-def _solar_payload(days=60):
-    """An Open-Meteo daylight response with a plausible upward trend."""
-    start = date.today() - timedelta(days=days - 1)
-    return {
-        "daily": {
-            "daylight_duration": [30000 + i * 120 for i in range(days)],
-            "sunrise": [f"{start + timedelta(days=i)}T07:30" for i in range(days)],
-            "sunset": [f"{start + timedelta(days=i)}T17:30" for i in range(days)],
-        }
-    }
-
-
 def _weather_payload(days=7):
     start = date.today()
     return {
@@ -50,18 +38,17 @@ def stub_upstream():
     """
     Keep the suite off the network.
 
-    Each service imports request_json into its own namespace, so all three are
+    Each service imports request_json into its own namespace, so both are
     patched separately. Without this the tests took minutes on a bad
     connection and quietly changed meaning depending on the live forecast.
+    Daylight is calculated, so it needs no stub.
     """
-    from services import geocoding, solar_service, weather_service
+    from services import geocoding, weather_service
 
-    solar_service._cache.clear()
     weather_service._cache.clear()
     geocoding._cache.clear()
 
-    with patch.object(solar_service, 'request_json', return_value=_solar_payload()), \
-         patch.object(weather_service, 'request_json', return_value=_weather_payload()), \
+    with patch.object(weather_service, 'request_json', return_value=_weather_payload()), \
          patch.object(geocoding, 'request_json', return_value=_GEO_PAYLOAD):
         yield
 

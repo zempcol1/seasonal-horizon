@@ -10,32 +10,32 @@ import pytest
 
 class TestSolarService:
 
-    def test_result_is_cached(self):
-        from services import solar_service
-        solar_service._cache.clear()
+    def test_matches_the_published_times(self):
+        """Zurich, 5 Oct 2026 - Open-Meteo gives 07:30 and 18:57."""
+        from services.solar_service import get_daylight_delta
 
-        with patch.object(solar_service, 'request_json') as mock_req:
-            mock_req.return_value = {
-                "daily": {
-                    "daylight_duration": [28800, 29000, 29200],
-                    "sunrise": ["2024-01-15T08:00", "2024-01-16T07:58", "2024-01-17T07:56"],
-                    "sunset": ["2024-01-15T16:00", "2024-01-16T16:03", "2024-01-17T16:06"],
-                }
-            }
-            first = solar_service.get_daylight_delta(47.37, 8.54)
-            second = solar_service.get_daylight_delta(47.37, 8.54)
+        r = get_daylight_delta(47.37, 8.54, date(2026, 10, 5))
+        assert r["sunrise"].strftime("%H:%M") == "07:30"
+        assert r["sunset"].strftime("%H:%M") == "18:57"
 
-        assert mock_req.call_count == 1
-        assert first == second
+    def test_spring_gain_counts_all_the_way_from_december(self):
+        """Fetching used to stop 92 days back, which undercounted from March."""
+        from services.solar_service import get_daylight_delta
 
-    @pytest.mark.parametrize('payload', [None, {"daily": {}}])
-    def test_unusable_response_yields_nothing(self, payload):
-        """No data must mean no data, never a zero-filled result."""
-        from services import solar_service
-        solar_service._cache.clear()
+        r = get_daylight_delta(47.37, 8.54, date(2026, 5, 1))
+        assert r["delta_solstice_sec"] > 6 * 3600
 
-        with patch.object(solar_service, 'request_json', return_value=payload):
-            assert solar_service.get_daylight_delta(47.37, 8.54) == {}
+    def test_sunset_milestone_only_while_evenings_lengthen(self):
+        from services.solar_service import get_daylight_delta
+
+        assert get_daylight_delta(47.37, 8.54, date(2026, 1, 10))["sunset_milestone"] ==             {"time": "17:00", "days": 4}
+        assert get_daylight_delta(47.37, 8.54, date(2026, 10, 5))["sunset_milestone"] is None
+
+    def test_polar_night_yields_nothing(self):
+        """No sunrise at all must mean no data, never a zero-filled result."""
+        from services.solar_service import get_daylight_delta
+
+        assert get_daylight_delta(89.0, 0.0, date(2026, 1, 10)) == {}
 
 
 class TestWeatherService:
@@ -223,13 +223,14 @@ class TestNeverClaimsUnbackedFacts:
 
     @pytest.mark.parametrize('today,expected', [
         (date(2025, 1, 10), date(2024, 12, 21)),
-        (date(2025, 12, 20), date(2024, 12, 21)),
+        (date(2025, 6, 20), date(2024, 12, 21)),
+        (date(2025, 11, 15), date(2025, 6, 21)),    # no "gain" in November
         (date(2025, 12, 21), date(2025, 12, 21)),
     ])
-    def test_gains_count_from_the_last_december_solstice(self, today, expected):
-        from services.solar_service import _last_winter_solstice
+    def test_solstice_delta_counts_from_the_last_solstice(self, today, expected):
+        from services.solar_service import _last_solstice
 
-        assert _last_winter_solstice(today) == expected
+        assert _last_solstice(today) == expected
 
     def test_template_needing_a_missing_fact_is_not_used(self):
         from services.uplift_engine import _pick_template

@@ -677,10 +677,11 @@ def generate_uplift_data(lat, lon, lang="en"):
     if lang not in ("en", "de"):
         lang = "en"
 
-    solar = get_daylight_delta(lat, lon) or {}
+    today = local_today()
+    solar = get_daylight_delta(lat, lon, today)
     weather = fetch_daily_weather(lat, lon, days=7) or {}
 
-    ctx = _build_context(solar, weather, local_today(), lang)
+    ctx = _build_context(solar, weather, today, lang)
     rng = random.Random()
 
     return {
