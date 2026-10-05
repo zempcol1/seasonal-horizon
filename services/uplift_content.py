@@ -1066,10 +1066,9 @@ SUN_ENJOYMENT = {
 }
 
 
-# Early signs of spring, by coarse region and month. Regions come from
-# _region() in uplift_engine: "alpine" covers Switzerland and the pre-alpine
-# foothills, which is where most users are; "central_europe" is the wider
-# lowland band; "generic" avoids naming any species that might be absent.
+# Early signs of spring, by region and month. Regions come from _region() in
+# uplift_engine, which splits the Central European band by elevation:
+# "alpine" from about 800 m up, "lowland" below.
 #
 # Everything here has to hold for an ordinary year in that region. Where
 # timing varies, the wording hedges ("about now", "any week") rather than
@@ -1118,7 +1117,7 @@ SPRING_SIGNS = {
                 "Die Buchenwälder nehmen dieses bestimmte Grün an, das nur vierzehn Tage hält."],
         },
     },
-    "central_europe": {
+    "lowland": {
         "en": {
             1: ["Snowdrops are up in the sheltered corners of gardens and parks.",
                 "Hazel catkins are lengthening - the first pollen of the year is on its way.",
@@ -1154,53 +1153,4 @@ SPRING_SIGNS = {
                 "Die Schwalben kommen an den Nistplätzen vom Vorjahr wieder an."],
         },
     },
-    "generic": {
-        "en": {
-            1: ["The first buds are already sitting on the branches, waiting.",
-                "Birdsong starts earlier in the morning than it did a month ago."],
-            2: ["Buds are visibly swelling on the bare branches.",
-                "The dawn chorus is filling out again, a little earlier each week."],
-            3: ["Green is coming back at ground level, ahead of the trees.",
-                "Insects are about again on the warmer afternoons."],
-            4: ["The trees are coming into leaf and the light through them changes everything.",
-                "Everything that overwintered is moving again."],
-        },
-        "de": {
-            1: ["Die ersten Knospen sitzen schon an den Zweigen und warten.",
-                "Der Vogelgesang beginnt morgens früher als noch vor einem Monat."],
-            2: ["An den kahlen Zweigen schwellen die Knospen sichtbar.",
-                "Der Morgenchor wird wieder voller, jede Woche etwas früher."],
-            3: ["Am Boden kommt das Grün zurück, noch vor den Bäumen.",
-                "An den wärmeren Nachmittagen sind wieder Insekten unterwegs."],
-            4: ["Die Bäume treiben aus, und das Licht dazwischen verändert alles.",
-                "Alles, was überwintert hat, ist wieder in Bewegung."],
-        },
-    },
-}
-
-
-# Near the equator the day barely changes length all year, so the returning
-# light has nothing to say. This mode stays short and talks about the day
-# itself instead.
-TROPICS = {
-    "en": [
-        "The day runs close to twelve hours here, as it does most of the year. The rhythm comes from the sky, not the calendar.",
-        "Sunrise and sunset barely move this close to the equator. What changes is the weather, not the light.",
-        "Around twelve hours of daylight, near enough all year. The seasons here are wet and dry rather than light and dark.",
-        "The sun keeps to its schedule here. {day_length} today, much the same tomorrow.",
-        "Light from {sunrise} to {sunset} - and roughly the same next month, and the month after.",
-        "No long evenings to wait for here, and no dark mornings to endure either. An even trade.",
-        "The length of the day is settled at this latitude. Everything interesting happens in the clouds.",
-        "{day_length} of daylight, steady as it goes. Worth using while the weather cooperates.",
-    ],
-    "de": [
-        "Der Tag dauert hier nahe an zwölf Stunden, wie fast das ganze Jahr. Der Rhythmus kommt vom Himmel, nicht vom Kalender.",
-        "So nah am Äquator bewegen sich Auf- und Untergang kaum. Was wechselt, ist das Wetter, nicht das Licht.",
-        "Rund zwölf Stunden Tageslicht, praktisch das ganze Jahr. Die Jahreszeiten heißen hier nass und trocken statt hell und dunkel.",
-        "Die Sonne hält sich hier an ihren Fahrplan. Heute {day_length}, morgen so ziemlich dasselbe.",
-        "Licht von {sunrise} bis {sunset} - und nächsten Monat ungefähr genauso, und den Monat darauf auch.",
-        "Keine langen Abende, auf die man warten muss, aber auch keine dunklen Morgen. Ein fairer Tausch.",
-        "Auf dieser Breite ist die Tageslänge eine feste Größe. Alles Interessante passiert in den Wolken.",
-        "{day_length} Tageslicht, gleichmäßig wie immer. Lohnt sich zu nutzen, solange das Wetter mitspielt.",
-    ],
 }

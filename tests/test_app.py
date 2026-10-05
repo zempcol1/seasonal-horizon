@@ -67,7 +67,7 @@ def test_uplift_handles_every_language(client, lang):
 
 @pytest.mark.parametrize('lat,lon', [
     (89, 0),            # near the pole
-    (-33.87, 151.21),   # southern hemisphere
+    (-33.87, 151.21),   # far outside the region still answers
     (999, 8.54),        # out of range, gets clamped
     ('invalid', 8.54),  # not a number at all
 ])
