@@ -14,13 +14,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 def _weather_payload(days=7):
     start = date.today()
     return {
+        "elevation": 422,
         "daily": {
             "time": [str(start + timedelta(days=i)) for i in range(days)],
             "weathercode": [0, 1, 3, 61, 2, 0, 0][:days],
             "temperature_2m_max": [8, 9, 11, 10, 12, 13, 14][:days],
             "temperature_2m_min": [1, 2, 3, 4, 4, 5, 6][:days],
-            "precipitation_sum": [0, 0, 1, 6, 0, 0, 0][:days],
-            "precipitation_probability_max": [0, 10, 40, 80, 20, 0, 0][:days],
+            "sunshine_duration": [h * 3600 for h in (6, 5, 1, 0, 4, 7, 7)][:days],
+            "daylight_duration": [10 * 3600] * days,
         }
     }
 
