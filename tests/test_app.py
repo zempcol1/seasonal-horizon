@@ -12,6 +12,9 @@ def test_homepage_renders(client):
     assert response.status_code == 200
     assert b'Seasonal Horizon' in response.data
     assert b'{{' not in response.data, "unrendered Jinja placeholder"
+    # The page takes its colours from the phase of the year.
+    assert re.search(rb'<html lang="en" data-phase="(darkening|returning_light|spring|summer|autumn)">',
+                     response.data)
 
 
 def test_health(client):

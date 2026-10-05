@@ -4,7 +4,7 @@ from config import config
 from services.geocoding import search_cities
 from services.logging_service import get_logger, log_event
 from services.rate_limiter import rate_limit
-from services.uplift_engine import generate_uplift_data
+from services.uplift_engine import current_phase, generate_uplift_data
 
 app = Flask(__name__)
 app.config['DEBUG'] = config.DEBUG
@@ -24,6 +24,7 @@ def index():
         default_city=config.DEFAULT_CITY,
         default_lat=config.DEFAULT_LAT,
         default_lon=config.DEFAULT_LON,
+        phase=current_phase(),
     )
 
 

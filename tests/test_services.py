@@ -397,7 +397,7 @@ class TestUpliftEngine:
             for elevation, weather in ((420, weathers[offset % 3]), (1500, weathers[(offset + 1) % 3])):
                 for lang in ("en", "de"):
                     ctx = _ctx(day, solar, today=weather, elevation=elevation, lang=lang, customs=True)
-                    text = _compose(ctx, Picker("47.37:8.54", day))
+                    text = " ".join(_compose(ctx, Picker("47.37:8.54", day)))
                     assert text and "None" not in text, (day, lang)
                     assert not re.search(r"\{\w+\}", text), (day, lang, text)
 
@@ -407,7 +407,8 @@ class TestUpliftEngine:
 
         result = generate_uplift_data(47.37, 8.54, lang=lang)
         assert result["text"]
-        assert set(result) == {"text", "facts"}
+        assert set(result) == {"text", "lead", "companion", "facts"}
+        assert result["text"] == f"{result['lead']} {result['companion']}"
 
     def test_polar_night_still_gets_a_message(self):
         from services.uplift_engine import generate_uplift_data
