@@ -19,15 +19,8 @@ const i18n = {
         noResults: "No cities found",
         searchFailed: "Search failed. Try again.",
         connectionError: "Connection issue. Please refresh.",
-        weather: {
-            0: "Clear", 1: "Mostly Clear", 2: "Partly Cloudy", 3: "Overcast",
-            45: "Foggy", 48: "Icy Fog", 51: "Light Drizzle", 53: "Drizzle",
-            55: "Heavy Drizzle", 61: "Light Rain", 63: "Rain", 65: "Heavy Rain",
-            71: "Light Snow", 73: "Snow", 75: "Heavy Snow", 77: "Snow Grains",
-            80: "Light Showers", 81: "Showers", 82: "Heavy Showers",
-            85: "Snow Showers", 86: "Heavy Snow", 95: "Thunderstorm", 96: "Hail Storm",
-            99: "Severe Storm"
-        },
+        sunHours: h => `${h} h of sun`,
+        sky: { grey: "Cloudy", rain: "Rain", snow: "Snow", fog: "Fog" },
         changelog: [
             { version: "v0.6", text: "Rebuilt around what is good about today, tuned for Central Europe: light calculated, weather read from sunshine hours, nature by region and weather, Zurich customs, and one message a day with a button for another" },
             { version: "v0.5", text: "Winter now leads with the returning light: spring signs, sun tips, and only facts we actually measured" },
@@ -57,16 +50,8 @@ const i18n = {
         noResults: "Keine Städte gefunden",
         searchFailed: "Suche fehlgeschlagen. Nochmal versuchen.",
         connectionError: "Verbindungsproblem. Bitte neu laden.",
-        weather: {
-            0: "Klar", 1: "Überwiegend klar", 2: "Teils bewölkt", 3: "Bedeckt",
-            45: "Neblig", 48: "Eisnebel", 51: "Leichter Nieselregen",
-            53: "Nieselregen", 55: "Starker Nieselregen", 61: "Leichter Regen",
-            63: "Regen", 65: "Starker Regen", 71: "Leichter Schneefall",
-            73: "Schneefall", 75: "Starker Schneefall", 77: "Schneegriesel",
-            80: "Leichte Schauer", 81: "Schauer", 82: "Starke Schauer",
-            85: "Schneeschauer", 86: "Starker Schneefall", 95: "Gewitter",
-            96: "Hagelgewitter", 99: "Schweres Gewitter"
-        },
+        sunHours: h => `${h} Std. Sonne`,
+        sky: { grey: "Bewölkt", rain: "Regen", snow: "Schnee", fog: "Nebel" },
         changelog: [
             { version: "v0.6", text: "Neu aufgebaut um das, was heute gut ist, abgestimmt auf Mitteleuropa: Licht berechnet, Wetter nach Sonnenstunden, Natur nach Region und Wetter, Zürcher Bräuche, und eine Botschaft pro Tag mit Knopf für eine andere" },
             { version: "v0.5", text: "Im Winter steht das zurückkehrende Licht im Vordergrund: Frühlingsboten, Sonnentipps, und nur noch belegte Angaben" },
@@ -79,12 +64,8 @@ const i18n = {
     }
 };
 
-const WEATHER_ICONS = {
-    0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️',
-    51: '🌦️', 53: '🌦️', 55: '🌧️', 61: '🌧️', 63: '🌧️', 65: '🌧️',
-    71: '🌨️', 73: '🌨️', 75: '❄️', 77: '🌨️', 80: '🌦️', 81: '🌧️',
-    82: '⛈️', 85: '🌨️', 86: '❄️', 95: '⛈️', 96: '⛈️', 99: '⛈️'
-};
+// The sky as the server reads it from the measured sun, not from weather codes.
+const SKY_ICONS = { sunny: '☀️', mixed: '⛅', grey: '☁️', rain: '🌧️', snow: '🌨️', fog: '🌫️' };
 
 // ===== STATE =====
 // Server-rendered defaults, so the client keeps no copy of its own.
@@ -187,11 +168,13 @@ async function fetchData() {
             showDelta('f-delta-w', data.facts.delta_week);
             showDelta('f-delta-s', data.facts.delta_solstice);
 
-            const weatherCode = data.facts.weather_code || 0;
-            document.getElementById('weather-icon').textContent =
-                WEATHER_ICONS[weatherCode] || WEATHER_ICONS[0];
+            // Gains are only shown while they are gains - in the returning light.
+            document.getElementById('gains-section').classList.toggle('hidden', !data.facts.gains);
+
+            const { sky, sun_hours: sun } = data.facts;
+            document.getElementById('weather-icon').textContent = SKY_ICONS[sky] || '';
             document.getElementById('f-weather').textContent =
-                labels.weather[weatherCode] || i18n.en.weather[weatherCode] || '';
+                sun >= 1 ? labels.sunHours(sun) : (labels.sky[sky] || '--');
             document.getElementById('f-temp').textContent = data.facts.temp_max;
         } else {
             document.getElementById('uplift-text').textContent = data.error || 'Could not load data.';

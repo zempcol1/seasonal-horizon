@@ -783,10 +783,36 @@ def _compose(ctx, picker):
 
 # ===== Facts =====
 
+def _sky(weather):
+    """
+    Today's sky in one word, read from the measured sun like the message is.
+    Codes only decide snow and fog; an "overcast" code with nine hours of
+    sun is a sunny day here too.
+    """
+    if not weather:
+        return None
+    if weather.get("code") in SNOW_CODES or (weather.get("snow_cm") or 0) >= 1:
+        return "snow"
+    if weather.get("code") in FOG_CODES:
+        return "fog"
+    if weather.get("is_sunny"):
+        return "sunny"
+    if (weather.get("sun_hours") or 0) >= 1:
+        return "mixed"
+    return "rain" if (weather.get("precip") or 0) >= 1 else "grey"
+
+
 def _format_facts(ctx):
-    """The numbers shown beside the text. Unmeasured values read "--"."""
+    """
+    The numbers shown beside the text. Unmeasured values read "--".
+
+    The changes against yesterday, last week and the solstice are only shown
+    while they are gains - in the returning light. The rest of the year they
+    would mostly count losses, which is not what this app is for.
+    """
     solar = ctx.solar
     temp = ctx.weather.get("temp_max")
+    sun_hours = ctx.weather.get("sun_hours")
 
     def minutes(key):
         return int(solar[key] // 60)
@@ -795,10 +821,12 @@ def _format_facts(ctx):
         "sunrise": _clock(solar.get("sunrise")),
         "sunset": _clock(solar.get("sunset")),
         "day_length": format_duration(solar["day_len_sec"]) if solar else "--",
+        "gains": ctx.phase == "returning_light",
         "delta_yesterday": f"{minutes('delta_daily_sec'):+d} min" if solar else "--",
         "delta_week": f"{minutes('delta_weekly_sec'):+d} min" if solar else "--",
         "delta_solstice": format_signed_span(minutes("delta_solstice_sec")) if solar else "--",
-        "weather_code": ctx.weather.get("code") or 0,
+        "sky": _sky(ctx.weather),
+        "sun_hours": round(sun_hours) if sun_hours is not None else None,
         "temp_max": f"{temp:.0f}°C" if temp is not None else "--",
     }
 

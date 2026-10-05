@@ -55,6 +55,9 @@ def test_uplift_returns_text_and_well_formed_facts(client):
     assert re.fullmatch(r'\d{2}:\d{2}', facts['sunset'])
     for key in ('delta_yesterday', 'delta_week', 'delta_solstice'):
         assert facts[key][0] in '+-', f"{key} should carry a sign"
+    assert facts['sky'] in ('sunny', 'mixed', 'grey', 'rain', 'snow', 'fog')
+    assert isinstance(facts['sun_hours'], int)
+    assert isinstance(facts['gains'], bool)
 
 
 @pytest.mark.parametrize('lang', ['en', 'de', 'xyz'])
