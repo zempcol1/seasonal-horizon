@@ -139,10 +139,24 @@ h1 {
     font-family: 'Merriweather', Georgia, serif;
     font-size: 1.1rem;
     line-height: 1.8;
-    margin-bottom: 1.75rem;
+    margin-bottom: 0.5rem;
     color: var(--text);
     font-weight: 300;
 }
+
+.another-btn {
+    display: block;
+    margin: 0 0 1.25rem auto;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.25rem 0;
+}
+
+.another-btn:hover { color: var(--accent); }
 
 /* ===== FACTS SECTIONS ===== */
 .facts-section {

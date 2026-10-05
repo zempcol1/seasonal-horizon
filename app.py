@@ -46,8 +46,10 @@ def api_uplift():
         lang = request.args.get('lang', 'en')
         if lang not in LANGUAGES:
             lang = 'en'
+        # 0 is today's message; the "another" button counts up from there.
+        variant = max(0, min(999, request.args.get('v', 0, type=int)))
 
-        data = generate_uplift_data(lat, lon, lang=lang)
+        data = generate_uplift_data(lat, lon, lang=lang, variant=variant)
         return jsonify({"success": True, **data})
     except Exception as e:
         log_event('error', f'uplift:{str(e)[:50]}')

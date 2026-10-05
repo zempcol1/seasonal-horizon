@@ -7,6 +7,7 @@ const i18n = {
         vsYesterday: "vs Yesterday",
         vsLastWeek: "vs Last Week",
         vsSolstice: "vs Solstice",
+        another: "Another thought",
         settings: "Settings",
         language: "Language",
         location: "Location",
@@ -43,6 +44,7 @@ const i18n = {
         vsYesterday: "vs Gestern",
         vsLastWeek: "vs Vorwoche",
         vsSolstice: "vs Wende",
+        another: "Ein anderer Gedanke",
         settings: "Einstellungen",
         language: "Sprache",
         location: "Standort",
@@ -90,7 +92,9 @@ const state = {
     city: localStorage.getItem('sh_city') || defaults.city,
     lat: parseFloat(localStorage.getItem('sh_lat')) || parseFloat(defaults.lat),
     lon: parseFloat(localStorage.getItem('sh_lon')) || parseFloat(defaults.lon),
-    lang: localStorage.getItem('sh_lang') || detectLanguage()
+    lang: localStorage.getItem('sh_lang') || detectLanguage(),
+    // 0 is today's message, the same all day; the button counts up.
+    variant: 0
 };
 
 let dataController = null;
@@ -163,7 +167,7 @@ async function fetchData() {
 
     try {
         const res = await fetch(
-            `/api/uplift?lat=${state.lat}&lon=${state.lon}&city=${encodeURIComponent(state.city)}&lang=${state.lang}`,
+            `/api/uplift?lat=${state.lat}&lon=${state.lon}&city=${encodeURIComponent(state.city)}&lang=${state.lang}&v=${state.variant}`,
             { signal: dataController.signal }
         );
         
@@ -207,6 +211,11 @@ async function fetchData() {
     
     loader.classList.add('hidden');
     content.classList.remove('hidden');
+}
+
+function anotherMessage() {
+    state.variant++;
+    fetchData();
 }
 
 // ===== SETTINGS =====
@@ -301,6 +310,7 @@ function selectCity(name, lat, lon, country) {
     state.city = fullName;
     state.lat = lat;
     state.lon = lon;
+    state.variant = 0;
     
     localStorage.setItem('sh_city', fullName);
     localStorage.setItem('sh_lat', String(lat));

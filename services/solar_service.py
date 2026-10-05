@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from zoneinfo import ZoneInfo
 
 from astral import Observer
-from astral.sun import sun
+from astral.sun import elevation, sun
 
 from config import TIMEZONE
 
@@ -36,6 +36,15 @@ def _sun(observer, day):
     """Sunrise and sunset for one day, local time."""
     times = sun(observer, date=day, tzinfo=_TZ)
     return times["sunrise"], times["sunset"]
+
+
+def _noon_height(observer, day):
+    """How high the sun stands at midday, in degrees."""
+    return elevation(observer, sun(observer, date=day, tzinfo=_TZ)["noon"])
+
+
+def _clock_seconds(moment):
+    return moment.hour * 3600 + moment.minute * 60 + moment.second
 
 
 def _day_length(observer, day):
@@ -70,21 +79,28 @@ def get_daylight_delta(lat, lon, today):
     far outside the region this app is made for.
     """
     observer = Observer(lat, lon)
+    solstice = _last_solstice(today)
     try:
         sunrise, sunset = _sun(observer, today)
+        sunrise_before, sunset_before = _sun(observer, today - timedelta(days=1))
         today_sec = (sunset - sunrise).total_seconds()
-        yesterday_sec = _day_length(observer, today - timedelta(days=1))
         last_week_sec = _day_length(observer, today - timedelta(days=7))
-        solstice_sec = _day_length(observer, _last_solstice(today))
+        solstice_sec = _day_length(observer, solstice)
     except ValueError:
         return {}
 
     return {
         "day_len_sec": today_sec,
-        "delta_daily_sec": today_sec - yesterday_sec,
+        "delta_daily_sec": today_sec - (sunset_before - sunrise_before).total_seconds(),
         "delta_weekly_sec": today_sec - last_week_sec,
         "delta_solstice_sec": today_sec - solstice_sec,
         "sunrise": sunrise,
         "sunset": sunset,
         "sunset_milestone": _next_sunset_milestone(observer, today, sunset),
+        # On the clock, against yesterday: negative means earlier. Sunsets
+        # start getting later about ten days before the solstice, sunrises
+        # earlier about ten days after it.
+        "sunrise_shift_sec": _clock_seconds(sunrise) - _clock_seconds(sunrise_before),
+        "sunset_shift_sec": _clock_seconds(sunset) - _clock_seconds(sunset_before),
+        "noon_gain_deg": _noon_height(observer, today) - _noon_height(observer, solstice),
     }

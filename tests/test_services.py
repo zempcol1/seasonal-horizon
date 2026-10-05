@@ -31,6 +31,13 @@ class TestSolarService:
         assert get_daylight_delta(47.37, 8.54, date(2026, 1, 10))["sunset_milestone"] ==             {"time": "17:00", "days": 4}
         assert get_daylight_delta(47.37, 8.54, date(2026, 10, 5))["sunset_milestone"] is None
 
+    def test_evenings_turn_before_the_solstice_and_mornings_after(self):
+        from services.solar_service import get_daylight_delta
+
+        december = get_daylight_delta(47.37, 8.54, date(2025, 12, 14))
+        assert december["delta_daily_sec"] < 0 < december["sunset_shift_sec"]
+        assert get_daylight_delta(47.37, 8.54, date(2026, 1, 10))["sunrise_shift_sec"] < 0
+
     def test_polar_night_yields_nothing(self):
         """No sunrise at all must mean no data, never a zero-filled result."""
         from services.solar_service import get_daylight_delta
@@ -51,8 +58,8 @@ class TestWeatherService:
                     "weathercode": [0, 3],
                     "temperature_2m_max": [10, 12],
                     "temperature_2m_min": [2, 4],
-                    "precipitation_sum": [0, 0],
-                    "precipitation_probability_max": [0, 10],
+                    "sunshine_duration": [20000, 0],
+                    "daylight_duration": [30000, 30000],
                 }
             }
             weather_service.fetch_daily_weather(47.37, 8.54)
@@ -60,31 +67,40 @@ class TestWeatherService:
 
         assert mock_req.call_count == 1
 
-    def test_code_classification(self):
-        from services.weather_service import classify, is_good, is_bad
+    def test_sunshine_not_the_code_makes_a_sunny_day(self):
+        """An "overcast" code with nine hours of sun is a sunny day."""
+        from services.weather_service import _sun
 
-        assert [is_good(c) for c in (0, 1, 2)] == [True] * 3
-        assert [is_good(c) for c in (3, 61)] == [False] * 2
-        assert [is_bad(c) for c in (61, 95)] == [True] * 2
-        assert [is_bad(c) for c in (0, 3)] == [False] * 2
+        assert _sun(9 * 3600, 10 * 3600) == (9, True)
+        assert _sun(1 * 3600, 10 * 3600) == (1, False)
+        assert _sun(None, 10 * 3600) == (None, False)
 
-        # Buckets for narrative lookup. Note 2 is "good" but not "clear".
-        assert classify(0) == "clear"
-        assert classify(2) == "grey"
-        assert classify(75) == "snow"
-        assert classify(61) == "rain"
+    def test_analysis_finds_what_to_look_forward_to(self):
+        from services.weather_service import _analyze_forecast
+
+        def day(weekday, sunny):
+            return {"weekday_index": weekday, "is_sunny": sunny,
+                    "sun_hours": 6 if sunny else 0, "temp_max": 5}
+
+        grey_then_sun = [day(0, False), day(1, False), day(2, True)]
+        assert _analyze_forecast(grey_then_sun)["next_sunny_in_days"] == 2
+
+        # Thursday, sun all the way through the weekend.
+        sunny_week = [day(d % 7, True) for d in range(3, 10)]
+        analysis = _analyze_forecast(sunny_week)
+        assert analysis["sunny_streak"] == 7
+        assert analysis["next_sunny_in_days"] is None
+        assert analysis["weekend_sunny"] is True
 
     @pytest.mark.parametrize('temps,expected', [
         ([10, 11, 12, 15, 16, 17, 18], ("warming", "warming_strong")),
-        ([18, 17, 16, 12, 11, 10, 9], ("cooling", "cooling_strong")),
+        ([18, 17, 16, 12, 11, 10, 9], ("stable",)),     # cooling is not a signal
         ([15, 15, 15, 15, 15, 15, 15], ("stable",)),
     ])
     def test_temperature_trend(self, temps, expected):
-        from services.weather_service import _analyze_forecast
+        from services.weather_service import _temp_trend
 
-        forecast = [{"is_good": True, "is_bad": False, "date": datetime(2024, 1, 15)}
-                    for _ in range(7)]
-        assert _analyze_forecast(forecast, temps)["temp_trend"] in expected
+        assert _temp_trend(temps)[0] in expected
 
 
 class TestRateLimiter:
@@ -106,77 +122,99 @@ class TestRateLimiter:
         assert limiter.is_allowed("ip2", 5) is True
 
 
+JANUARY = date(2026, 1, 20)
+
+SOLAR = {
+    "day_len_sec": 32640, "delta_daily_sec": 150, "delta_weekly_sec": 1000,
+    "delta_solstice_sec": 1900,
+    "sunrise": datetime(2026, 1, 20, 8, 5), "sunset": datetime(2026, 1, 20, 17, 9),
+    "sunset_milestone": {"time": "17:30", "days": 9},
+    "sunrise_shift_sec": -50, "sunset_shift_sec": 87, "noon_gain_deg": 3.4,
+}
+
+
+def _ctx(day=JANUARY, solar=SOLAR, today=None, analysis=None, elevation=None, lang="en"):
+    from services.uplift_engine import _build_context
+    weather = {"today": today or {}, "analysis": analysis or {}, "elevation": elevation}
+    return _build_context(solar, weather, day, lang)
+
+
+# One context per signal, built to satisfy exactly its own condition.
+PROBES = {
+    "_turning_day": lambda: _ctx(date(2025, 12, 21)),
+    "_evenings_turned": lambda: _ctx(date(2025, 12, 14), {**SOLAR, "sunset_shift_sec": 9}),
+    "_sun_ahead": lambda: _ctx(analysis={"next_sunny_in_days": 2, "next_sunny_weekday": 3,
+                                         "next_sunny_hours": 5.6}),
+    "_solstice_countdown": lambda: _ctx(date(2025, 12, 10)),
+    "_mornings_turned": lambda: _ctx(),
+    "_snow": lambda: _ctx(today={"code": 73}),
+    "_sunny_today": lambda: _ctx(today={"is_sunny": True, "sun_hours": 6.2}),
+    "_sunset_milestone": lambda: _ctx(),
+    "_warming": lambda: _ctx(analysis={"temp_trend": "warming", "temp_change": 3.1}),
+    "_since_solstice": lambda: _ctx(),
+    "_fog": lambda: _ctx(today={"code": 45}),
+    "_frost_clear": lambda: _ctx(today={"is_sunny": True, "sun_hours": 6, "temp_min": -4}),
+    "_sunny_streak": lambda: _ctx(analysis={"sunny_streak": 4}),
+    "_daily_gain": lambda: _ctx(),
+    "_some_sun": lambda: _ctx(today={"is_sunny": False, "sun_hours": 2.4}),
+    "_weekend_sunny": lambda: _ctx(date(2026, 1, 22), analysis={"weekend_sunny": True}),
+    "_noon_sun": lambda: _ctx(),
+    "_peak_light": lambda: _ctx(date(2026, 6, 25)),
+    "_season": lambda: _ctx(),
+}
+
+
 class TestUpliftEngine:
 
-    def _solar(self):
-        return {
-            "day_len_sec": 36000,
-            "delta_daily_sec": 120,
-            "delta_weekly_sec": 840,
-            "delta_solstice_sec": 3600,
-            "sunrise": datetime(2024, 1, 15, 8, 0),
-            "sunset": datetime(2024, 1, 15, 18, 0),
-        }
-
-    def test_detect_scenario_picks_a_known_scenario(self):
-        from services.uplift_engine import detect_scenario
-
-        weather = {
-            "forecast": [{"is_good": False, "is_bad": True}],
-            "today": {"is_good": False, "is_bad": True},
-            "analysis": {"next_good_weekday": 2, "next_good_in_days": 2,
-                         "temp_trend": "stable", "bad_streak_length": 2},
-        }
-        scenario, _ = detect_scenario(weather, self._solar(), date(2024, 2, 15))
-        assert scenario in ("rain_clearing_soon", "light_fighter",
-                            "post_solstice_grind", "stable_focus_light")
-
-    def test_every_rule_can_fire(self):
+    def test_every_signal_can_fire(self):
         """
-        Each rule gets a context built to satisfy exactly its own condition.
-
-        A rule that silently stopped matching - a renamed analysis key, a
+        A signal that silently stopped matching - a renamed analysis key, a
         flipped comparison - would otherwise just quietly never be chosen.
         """
-        from services.uplift_engine import RULES, _build_context
+        from services.uplift_engine import SIGNALS
 
-        def ctx(solar, weather, today=date(2024, 2, 15)):
-            return _build_context(solar, weather, today, "en")
+        assert {signal.__name__ for signal in SIGNALS} == set(PROBES), "probe list out of sync"
+        for signal in SIGNALS:
+            assert signal(PROBES[signal.__name__]()) is not None, f"{signal.__name__} never fires"
 
-        def w(today_weather, analysis=None):
-            today_weather.setdefault("temp_max", 10)
-            today_weather.setdefault("temp_min", 3)
-            return {"today": today_weather, "analysis": analysis or {},
-                    "forecast": [{"temp_max": 10}]}
+    @pytest.mark.parametrize('day,phase', [
+        (date(2026, 10, 31), "autumn"),
+        (date(2026, 11, 1), "darkening"),
+        (date(2026, 12, 20), "darkening"),
+        (date(2026, 12, 21), "returning_light"),
+        (date(2026, 3, 19), "returning_light"),
+        (date(2026, 3, 20), "spring"),
+        (date(2026, 6, 21), "summer"),
+        (date(2026, 9, 22), "autumn"),
+    ])
+    def test_phases(self, day, phase):
+        from services.uplift_engine import _phase
 
-        s = {"day_len_sec": 36000, "delta_daily_sec": 180,
-             "delta_solstice_sec": 3600, "delta_weekly_sec": 900}
+        assert _phase(day) == phase
 
-        probes = {
-            "_carpe_diem": ctx(s, w({"is_good": True},
-                                    {"next_bad_weekday": 3, "next_bad_in_days": 2})),
-            "_rain_clearing_soon": ctx(s, w({"is_bad": True},
-                                            {"next_good_weekday": 2, "next_good_in_days": 2})),
-            "_light_fighter": ctx(s, w({"is_bad": True})),
-            "_post_solstice_grind": ctx(s, w({}), date(2024, 1, 20)),
-            "_warming_trend": ctx(s, w({}, {"temp_trend": "warming_strong", "temp_change": 5})),
-            "_spring_acceleration": ctx(s, w({}), date(2024, 3, 10)),
-            "_breakthrough_day": ctx(s, w({"is_good": True})),
-            "_heat_day": ctx(s, w({"temp_max": 31})),
-            "_first_frost": ctx(s, w({"temp_min": -3}), date(2024, 11, 20)),
-            "_fog_day": ctx(s, w({"code": 45})),
-            "_peak_light": ctx({**s, "day_len_sec": 55000}, w({}), date(2024, 6, 30)),
-            "_cooling_trend": ctx(s, w({}, {"temp_trend": "cooling_strong", "temp_change": -5})),
-            "_good_streak": ctx(s, w({}, {"good_streak_length": 5})),
-            "_solstice_approaching": ctx(s, w({}), date(2024, 6, 15)),
-            "_weekend_outlook": ctx(s, w({}, {"weekend_outlook": "good"})),
-            "_grey_stretch": ctx(s, w({}, {"bad_streak_length": 4})),
-            "_stable_focus_light": ctx(s, w({})),
-        }
+    def test_shrinking_days_say_nothing_about_the_light(self):
+        """In autumn the light is losing, so only the season line may speak for it."""
+        from services.solar_service import get_daylight_delta
+        from services.uplift_engine import _signals
 
-        assert {rule.__name__ for rule in RULES} == set(probes), "probe list out of sync"
-        for rule in RULES:
-            assert rule(probes[rule.__name__]) is not None, f"{rule.__name__} never fires"
+        october = date(2026, 10, 5)
+        found = _signals(_ctx(october, get_daylight_delta(47.37, 8.54, october)))
+        assert [s.key for s in found] == ["season"]
+
+    def test_countdown_waits_for_the_last_fortnight(self):
+        from services.uplift_engine import _solstice_countdown
+
+        assert _solstice_countdown(_ctx(date(2025, 11, 20))) is None
+        assert _solstice_countdown(_ctx(date(2025, 12, 7))).data["days_to_solstice"] == 14
+
+    def test_same_message_all_day_and_another_on_request(self):
+        from services.uplift_engine import generate_uplift_data
+
+        first = generate_uplift_data(47.37, 8.54)["text"]
+        assert generate_uplift_data(47.37, 8.54)["text"] == first
+
+        texts = [generate_uplift_data(47.37, 8.54, variant=v)["text"] for v in range(10)]
+        assert all(a != b for a, b in zip(texts, texts[1:])), "the button must change something"
 
     @pytest.mark.parametrize('elevation,region', [
         (408, "lowland"),       # Zurich
@@ -184,38 +222,27 @@ class TestUpliftEngine:
         (None, "lowland"),      # not reported
     ])
     def test_region_follows_elevation(self, elevation, region):
-        from services.uplift_engine import _build_context
+        assert _ctx(elevation=elevation).region == region
 
-        ctx = _build_context({}, {"elevation": elevation}, date(2024, 2, 15), "en")
-        assert ctx.region == region
+    def test_companion_comes_from_the_region(self):
+        from services import uplift_content as content
+        from services.uplift_engine import _companion_pool, _season
+
+        ctx = _ctx(date(2026, 2, 10), elevation=1500)
+        assert _companion_pool(ctx, _season(ctx)) == content.SPRING_SIGNS["alpine"]["en"][2]
 
     @pytest.mark.parametrize('lang', ['en', 'de', 'fr'])
     def test_generates_text_in_any_language(self, lang):
         from services.uplift_engine import generate_uplift_data
 
-        with patch('services.uplift_engine.get_daylight_delta', return_value=self._solar()), \
-             patch('services.uplift_engine.fetch_daily_weather') as mock_weather:
-            mock_weather.return_value = {
-                "forecast": [{"code": 0, "temp_max": 10, "is_good": True, "is_bad": False}],
-                "today": {"code": 0, "is_good": True, "is_bad": False},
-                "analysis": {"temp_trend": "stable"},
-            }
-            result = generate_uplift_data(47.37, 8.54, lang=lang)
-
+        result = generate_uplift_data(47.37, 8.54, lang=lang)
         assert result["text"]
         assert set(result) == {"text", "facts"}
 
-    def test_extreme_latitude(self):
-        """Polar summer: 24h of daylight and no sunrise time at all."""
+    def test_polar_night_still_gets_a_message(self):
         from services.uplift_engine import generate_uplift_data
 
-        with patch('services.uplift_engine.get_daylight_delta') as mock_solar, \
-             patch('services.uplift_engine.fetch_daily_weather', return_value={}):
-            mock_solar.return_value = {
-                "day_len_sec": 86400, "delta_daily_sec": 0, "delta_weekly_sec": 0,
-                "delta_solstice_sec": 0, "sunrise": None, "sunset": None,
-            }
-            assert generate_uplift_data(70.0, 25.0)["text"]
+        assert generate_uplift_data(89.0, 0.0)["text"]
 
 
 class TestNeverClaimsUnbackedFacts:
@@ -231,6 +258,24 @@ class TestNeverClaimsUnbackedFacts:
         from services.solar_service import _last_solstice
 
         assert _last_solstice(today) == expected
+
+    def test_every_template_is_backed_by_its_signal(self):
+        """A pool may only use what its signal provides, in every language."""
+        from services import uplift_content as content
+        from services.uplift_engine import SIGNALS, _PLACEHOLDER
+
+        for signal in SIGNALS:
+            fired = signal(PROBES[signal.__name__]())
+            if fired.key == "season":
+                continue
+            for lang, templates in content.SIGNALS[fired.key].items():
+                for template in templates:
+                    missing = set(_PLACEHOLDER.findall(template)) - set(fired.data)
+                    assert not missing, f"{fired.key}/{lang}: {template}"
+
+        for phase in content.PHASES.values():
+            for templates in phase.values():
+                assert not any("{" in t for t in templates), "phase lines take no figures"
 
     def test_template_needing_a_missing_fact_is_not_used(self):
         from services.uplift_engine import _pick_template

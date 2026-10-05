@@ -23,6 +23,14 @@ Tuned for Central and Western Europe - Switzerland, Germany, Austria, the Benelu
 
 Nature observations differ between lowland and alpine locations (from about 800 m).
 
+## How a message is made
+
+Each message is a **lead** plus a **companion** line.
+
+- The lead comes from the strongest **signal** of the day: one true, good thing about today. Light signals are calculated (minutes gained, the next sunset milestone, the first later sunsets in December, the sun standing higher at noon). Weather signals come from the forecast's sunshine hours, not its weather codes (sun in two days, a sunny day, fresh snow, fog with sun above it). When nothing stands out, a line about the phase of the year leads.
+- The companion is a nature sign for the month and region, or, on a sunny winter day, a suggestion for getting out into it.
+- The message stays the same all day for one place. "Another thought" asks for a different one.
+
 ## Local Development
 
 ```bash
@@ -62,9 +70,9 @@ Environment variables (all optional with sensible defaults):
 ├── wsgi.py               # WSGI entry point for production
 ├── requirements.txt      # Python dependencies
 ├── services/             # Business logic modules
-│   ├── solar_service.py  # Daylight calculations
-│   ├── weather_service.py # Weather API integration
-│   ├── uplift_engine.py  # Narrative text generation
+│   ├── solar_service.py  # Daylight, calculated with astral
+│   ├── weather_service.py # Forecast and sunshine hours
+│   ├── uplift_engine.py  # Signals and message composition
 │   ├── uplift_content.py # Content templates (EN/DE)
 │   ├── rate_limiter.py   # API rate limiting
 │   └── logging_service.py # Minimal logging
@@ -80,7 +88,7 @@ This application is configured for deployment on PythonAnywhere. The `wsgi.py` f
 ## API Endpoints
 
 - `GET /` - Main dashboard
-- `GET /api/uplift?lat=<lat>&lon=<lon>&lang=<en|de>` - Get daylight data and narrative
+- `GET /api/uplift?lat=<lat>&lon=<lon>&lang=<en|de>&v=<n>` - Today's message and figures; `v` > 0 asks for another message
 - `GET /api/search?q=<query>` - Search for cities by name
 - `GET /health` - Health check endpoint
 
