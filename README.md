@@ -1,15 +1,27 @@
 # Seasonal Horizon
 
-A Flask application designed to help you stay connected with the natural rhythm of daylight throughout the year. During the dark winter months, it provides encouraging context about the returning light. In summer, it reminds you to appreciate the abundance before it fades.
+A small web app that finds what is good about the season you are in. Its heart is the stretch from the winter solstice to spring: after Christmas, when the cold, grey, dark and wet start to weigh, it collects the evidence that the sun is still there, life is not gone, and the light is coming back.
 
-## Features
+Tuned for Central and Western Europe - Switzerland, Germany, Austria, the Benelux, northern and western France, northern Italy - one timezone, one climate band.
 
-- Displays sunrise, sunset, and total daylight duration for your location
-- Tracks daily, weekly, and seasonal changes in daylight
-- Generates narrative messages in English and German
-- Weather-aware nature observations that adapt to current conditions
-- Uses weather forecast data for contextual observations
-- Built-in rate limiting and caching for production use
+## Principles
+
+- **Notice, don't forecast.** Each message is a true observation, measured or plausible for the region, plus at most one small invitation.
+- **Evidence over comfort.** In winter, show the signals (minutes gained, the next later sunset, the first hazel catkins) rather than just saying "hang in there".
+- **Weather is something to look forward to.** "Sun in two days", the light off fresh snow, the sun above the Hochnebel - not a to-do list.
+- **Nothing unmeasured is stated.** A fact we could not fetch silently removes every sentence that needed it.
+
+## Seasons
+
+| Phase | Dates | Message | Hard facts |
+|-------|-------|---------|------------|
+| Darkening | Nov 1 - Dec 21 | Coziness and low light; a countdown to the turn in the last two weeks | A few |
+| **Returning light** | Dec 21 - Mar 20 | Spotting the signals that spring is coming | Full signal board |
+| Spring | Mar 20 - Jun 21 | Blossom, green, long evenings | A few |
+| Summer | Jun 21 - Sep 22 | Abundance, warm evenings | A few |
+| Autumn | Sep 22 - Oct 31 | Colours, harvest, golden light | A few |
+
+Nature observations differ between lowland and alpine locations (from about 800 m).
 
 ## Local Development
 

@@ -18,15 +18,16 @@ import re
 from dataclasses import dataclass
 from datetime import date
 
+from config import today as local_today
 from services.solar_service import get_daylight_delta
 from services.weather_service import classify, fetch_daily_weather
 from services import uplift_content as content
 
 COLD_MONTHS = frozenset([11, 12, 1, 2, 3])
 
-# Within this band the day barely changes length all year, so the whole
-# "the light is coming back" idea means nothing there.
-TROPICS_LAT = 10.0
+# Above this the spring signs come late and snow and Hochnebel play a bigger
+# part, so the mountains get their own nature content.
+ALPINE_ELEVATION_M = 800
 
 # In the cold months the message is meant to be about the returning light
 # rather than the weather. This is how often it takes over completely.
@@ -124,39 +125,21 @@ def _weekday_name(index, lang):
 
 # ===== Season =====
 
-def _effective_month(month, lat):
+def _region(elevation):
     """
-    Month translated to its northern-hemisphere equivalent.
+    Lowland or alpine, used to pick nature observations that fit.
 
-    Everything seasonal here is written from a northern point of view, so for
-    southern latitudes we shift half a year and reuse it. Deliberately crude:
-    no equinox dates, just the six-month flip.
+    The app is tuned for one climate band - Switzerland, Germany, Austria,
+    the Benelux, northern France and Italy - so height is what separates
+    one place from another. Unknown elevation counts as lowland.
     """
-    if lat < 0:
-        return (month + 5) % 12 + 1
-    return month
+    if elevation is not None and elevation >= ALPINE_ELEVATION_M:
+        return "alpine"
+    return "lowland"
 
 
-def _region(lat, lon):
-    """
-    Coarse region, used to pick nature observations that are plausible there.
-
-    Deliberately crude boxes rather than real geography: most users are in
-    Switzerland, and being roughly right elsewhere beats being precisely
-    wrong. Anything unrecognised falls back to observations that hold widely.
-    """
-    if abs(lat) <= TROPICS_LAT:
-        return "tropics"
-    if 45.5 <= lat <= 48.0 and 5.5 <= lon <= 11.0:
-        return "alpine"          # Switzerland, Vorarlberg, Bavarian foothills
-    if 45.0 <= lat <= 55.0 and -5.0 <= lon <= 20.0:
-        return "central_europe"
-    return "generic"
-
-
-def _get_seasonal_phase(month, day, lat=0.0):
-    """Determine seasonal phase based on date and hemisphere."""
-    month = _effective_month(month, lat)
+def _get_seasonal_phase(month, day):
+    """Determine seasonal phase from the date."""
     if (month == 12 and day >= 21) or month == 1:
         return "deep_winter"
     elif month == 2 or (month == 3 and day < 20):
@@ -193,11 +176,8 @@ class Context:
     depending on them is dropped instead of stating a confident nothing.
     """
     today: date
-    lat: float
-    lon: float
     lang: str
     region: str
-    is_tropical: bool
 
     has_solar: bool
     day_len_sec: int
@@ -224,7 +204,7 @@ class Context:
     is_cold_season: bool
 
 
-def _build_context(solar, weather, today, lang, lat, lon=0.0):
+def _build_context(solar, weather, today, lang):
     """Derive every value the rules and the composer need, exactly once."""
     has_solar = bool(solar)
     has_weather = bool(weather)
@@ -237,16 +217,11 @@ def _build_context(solar, weather, today, lang, lat, lon=0.0):
 
     weather_code = weather.get("today", {}).get("code", 0)
     forecast = weather.get("forecast") or []
-    season_month = _effective_month(today.month, lat)
 
-    region = _region(lat, lon)
     return Context(
         today=today,
-        lat=lat,
-        lon=lon,
         lang=lang,
-        region=region,
-        is_tropical=region == "tropics",
+        region=_region(weather.get("elevation")),
         has_solar=has_solar,
         day_len_sec=day_len_sec,
         delta_daily_sec=delta_daily_sec,
@@ -268,8 +243,8 @@ def _build_context(solar, weather, today, lang, lat, lon=0.0):
         temp_high=weather.get("today", {}).get("temp_max"),
         analysis=weather.get("analysis", {}),
         temps=[d.get("temp_max") for d in forecast if d.get("temp_max") is not None],
-        season_month=season_month,
-        is_cold_season=season_month in COLD_MONTHS,
+        season_month=today.month,
+        is_cold_season=today.month in COLD_MONTHS,
     )
 
 
@@ -411,10 +386,9 @@ def _good_streak(ctx):
 
 
 def _solstice_approaching(ctx):
-    """Within a fortnight of either solstice; they swap below the equator."""
-    peak_month, dark_month = (6, 12) if ctx.lat >= 0 else (12, 6)
-    to_peak = _days_to_date(ctx.today, date(ctx.today.year, peak_month, 21))
-    to_dark = _days_to_date(ctx.today, date(ctx.today.year, dark_month, 21))
+    """Within a fortnight of either solstice."""
+    to_peak = _days_to_date(ctx.today, date(ctx.today.year, 6, 21))
+    to_dark = _days_to_date(ctx.today, date(ctx.today.year, 12, 21))
 
     if 0 < to_peak <= 14:
         days, which = to_peak, "peak"
@@ -500,12 +474,12 @@ def _select_scenario(ctx, rng):
     return chosen.key, {k: v for k, v in chosen.data.items() if v is not None}
 
 
-def detect_scenario(weather_data, solar_data, today, lang="en", lat=0.0, lon=0.0):
+def detect_scenario(weather_data, solar_data, today, lang="en"):
     """
     Analyze weather and solar data to identify the primary narrative scenario.
     Returns a tuple: (scenario_key, scenario_data)
     """
-    ctx = _build_context(solar_data, weather_data, today, lang, lat, lon)
+    ctx = _build_context(solar_data, weather_data, today, lang)
     return _select_scenario(ctx, random.Random())
 
 
@@ -529,7 +503,7 @@ MIN_PARTS = 2
 
 
 def _seasonal_texts(ctx):
-    phase = _get_seasonal_phase(ctx.today.month, ctx.today.day, ctx.lat)
+    phase = _get_seasonal_phase(ctx.today.month, ctx.today.day)
     return _get_localized_nested(content.SEASONAL_PHASE, phase, ctx.lang)
 
 
@@ -545,8 +519,7 @@ def _weather_texts(ctx):
 
 def _spring_sign_texts(ctx):
     """Early signs of spring for this region, in the run-up months only."""
-    by_region = content.SPRING_SIGNS.get(ctx.region) or content.SPRING_SIGNS["generic"]
-    return _get_localized(by_region, ctx.lang).get(ctx.season_month, [])
+    return _get_localized(content.SPRING_SIGNS[ctx.region], ctx.lang).get(ctx.season_month, [])
 
 
 def _light_data(ctx):
@@ -577,22 +550,6 @@ def _light_data(ctx):
         data["days_dat"] = _noun(milestone["days"], "days_dat", ctx.lang)
 
     return data
-
-
-def _compose_tropics(ctx, rng):
-    """Near the equator the changing-light story does not apply."""
-    data = _light_data(ctx)
-    parts = []
-
-    template = _pick_template(_get_localized(content.TROPICS, ctx.lang), data, rng)
-    if template:
-        parts.append(template.format(**data))
-
-    observations = _weather_texts(ctx)
-    if observations and rng.random() > 0.4:
-        parts.append(rng.choice(observations))
-
-    return " ".join(parts)
 
 
 def _compose_winter(ctx, rng):
@@ -723,7 +680,7 @@ def generate_uplift_data(lat, lon, lang="en"):
     solar = get_daylight_delta(lat, lon) or {}
     weather = fetch_daily_weather(lat, lon, days=7) or {}
 
-    ctx = _build_context(solar, weather, date.today(), lang, lat, lon)
+    ctx = _build_context(solar, weather, local_today(), lang)
     rng = random.Random()
 
     return {
@@ -738,14 +695,8 @@ def _compose(ctx, rng):
 
     Winter takes over most of the time because that is the whole point of the
     app; the weather narrative can wait until the light no longer needs
-    arguing for. Both special modes fall back to the general composer if they
-    come up empty.
+    arguing for. It falls back to the general composer if it comes up empty.
     """
-    if ctx.is_tropical:
-        text = _compose_tropics(ctx, rng)
-        if text:
-            return text
-
     if ctx.is_cold_season and rng.random() < WINTER_TAKEOVER_CHANCE:
         text = _compose_winter(ctx, rng)
         if text:

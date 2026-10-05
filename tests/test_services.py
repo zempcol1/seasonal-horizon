@@ -140,8 +140,8 @@ class TestUpliftEngine:
         """
         from services.uplift_engine import RULES, _build_context
 
-        def ctx(solar, weather, today=date(2024, 2, 15), lat=47.4):
-            return _build_context(solar, weather, today, "en", lat)
+        def ctx(solar, weather, today=date(2024, 2, 15)):
+            return _build_context(solar, weather, today, "en")
 
         def w(today_weather, analysis=None):
             today_weather.setdefault("temp_max", 10)
@@ -178,15 +178,16 @@ class TestUpliftEngine:
         for rule in RULES:
             assert rule(probes[rule.__name__]) is not None, f"{rule.__name__} never fires"
 
-    def test_southern_hemisphere_flips_the_solstice_rule(self):
-        """The June solstice is the peak up north and the low point down south."""
-        from services.uplift_engine import _solstice_approaching, _build_context
+    @pytest.mark.parametrize('elevation,region', [
+        (408, "lowland"),       # Zurich
+        (1560, "alpine"),       # Davos
+        (None, "lowland"),      # not reported
+    ])
+    def test_region_follows_elevation(self, elevation, region):
+        from services.uplift_engine import _build_context
 
-        june = date(2024, 6, 15)
-        north = _solstice_approaching(_build_context({}, {}, june, "en", 47.4))
-        south = _solstice_approaching(_build_context({}, {}, june, "en", -33.9))
-        assert north.data["peak_or_min"] == "peak"
-        assert south.data["peak_or_min"] == "minimum"
+        ctx = _build_context({}, {"elevation": elevation}, date(2024, 2, 15), "en")
+        assert ctx.region == region
 
     @pytest.mark.parametrize('lang', ['en', 'de', 'fr'])
     def test_generates_text_in_any_language(self, lang):
@@ -220,18 +221,15 @@ class TestUpliftEngine:
 class TestNeverClaimsUnbackedFacts:
     """The app must never state something it did not measure."""
 
-    def test_southern_hemisphere_seasons_are_flipped(self):
-        from services.uplift_engine import _get_seasonal_phase
+    @pytest.mark.parametrize('today,expected', [
+        (date(2025, 1, 10), date(2024, 12, 21)),
+        (date(2025, 12, 20), date(2024, 12, 21)),
+        (date(2025, 12, 21), date(2025, 12, 21)),
+    ])
+    def test_gains_count_from_the_last_december_solstice(self, today, expected):
+        from services.solar_service import _last_winter_solstice
 
-        assert _get_seasonal_phase(1, 15, lat=47.4) == "deep_winter"
-        assert _get_seasonal_phase(1, 15, lat=-33.9) == "peak_summer"
-        assert _get_seasonal_phase(7, 15, lat=-33.9) == "deep_winter"
-
-    def test_darkest_solstice_follows_hemisphere(self):
-        from services.solar_service import _get_darkest_solstice_date
-
-        assert _get_darkest_solstice_date(47.4).month == 12
-        assert _get_darkest_solstice_date(-33.9).month == 6
+        assert _last_winter_solstice(today) == expected
 
     def test_template_needing_a_missing_fact_is_not_used(self):
         from services.uplift_engine import _pick_template
