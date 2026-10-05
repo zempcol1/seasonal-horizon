@@ -79,6 +79,8 @@ Environment variables (all optional with sensible defaults):
 │   ├── weather_service.py # Forecast and sunshine hours
 │   ├── uplift_engine.py  # Signals and message composition
 │   ├── uplift_content.py # Content templates (EN/DE)
+│   ├── geocoding.py      # City search
+│   ├── api_client.py     # HTTP retries and caching
 │   ├── rate_limiter.py   # API rate limiting
 │   └── logging_service.py # Minimal logging
 ├── templates/            # Jinja2 HTML templates
@@ -99,6 +101,7 @@ This application is configured for deployment on PythonAnywhere. The `wsgi.py` f
 
 ## Changelog
 
+- **v0.6** - Rebuilt around what is good about today, tuned for Central Europe: light calculated locally, weather read from sunshine hours and the past month, nature lines by region and weather, customs for Zurich and Aargau, and one message a day with a button for another
 - **v0.5** - Winter leads with the returning light: spring signs by region, suggestions for using the sun, hemisphere-aware seasons, a short mode for the tropics, and a guarantee that nothing is stated that was not measured
 - **v0.4.1** - Added basic logging, rate limiting and more tests. Cleaner mobile layout
 - **v0.4** - Multi-language support (English/German), rate limiting, improved German translations

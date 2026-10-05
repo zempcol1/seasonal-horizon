@@ -7,7 +7,6 @@ import time
 from collections import defaultdict
 from functools import wraps
 from flask import request, jsonify
-from config import config
 from services.logging_service import log_event
 
 

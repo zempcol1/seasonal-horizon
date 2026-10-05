@@ -645,36 +645,27 @@ def _first_advent(year):
 
 
 def _customs(year):
-    """(pool, first day, last day) - when each custom's lines hold."""
+    """(pool, first day, last day, weight) - when each custom's lines hold."""
     sechselaeuten = _sechselaeuten(year)
     knabenschiessen = _nth_weekday(year, 9, 5, 2)      # second Saturday of September
     return [
         ("custom.sechselaeuten_soon", sechselaeuten - timedelta(days=7),
-         sechselaeuten - timedelta(days=1)),
-        ("custom.sechselaeuten", sechselaeuten, sechselaeuten),
-        ("custom.knabenschiessen", knabenschiessen, knabenschiessen + timedelta(days=2)),
-        ("custom.samichlaus", date(year, 12, 6), date(year, 12, 6)),
-        ("custom.christmas_markets", _first_advent(year), date(year, 12, 23)),
+         sechselaeuten - timedelta(days=1), 80),
+        ("custom.sechselaeuten", sechselaeuten, sechselaeuten, EVENT_WEIGHT),
+        ("custom.knabenschiessen", knabenschiessen, knabenschiessen + timedelta(days=2),
+         EVENT_WEIGHT),
+        ("custom.samichlaus", date(year, 12, 6), date(year, 12, 6), EVENT_WEIGHT),
+        ("custom.christmas_markets", _first_advent(year), date(year, 12, 23), 55),
     ]
 
 
 def _custom(ctx):
-    """
-    Today's custom, if any. An event of a day or a weekend outranks the
-    weeks-long ones; overlapping weeks-long ones take turns by day.
-    """
-    if not ctx.customs:
+    """Today's custom, if any - the strongest, where two overlap."""
+    current = [c for c in _customs(ctx.today.year) if c[1] <= ctx.today <= c[2]]
+    if not ctx.customs or not current:
         return None
-    current = [(pool, first, last) for pool, first, last in _customs(ctx.today.year)
-               if first <= ctx.today <= last]
-    if not current:
-        return None
-
-    events = [c for c in current if (c[2] - c[1]).days <= 2 or c[0].endswith("_soon")]
-    pool, _, last = events[0] if events else current[ctx.today.toordinal() % len(current)]
-    soon = pool.endswith("_soon")
-    days = (last - ctx.today).days + 1 if soon else 0
-    weight = 80 if soon else EVENT_WEIGHT if events else 55
+    pool, _, last, weight = max(current, key=lambda c: c[3])
+    days = (last - ctx.today).days + 1 if pool.endswith("_soon") else 0
     return Signal("custom", weight, _countdown("days_until", days, ctx.lang), pool=pool)
 
 

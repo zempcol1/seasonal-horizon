@@ -1,9 +1,4 @@
-"""
-Shared plumbing for calling external HTTP APIs: retries and response caching.
-
-Both helpers here existed as near-copies in app.py, solar_service.py and
-weather_service.py before being consolidated.
-"""
+"""Shared plumbing for calling external HTTP APIs: retries and response caching."""
 
 import time
 
