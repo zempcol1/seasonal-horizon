@@ -1,19 +1,29 @@
 // ===== I18N LABELS =====
 const i18n = {
     en: {
+        locale: "en-GB",
         sunrise: "Sunrise",
         sunset: "Sunset",
         daylight: "Daylight",
-        vsYesterday: "vs Yesterday",
-        vsLastWeek: "vs Last Week",
-        vsSolstice: "vs Solstice",
+        sinceYesterday: "Since yesterday",
+        sinceLastWeek: "Since last week",
+        sinceSolstice: "Since solstice",
         another: "Another thought",
         settings: "Settings",
+        close: "Close",
         language: "Language",
         location: "Location",
         searchCity: "Search for a city",
+        cityPlaceholder: "e.g. Zurich, Munich, Vienna...",
         loading: "Reading the sky...",
-        footer: "Your daily reminder that light always returns.",
+        // One line under the card for each phase of the year.
+        footer: {
+            darkening: "The year is resting, and the turn is coming.",
+            returning_light: "Your daily reminder that light always returns.",
+            spring: "Everything that waited is growing again.",
+            summer: "The long days are here. Enjoy them.",
+            autumn: "The season of colour and harvest."
+        },
         current: "Current",
         searching: "Searching...",
         noResults: "No cities found",
@@ -32,19 +42,28 @@ const i18n = {
         ]
     },
     de: {
+        locale: "de-CH",
         sunrise: "Aufgang",
         sunset: "Untergang",
         daylight: "Tageslicht",
-        vsYesterday: "vs Gestern",
-        vsLastWeek: "vs Vorwoche",
-        vsSolstice: "vs Wende",
+        sinceYesterday: "Seit gestern",
+        sinceLastWeek: "Seit Vorwoche",
+        sinceSolstice: "Seit Sonnenwende",
         another: "Ein anderer Gedanke",
         settings: "Einstellungen",
+        close: "Schliessen",
         language: "Sprache",
         location: "Standort",
         searchCity: "Stadt suchen",
+        cityPlaceholder: "z.B. Zürich, München, Wien...",
         loading: "Blick in den Himmel...",
-        footer: "Deine tägliche Erinnerung daran, dass das Licht immer wiederkehrt.",
+        footer: {
+            darkening: "Das Jahr ruht, und die Wende kommt.",
+            returning_light: "Deine tägliche Erinnerung daran, dass das Licht immer wiederkehrt.",
+            spring: "Alles, was gewartet hat, wächst wieder.",
+            summer: "Die langen Tage sind da. Geniess sie.",
+            autumn: "Die Zeit der Farben und der Ernte."
+        },
         current: "Aktuell",
         searching: "Suche...",
         noResults: "Keine Städte gefunden",
@@ -71,6 +90,9 @@ const SKY_ICONS = { sunny: '☀️', mixed: '⛅', grey: '☁️', rain: '🌧�
 // Server-rendered defaults, so the client keeps no copy of its own.
 const defaults = document.getElementById('app-config').dataset;
 
+// The phase of the year depends only on the date, so the server sets it on <html>.
+const phase = document.documentElement.dataset.phase;
+
 const state = {
     city: localStorage.getItem('sh_city') || defaults.city,
     lat: parseFloat(localStorage.getItem('sh_lat')) || parseFloat(defaults.lat),
@@ -85,6 +107,9 @@ let searchController = null;
 let searchTimer = null;
 let searchRequestId = 0;
 
+const $ = id => document.getElementById(id);
+const labelsFor = () => i18n[state.lang] || i18n.en;
+
 // ===== INIT =====
 function detectLanguage() {
     const browserLang = navigator.language || navigator.userLanguage || 'en';
@@ -92,35 +117,41 @@ function detectLanguage() {
 }
 
 function init() {
-    document.getElementById('location-label').textContent = state.city;
-    document.getElementById('lang-select').value = state.lang;
+    // The status bar on phones takes the top colour of the season's sky.
+    const top = getComputedStyle(document.documentElement).getPropertyValue('--top').trim();
+    if (top) document.querySelector('meta[name="theme-color"]').content = top;
+
+    $('location-label').textContent = state.city;
+    $('lang-select').value = state.lang;
     document.documentElement.lang = state.lang;
     applyLabels();
     fetchData();
 }
 
 function applyLabels() {
-    const labels = i18n[state.lang] || i18n.en;
-    
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (labels[key]) {
-            el.textContent = labels[key];
-        }
-    });
-    
-    document.getElementById('footer-text').textContent = labels.footer;
-    document.getElementById('loader-text').textContent = labels.loading;
-    document.getElementById('city-input').placeholder = state.lang === 'de' 
-        ? 'z.B. Zürich, München, Wien...'
-        : 'e.g. Zurich, Munich, Vienna...';
+    const labels = labelsFor();
 
-    // Update changelog
-    const changelogList = document.getElementById('changelog-list');
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const text = labels[el.getAttribute('data-i18n')];
+        if (typeof text === 'string') el.textContent = text;
+    });
+    document.querySelectorAll('[data-i18n-label]').forEach(el => {
+        el.setAttribute('aria-label', labels[el.getAttribute('data-i18n-label')]);
+    });
+
+    $('date-label').textContent = new Intl.DateTimeFormat(labels.locale,
+        { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+    $('footer-text').textContent = labels.footer[phase] || labels.footer.returning_light;
+    $('loader-text').textContent = labels.loading;
+    $('city-input').placeholder = labels.cityPlaceholder;
+
+    const changelogList = $('changelog-list');
     changelogList.innerHTML = '';
     labels.changelog.forEach(item => {
         const li = document.createElement('li');
-        li.innerHTML = `<strong>${item.version}</strong> – ${item.text}`;
+        const version = document.createElement('strong');
+        version.textContent = item.version;
+        li.append(version, ` – ${item.text}`);
         changelogList.appendChild(li);
     });
 }
@@ -134,83 +165,102 @@ function changeLanguage(lang) {
 }
 
 // ===== DATA FETCHING =====
-async function fetchData() {
+// `gentle` keeps the card in place and only cross-fades the message - for
+// "another thought", where the figures do not change.
+async function fetchData({ gentle = false } = {}) {
     if (dataController) {
         dataController.abort();
     }
     dataController = new AbortController();
-    
-    const loader = document.getElementById('loader');
-    const content = document.getElementById('content');
-    const labels = i18n[state.lang] || i18n.en;
-    
-    loader.classList.remove('hidden');
-    content.classList.add('hidden');
-    document.getElementById('loader-text').textContent = labels.loading;
+
+    const labels = labelsFor();
+    const message = $('message');
+
+    if (gentle) {
+        message.classList.add('fading');
+    } else {
+        $('loader').classList.remove('hidden');
+        $('content').classList.add('hidden');
+    }
+    $('another-btn').disabled = true;
 
     try {
         const res = await fetch(
             `/api/uplift?lat=${state.lat}&lon=${state.lon}&lang=${state.lang}&v=${state.variant}`,
             { signal: dataController.signal }
         );
-        
+
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        
+
         if (data.success) {
-            document.getElementById('uplift-text').textContent = data.text;
-            
-            document.getElementById('f-sunrise').textContent = data.facts.sunrise;
-            document.getElementById('f-sunset').textContent = data.facts.sunset;
-            document.getElementById('f-length').textContent = data.facts.day_length;
-            
-            showDelta('f-delta-d', data.facts.delta_yesterday);
-            showDelta('f-delta-w', data.facts.delta_week);
-            showDelta('f-delta-s', data.facts.delta_solstice);
-
-            // Gains are only shown while they are gains - in the returning light.
-            document.getElementById('gains-section').classList.toggle('hidden', !data.facts.gains);
-
-            const { sky, sun_hours: sun } = data.facts;
-            document.getElementById('weather-icon').textContent = SKY_ICONS[sky] || '';
-            document.getElementById('f-weather').textContent =
-                sun >= 1 ? labels.sunHours(sun) : (labels.sky[sky] || '--');
-            document.getElementById('f-temp').textContent = data.facts.temp_max;
+            showMessage(data.lead, data.companion);
+            showFacts(data.facts, labels);
         } else {
-            document.getElementById('uplift-text').textContent = data.error || 'Could not load data.';
+            showMessage(data.error || labels.connectionError, '');
         }
     } catch (e) {
-        if (e.name !== 'AbortError') {
-            console.error('Fetch error:', e);
-            document.getElementById('uplift-text').textContent = labels.connectionError;
-        }
+        if (e.name === 'AbortError') return;
+        console.error('Fetch error:', e);
+        showMessage(labels.connectionError, '');
     }
-    
-    loader.classList.add('hidden');
-    content.classList.remove('hidden');
+
+    $('another-btn').disabled = false;
+    message.classList.remove('fading');
+    $('loader').classList.add('hidden');
+    $('content').classList.remove('hidden');
+}
+
+function showMessage(lead, companion) {
+    $('lead').textContent = lead;
+    $('companion').textContent = companion;
+    $('companion').classList.toggle('hidden', !companion);
+}
+
+function showFacts(facts, labels) {
+    $('f-sunrise').textContent = facts.sunrise;
+    $('f-sunset').textContent = facts.sunset;
+    $('f-length').textContent = facts.day_length;
+
+    showDelta('f-delta-d', facts.delta_yesterday);
+    showDelta('f-delta-w', facts.delta_week);
+    showDelta('f-delta-s', facts.delta_solstice);
+
+    // Gains are only shown while they are gains - in the returning light.
+    $('gains-section').classList.toggle('hidden', !facts.gains);
+
+    const { sky, sun_hours: sun } = facts;
+    $('weather-icon').textContent = SKY_ICONS[sky] || '';
+    $('f-weather').textContent = sun >= 1 ? labels.sunHours(sun) : (labels.sky[sky] || '--');
+    $('f-temp').textContent = facts.temp_max;
 }
 
 function anotherMessage() {
     state.variant++;
-    fetchData();
+    fetchData({ gentle: true });
 }
 
 // A signed figure like "+3 min", coloured by its sign. "--" (not measured) stays plain.
 function showDelta(id, value) {
-    const el = document.getElementById(id);
+    const el = $(id);
     el.textContent = value;
     el.className = 'val ' + (/^\+\d/.test(value) ? 'positive' : /^-\d/.test(value) ? 'negative' : '');
 }
 
 // ===== SETTINGS =====
 function openSettings() {
-    const labels = i18n[state.lang] || i18n.en;
-    document.getElementById('overlay').classList.remove('hidden');
-    document.getElementById('city-input').value = '';
-    document.getElementById('city-results').innerHTML = '';
-    document.getElementById('current-loc').innerHTML = `<small>${labels.current}: <strong>${state.city}</strong></small>`;
-    document.getElementById('lang-select').value = state.lang;
-    document.getElementById('city-input').focus();
+    const labels = labelsFor();
+    $('overlay').classList.remove('hidden');
+    $('city-input').value = '';
+    $('city-results').innerHTML = '';
+
+    const current = $('current-loc');
+    const name = document.createElement('strong');
+    name.textContent = state.city;
+    current.replaceChildren(`${labels.current}: `, name);
+
+    $('lang-select').value = state.lang;
+    $('city-input').focus();
 }
 
 function closeSettings() {
@@ -219,88 +269,100 @@ function closeSettings() {
         searchController = null;
     }
     clearTimeout(searchTimer);
-    document.getElementById('overlay').classList.add('hidden');
+    $('overlay').classList.add('hidden');
 }
 
 function handleOverlayClick(e) {
     if (e.target.id === 'overlay') closeSettings();
 }
 
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !$('overlay').classList.contains('hidden')) closeSettings();
+});
+
 function toggleChangelog() {
-    document.getElementById('changelog').classList.toggle('hidden');
+    $('changelog').classList.toggle('hidden');
 }
 
 // ===== CITY SEARCH =====
-document.getElementById('city-input').addEventListener('input', function() {
+$('city-input').addEventListener('input', function() {
     const query = this.value.trim();
     clearTimeout(searchTimer);
-    
+
     if (searchController) {
         searchController.abort();
         searchController = null;
     }
-    
+
     if (query.length < 2) {
-        document.getElementById('city-results').innerHTML = '';
+        $('city-results').innerHTML = '';
         return;
     }
-    
+
     searchTimer = setTimeout(() => searchCity(query), 300);
 });
 
+function listNote(list, className, text) {
+    const li = document.createElement('li');
+    li.className = className;
+    li.textContent = text;
+    list.replaceChildren(li);
+}
+
 async function searchCity(q) {
-    const list = document.getElementById('city-results');
-    const labels = i18n[state.lang] || i18n.en;
+    const list = $('city-results');
+    const labels = labelsFor();
     const requestId = ++searchRequestId;
-    
+
     searchController = new AbortController();
-    list.innerHTML = `<li class="searching">${labels.searching}</li>`;
-    
+    listNote(list, 'searching', labels.searching);
+
     try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
             signal: searchController.signal
         });
-        
+
         if (requestId !== searchRequestId) return;
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (requestId !== searchRequestId) return;
-        
+
         if (data.length === 0) {
-            list.innerHTML = `<li class="no-results">${labels.noResults}</li>`;
+            listNote(list, 'no-results', labels.noResults);
             return;
         }
-        
+
         list.innerHTML = '';
         data.forEach(city => {
             const li = document.createElement('li');
-            const parts = [city.name];
-            if (city.admin1) parts.push(city.admin1);
-            if (city.country) parts.push(city.country);
-            li.textContent = parts.join(', ');
-            li.addEventListener('click', () => selectCity(city.name, city.latitude, city.longitude, city.country));
+            li.textContent = [city.name, city.admin1, city.country].filter(Boolean).join(', ');
+            // Reachable by keyboard as well: Tab to it, Enter to choose.
+            li.tabIndex = 0;
+            const choose = () => selectCity(city.name, city.latitude, city.longitude, city.country);
+            li.addEventListener('click', choose);
+            li.addEventListener('keydown', e => { if (e.key === 'Enter') choose(); });
             list.appendChild(li);
         });
     } catch (e) {
         if (e.name !== 'AbortError' && requestId === searchRequestId) {
-            list.innerHTML = `<li class="error">${labels.searchFailed}</li>`;
+            listNote(list, 'error', labels.searchFailed);
         }
     }
 }
 
 function selectCity(name, lat, lon, country) {
     const fullName = country ? `${name}, ${country}` : name;
-    
+
     state.city = fullName;
     state.lat = lat;
     state.lon = lon;
     state.variant = 0;
-    
+
     localStorage.setItem('sh_city', fullName);
     localStorage.setItem('sh_lat', String(lat));
     localStorage.setItem('sh_lon', String(lon));
-    
-    document.getElementById('location-label').textContent = fullName;
+
+    $('location-label').textContent = fullName;
     closeSettings();
     fetchData();
 }

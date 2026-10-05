@@ -776,9 +776,15 @@ def _companion(ctx, lead, picker):
 
 
 def _compose(ctx, picker):
+    """The lead and its companion line, kept apart so the page can set them apart."""
     lead = _select(ctx, picker)
     text = _lead(ctx, lead, picker) or _lead(ctx, _season(ctx), picker)
-    return f"{text} {_companion(ctx, lead, picker)}"
+    return text, _companion(ctx, lead, picker)
+
+
+def current_phase():
+    """Where the year stands today - the page takes its colours from it."""
+    return _phase(local_today())
 
 
 # ===== Facts =====
@@ -848,7 +854,10 @@ def generate_uplift_data(lat, lon, lang="en", variant=0):
 
     ctx = _build_context(solar, weather, today, lang,
                          customs=_in_customs_area(lat, lon), pollen=pollen)
+    lead, companion = _compose(ctx, picker)
     return {
-        "text": _compose(ctx, picker),
+        "text": f"{lead} {companion}",
+        "lead": lead,
+        "companion": companion,
         "facts": _format_facts(ctx),
     }

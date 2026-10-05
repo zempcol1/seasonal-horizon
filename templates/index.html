@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-phase="{{ phase }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#2c3e66">
     <title>Seasonal Horizon</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.png') }}">
@@ -17,22 +17,28 @@
     <main class="container">
         <header>
             <div class="brand">
-                <span class="brand-icon">☀️</span>
+                <span class="brand-icon" aria-hidden="true"></span>
                 <h1>Seasonal Horizon</h1>
             </div>
-            <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
+            <button class="icon-btn" onclick="openSettings()" data-i18n-label="settings" aria-label="Settings">⚙️</button>
         </header>
 
         <section class="card">
-            <p id="location-label" class="location-label">{{ default_city }}</p>
+            <div class="card-meta">
+                <p id="location-label" class="location-label">{{ default_city }}</p>
+                <p id="date-label" class="date-label"></p>
+            </div>
             <div id="loader" class="loader">
                 <div class="spinner"></div>
                 <span id="loader-text">Reading the sky...</span>
             </div>
             <div id="content" class="content hidden">
-                <p id="uplift-text" class="uplift-text"></p>
+                <div id="message" class="message" aria-live="polite">
+                    <p id="lead" class="uplift-text"></p>
+                    <p id="companion" class="companion"></p>
+                </div>
                 <button id="another-btn" class="another-btn" onclick="anotherMessage()">↻ <span data-i18n="another">Another thought</span></button>
-                
+
                 <div class="facts-section">
                     <div class="facts-row">
                         <div class="fact">
@@ -63,19 +69,19 @@
                     <div class="facts-row">
                         <div class="fact delta-fact">
                             <span class="label">
-                                <span class="text" data-i18n="vsYesterday">vs Yesterday</span>
+                                <span class="text" data-i18n="sinceYesterday">Since yesterday</span>
                             </span>
                             <span id="f-delta-d" class="val">--</span>
                         </div>
                         <div class="fact delta-fact">
                             <span class="label">
-                                <span class="text" data-i18n="vsLastWeek">vs Last Week</span>
+                                <span class="text" data-i18n="sinceLastWeek">Since last week</span>
                             </span>
                             <span id="f-delta-w" class="val">--</span>
                         </div>
                         <div class="fact delta-fact">
                             <span class="label">
-                                <span class="text" data-i18n="vsSolstice">vs Solstice</span>
+                                <span class="text" data-i18n="sinceSolstice">Since solstice</span>
                             </span>
                             <span id="f-delta-s" class="val">--</span>
                         </div>
@@ -95,9 +101,9 @@
                 </div>
             </div>
         </section>
-        
+
         <footer class="footer">
-            <p id="footer-text">Your daily reminder that light always returns.</p>
+            <p id="footer-text"></p>
         </footer>
     </main>
 
@@ -107,34 +113,32 @@
          data-lon="{{ default_lon }}"></div>
 
     <div id="overlay" class="overlay hidden" onclick="handleOverlayClick(event)">
-        <div class="overlay-box">
+        <div class="overlay-box" role="dialog" aria-modal="true" aria-labelledby="settings-title">
             <div class="overlay-header">
-                <h2 data-i18n="settings">Settings</h2>
-                <button class="close-btn" onclick="closeSettings()" title="Close">&times;</button>
+                <h2 id="settings-title" data-i18n="settings">Settings</h2>
+                <button class="close-btn" onclick="closeSettings()" data-i18n-label="close" aria-label="Close">&times;</button>
             </div>
-            
+
             <div class="settings-section">
-                <h3 data-i18n="language">Language</h3>
-                <select id="lang-select" onchange="changeLanguage(this.value)">
+                <h3 id="lang-title" data-i18n="language">Language</h3>
+                <select id="lang-select" onchange="changeLanguage(this.value)" aria-labelledby="lang-title">
                     <option value="en">English</option>
                     <option value="de">Deutsch</option>
                 </select>
             </div>
-            
+
             <div class="settings-section">
                 <h3 data-i18n="location">Location</h3>
-                <label data-i18n="searchCity">Search for a city</label>
-                <input type="text" id="city-input" placeholder="e.g. Berlin, Tokyo, New York..." autocomplete="off">
+                <label for="city-input" data-i18n="searchCity">Search for a city</label>
+                <input type="text" id="city-input" autocomplete="off">
                 <ul id="city-results" class="results-list"></ul>
                 <div class="current-location" id="current-loc"></div>
             </div>
-            
+
             <div class="version-section">
-                <span class="version-label" onclick="toggleChangelog()">{{ version }}</span>
+                <button class="version-label" onclick="toggleChangelog()">{{ version }}</button>
                 <div id="changelog" class="changelog hidden">
-                    <ul id="changelog-list">
-                        <!-- Filled by JS -->
-                    </ul>
+                    <ul id="changelog-list"></ul>
                 </div>
             </div>
         </div>
