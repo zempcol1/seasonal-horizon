@@ -29,6 +29,7 @@ const i18n = {
             99: "Severe Storm"
         },
         changelog: [
+            { version: "v0.6", text: "Rebuilt around what is good about today, tuned for Central Europe: light calculated, weather read from sunshine hours, nature by region and weather, Zurich customs, and one message a day with a button for another" },
             { version: "v0.5", text: "Winter now leads with the returning light: spring signs, sun tips, and only facts we actually measured" },
             { version: "v0.4.1", text: "Weather-aware nature observations, better mobile layout" },
             { version: "v0.4", text: "Multi-language support (English/German)" },
@@ -67,6 +68,7 @@ const i18n = {
             96: "Hagelgewitter", 99: "Schweres Gewitter"
         },
         changelog: [
+            { version: "v0.6", text: "Neu aufgebaut um das, was heute gut ist, abgestimmt auf Mitteleuropa: Licht berechnet, Wetter nach Sonnenstunden, Natur nach Region und Wetter, Zürcher Bräuche, und eine Botschaft pro Tag mit Knopf für eine andere" },
             { version: "v0.5", text: "Im Winter steht das zurückkehrende Licht im Vordergrund: Frühlingsboten, Sonnentipps, und nur noch belegte Angaben" },
             { version: "v0.4.1", text: "Wetterabhängige Naturbeobachtungen, optimiertes Layout" },
             { version: "v0.4", text: "Mehrsprachigkeit (Englisch/Deutsch)" },
@@ -129,8 +131,8 @@ function applyLabels() {
     document.getElementById('footer-text').textContent = labels.footer;
     document.getElementById('loader-text').textContent = labels.loading;
     document.getElementById('city-input').placeholder = state.lang === 'de' 
-        ? 'z.B. Berlin, Zürich, Wien...' 
-        : 'e.g. Berlin, Tokyo, New York...';
+        ? 'z.B. Zürich, München, Wien...'
+        : 'e.g. Zurich, Munich, Vienna...';
 
     // Update changelog
     const changelogList = document.getElementById('changelog-list');
@@ -167,7 +169,7 @@ async function fetchData() {
 
     try {
         const res = await fetch(
-            `/api/uplift?lat=${state.lat}&lon=${state.lon}&city=${encodeURIComponent(state.city)}&lang=${state.lang}&v=${state.variant}`,
+            `/api/uplift?lat=${state.lat}&lon=${state.lon}&lang=${state.lang}&v=${state.variant}`,
             { signal: dataController.signal }
         );
         
@@ -181,17 +183,9 @@ async function fetchData() {
             document.getElementById('f-sunset').textContent = data.facts.sunset;
             document.getElementById('f-length').textContent = data.facts.day_length;
             
-            const deltaD = document.getElementById('f-delta-d');
-            const deltaW = document.getElementById('f-delta-w');
-            const deltaS = document.getElementById('f-delta-s');
-            
-            deltaD.textContent = data.facts.delta_yesterday;
-            deltaW.textContent = data.facts.delta_week;
-            deltaS.textContent = data.facts.delta_solstice;
-
-            deltaD.className = 'val ' + (data.facts.delta_yesterday.includes('+') ? 'positive' : (data.facts.delta_yesterday.includes('-') ? 'negative' : ''));
-            deltaW.className = 'val ' + (data.facts.delta_week.includes('+') ? 'positive' : (data.facts.delta_week.includes('-') ? 'negative' : ''));
-            deltaS.className = 'val ' + (data.facts.delta_solstice.includes('+') ? 'positive' : (data.facts.delta_solstice.includes('-') ? 'negative' : ''));
+            showDelta('f-delta-d', data.facts.delta_yesterday);
+            showDelta('f-delta-w', data.facts.delta_week);
+            showDelta('f-delta-s', data.facts.delta_solstice);
 
             const weatherCode = data.facts.weather_code || 0;
             document.getElementById('weather-icon').textContent =
@@ -216,6 +210,13 @@ async function fetchData() {
 function anotherMessage() {
     state.variant++;
     fetchData();
+}
+
+// A signed figure like "+3 min", coloured by its sign. "--" (not measured) stays plain.
+function showDelta(id, value) {
+    const el = document.getElementById(id);
+    el.textContent = value;
+    el.className = 'val ' + (/^\+\d/.test(value) ? 'positive' : /^-\d/.test(value) ? 'negative' : '');
 }
 
 // ===== SETTINGS =====

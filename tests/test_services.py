@@ -302,6 +302,11 @@ class TestUpliftEngine:
         assert _custom(_ctx(advent - timedelta(days=1), customs=True)) is None
         assert _custom(_ctx(advent, customs=True)).pool == "custom.christmas_markets"
 
+    def test_samichlaus_outranks_the_markets(self):
+        from services.uplift_engine import _custom
+
+        assert _custom(_ctx(date(2026, 12, 6), customs=True)).pool == "custom.samichlaus"
+
     def test_same_message_all_day_and_another_on_request(self):
         from services.uplift_engine import generate_uplift_data
 
