@@ -209,7 +209,15 @@ def _in_customs_area(lat, lon):
 
 
 def _phase(day):
-    """Where the year stands. The dates are the ones in the README."""
+    """
+    Where the year stands:
+
+        darkening        1 Nov - 20 Dec   cosiness; the solstice countdown at the end
+        returning_light  21 Dec - 19 Mar  the heart of the app: signals that spring is coming
+        spring           20 Mar - 20 Jun
+        summer           21 Jun - 21 Sep
+        autumn           22 Sep - 31 Oct
+    """
     month_day = (day.month, day.day)
     if month_day >= (12, 21) or month_day < (3, 20):
         return "returning_light"

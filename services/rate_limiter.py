@@ -63,20 +63,27 @@ class RateLimiter:
 _limiter = RateLimiter()
 
 
+def client_ip():
+    """
+    The visitor's address. PythonAnywhere's load balancer writes it into
+    X-Real-IP. X-Forwarded-For is not used: its first entry is whatever the
+    client chose to send, so a limit keyed on it could be dodged with a
+    made-up address per request.
+    """
+    return request.headers.get('X-Real-IP') or request.remote_addr or 'unknown'
+
+
 def rate_limit(limit: int):
     """
     Decorator to apply rate limiting to a route.
-    
+
     Args:
         limit: Maximum requests per minute
     """
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-            if ip:
-                ip = ip.split(',')[0].strip()
-            
+            ip = client_ip()
             if not _limiter.is_allowed(ip, limit):
                 log_event('rate_limit', f'{ip}')
                 return jsonify({

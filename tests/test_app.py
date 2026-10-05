@@ -100,3 +100,13 @@ def test_rate_limit_blocks_once_the_limit_is_hit(client):
     assert data['success'] is False
     assert 'rate limit' in data['error'].lower()
     assert 'retry_after' in data
+
+
+def test_rate_limit_cannot_be_dodged_with_a_made_up_address(client):
+    """X-Forwarded-For is the client's to fill; PythonAnywhere's X-Real-IP is not."""
+    for i in range(config.RATE_LIMIT_UPLIFT):
+        client.get('/api/uplift', headers={'X-Real-IP': '1.2.3.4', 'X-Forwarded-For': f'9.9.9.{i}'})
+
+    blocked = client.get('/api/uplift', headers={'X-Real-IP': '1.2.3.4', 'X-Forwarded-For': '8.8.8.8'})
+    assert blocked.status_code == 429
+    assert client.get('/api/uplift', headers={'X-Real-IP': '5.6.7.8'}).status_code == 200

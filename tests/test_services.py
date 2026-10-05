@@ -162,6 +162,32 @@ class TestRateLimiter:
         assert limiter.is_allowed("ip2", 5) is True
 
 
+class TestApiClient:
+
+    def test_daily_budget_stops_upstream_calls(self):
+        """Past the budget the app stops asking, so nobody can spend the quota alone."""
+        from services import api_client
+
+        with patch.object(api_client, 'UPSTREAM_DAILY_LIMIT', 2), \
+             patch.dict(api_client._budget, {"day": None, "used": 0}), \
+             patch.object(api_client.requests, 'get') as mock_get:
+            mock_get.return_value.json.return_value = {"ok": True}
+            results = [api_client.request_json("https://example.org", {}) for _ in range(3)]
+
+        assert results == [{"ok": True}, {"ok": True}, None]
+        assert mock_get.call_count == 2
+
+    def test_cache_drops_the_oldest_when_full(self):
+        """Many different coordinates must not grow the cache without end."""
+        from services.api_client import TTLCache
+
+        cache = TTLCache(60, max_size=2)
+        for key in ("a", "b", "c"):
+            cache.set(key, key.upper())
+        assert cache.get("a") is None
+        assert (cache.get("b"), cache.get("c")) == ("B", "C")
+
+
 JANUARY = date(2026, 1, 20)
 
 SOLAR = {
