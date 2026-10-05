@@ -17,6 +17,8 @@ from config import TIMEZONE
 _TZ = ZoneInfo(TIMEZONE)
 
 MILESTONE_HORIZON_DAYS = 60  # near the solstice a half hour takes ~4 weeks
+HOUR_MARK_HORIZON_DAYS = 7
+MIRROR_SEARCH_DAYS = 120     # how far back into autumn to look for a twin day
 
 
 def _last_solstice(today):
@@ -52,6 +54,60 @@ def _day_length(observer, day):
     return (sunset - sunrise).total_seconds()
 
 
+def _next_sunrise_milestone(observer, today, today_sunrise):
+    """
+    When the sunrise next moves before a half-hour mark - 8:00, 7:30, ...
+
+    Returns None while the mornings are still getting darker.
+    """
+    minutes = today_sunrise.hour * 60 + today_sunrise.minute
+    target = (minutes // 30) * 30           # the :00 or :30 at or before today
+
+    for offset in range(1, MILESTONE_HORIZON_DAYS + 1):
+        sunrise, _ = _sun(observer, today + timedelta(days=offset))
+        if sunrise.hour * 60 + sunrise.minute < target:
+            return {"time": f"{target // 60:02d}:{target % 60:02d}", "days": offset}
+        if sunrise.hour * 60 + sunrise.minute > minutes:
+            return None                     # heading the other way
+    return None
+
+
+def _hour_mark(observer, today, today_sec, yesterday_sec):
+    """
+    The day length crossing a whole hour: today, or within a week.
+
+    {"hours": 10, "days": 0} means today is the first day over ten hours.
+    """
+    hours = int(today_sec // 3600)
+    if yesterday_sec < hours * 3600 <= today_sec:
+        return {"hours": hours, "days": 0}
+
+    target = (hours + 1) * 3600
+    for offset in range(1, HOUR_MARK_HORIZON_DAYS + 1):
+        length = _day_length(observer, today + timedelta(days=offset))
+        if length >= target:
+            return {"hours": hours + 1, "days": offset}
+        if length < today_sec:
+            return None                     # the days are shrinking
+    return None
+
+
+def _autumn_twin(observer, today, today_sec, solstice):
+    """
+    The last day before the December solstice that was as long as today.
+
+    "The light is back to where it was on 31 October" - a date people
+    remember. Only looked for after a December solstice.
+    """
+    if solstice.month != 12:
+        return None
+    for back in range(1, MIRROR_SEARCH_DAYS + 1):
+        day = solstice - timedelta(days=back)
+        if _day_length(observer, day) >= today_sec:
+            return day
+    return None
+
+
 def _next_sunset_milestone(observer, today, today_sunset):
     """
     When the sunset next crosses a half-hour mark - 17:00, 17:30, and so on.
@@ -81,9 +137,11 @@ def get_daylight_delta(lat, lon, today):
     observer = Observer(lat, lon)
     solstice = _last_solstice(today)
     try:
-        sunrise, sunset = _sun(observer, today)
+        times = sun(observer, date=today, tzinfo=_TZ)
+        sunrise, sunset = times["sunrise"], times["sunset"]
         sunrise_before, sunset_before = _sun(observer, today - timedelta(days=1))
         today_sec = (sunset - sunrise).total_seconds()
+        yesterday_sec = (sunset_before - sunrise_before).total_seconds()
         last_week_sec = _day_length(observer, today - timedelta(days=7))
         solstice_sec = _day_length(observer, solstice)
     except ValueError:
@@ -91,12 +149,17 @@ def get_daylight_delta(lat, lon, today):
 
     return {
         "day_len_sec": today_sec,
-        "delta_daily_sec": today_sec - (sunset_before - sunrise_before).total_seconds(),
+        "delta_daily_sec": today_sec - yesterday_sec,
         "delta_weekly_sec": today_sec - last_week_sec,
         "delta_solstice_sec": today_sec - solstice_sec,
         "sunrise": sunrise,
         "sunset": sunset,
         "sunset_milestone": _next_sunset_milestone(observer, today, sunset),
+        "sunrise_milestone": _next_sunrise_milestone(observer, today, sunrise),
+        "hour_mark": _hour_mark(observer, today, today_sec, yesterday_sec),
+        "autumn_twin": _autumn_twin(observer, today, today_sec, solstice),
+        # Civil dusk: still light enough to be outside without a lamp.
+        "dusk": times["dusk"],
         # On the clock, against yesterday: negative means earlier. Sunsets
         # start getting later about ten days before the solstice, sunrises
         # earlier about ten days after it.
