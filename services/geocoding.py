@@ -5,6 +5,7 @@ from config import config
 
 SEARCH_URL = "https://geocoding-api.open-meteo.com/v1/search"
 MIN_QUERY_LENGTH = 2
+MAX_QUERY_LENGTH = 80
 MAX_RESULTS = 8
 
 _cache = TTLCache(config.CACHE_TTL_GEO)
@@ -17,7 +18,8 @@ def search_cities(query):
     Failures are deliberately not cached, so a brief outage cannot blank out
     a city for the whole cache lifetime.
     """
-    query = (query or "").strip()
+    # No city name is longer than this; anything more is not a search.
+    query = (query or "").strip()[:MAX_QUERY_LENGTH]
     if len(query) < MIN_QUERY_LENGTH:
         return []
 
