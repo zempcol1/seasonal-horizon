@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from config import config
+from config import TIMEZONE, config, today as local_today
 from services.api_client import TTLCache, request_json
 
 _cache = TTLCache(config.CACHE_TTL_SOLAR)
@@ -10,18 +10,11 @@ FORECAST_DAYS = 16  # the most Open-Meteo allows; the milestone is simply
                     # absent when it falls outside that window
 
 
-def _get_darkest_solstice_date(lat):
-    """
-    Most recent solstice with the shortest day, for this hemisphere.
-
-    December in the north, June in the south. Getting this wrong would make
-    every "gained since the solstice" figure meaningless below the equator.
-    """
-    today = date.today()
-    month, day = (12, 21) if lat >= 0 else (6, 21)
-    solstice = date(today.year, month, day)
+def _last_winter_solstice(today):
+    """The most recent December solstice - the shortest day of the year."""
+    solstice = date(today.year, 12, 21)
     if today < solstice:
-        solstice = date(today.year - 1, month, day)
+        solstice = date(today.year - 1, 12, 21)
     return solstice
 
 
@@ -61,14 +54,14 @@ def get_daylight_delta(lat, lon):
     """
     Fetches solar dynamics: day length, change from yesterday, week, and solstice.
     """
-    cache_key = f"solar_{lat:.2f}_{lon:.2f}_{date.today()}"
+    today = local_today()
+    cache_key = f"solar_{lat:.2f}_{lon:.2f}_{today}"
     cached = _cache.get(cache_key)
     if cached:
         return cached
 
     try:
-        solstice = _get_darkest_solstice_date(lat)
-        today = date.today()
+        solstice = _last_winter_solstice(today)
         days_since_solstice = (today - solstice).days
         past_days = min(days_since_solstice, 92)
 
@@ -77,7 +70,7 @@ def get_daylight_delta(lat, lon):
             "latitude": lat,
             "longitude": lon,
             "daily": ["sunrise", "sunset", "daylight_duration"],
-            "timezone": "auto",
+            "timezone": TIMEZONE,
             "past_days": past_days,
             "forecast_days": FORECAST_DAYS,
         }

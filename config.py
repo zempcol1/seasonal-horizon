@@ -5,6 +5,11 @@ Uses environment variables with sensible defaults.
 
 import os
 from dataclasses import dataclass
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
+
+# The app is tuned for Central and Western Europe, which shares one clock.
+TIMEZONE = 'Europe/Zurich'
 
 
 @dataclass(frozen=True)
@@ -41,3 +46,8 @@ class Config:
 
 # Singleton instance
 config = Config()
+
+
+def today() -> date:
+    """Today on the local clock. The server runs on UTC, an hour behind."""
+    return datetime.now(ZoneInfo(TIMEZONE)).date()

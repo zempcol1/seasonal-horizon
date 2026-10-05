@@ -1,6 +1,6 @@
-from datetime import date, datetime
+from datetime import datetime
 
-from config import config
+from config import TIMEZONE, config, today
 from services.api_client import TTLCache, request_json
 
 _cache = TTLCache(config.CACHE_TTL_WEATHER)
@@ -37,7 +37,7 @@ def fetch_daily_weather(lat, lon, days=7):
     """
     Fetches 7-day weather data with detailed analysis for narrative generation.
     """
-    cache_key = f"weather_{lat:.2f}_{lon:.2f}_{date.today()}"
+    cache_key = f"weather_{lat:.2f}_{lon:.2f}_{today()}"
     cached = _cache.get(cache_key)
     if cached:
         return cached
@@ -49,7 +49,7 @@ def fetch_daily_weather(lat, lon, days=7):
             "longitude": lon,
             "daily": ["weathercode", "temperature_2m_max", "temperature_2m_min", 
                       "precipitation_sum", "precipitation_probability_max"],
-            "timezone": "auto",
+            "timezone": TIMEZONE,
             "forecast_days": days
         }
         
@@ -84,6 +84,7 @@ def fetch_daily_weather(lat, lon, days=7):
         result = {
             "forecast": forecast,
             "today": forecast[0] if forecast else {},
+            "elevation": data.get("elevation"),
             "analysis": _analyze_forecast(forecast, temps_max)
         }
         
