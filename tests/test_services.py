@@ -470,6 +470,26 @@ class TestNeverClaimsUnbackedFacts:
 
         assert "ß" not in inspect.getsource(uplift_content)
 
+    def test_the_sky_follows_the_sun_not_the_code(self):
+        """Code 80 ("showers") with ten hours of sun is a sunny day in the box too."""
+        from services.uplift_engine import _sky
+
+        assert _sky({"code": 80, "is_sunny": True, "sun_hours": 10}) == "sunny"
+        assert _sky({"code": 3, "sun_hours": 2}) == "mixed"
+        assert _sky({"code": 61, "sun_hours": 0, "precip": 5}) == "rain"
+        assert _sky({"code": 73, "is_sunny": True, "sun_hours": 6}) == "snow"
+        assert _sky({}) is None
+
+    @pytest.mark.parametrize('day,gains', [
+        (date(2026, 1, 20), True), (date(2026, 10, 5), False), (date(2026, 5, 1), False),
+    ])
+    def test_gains_only_shown_while_they_are_gains(self, day, gains):
+        from services.solar_service import get_daylight_delta
+        from services.uplift_engine import _format_facts
+
+        facts = _format_facts(_ctx(day, get_daylight_delta(47.37, 8.54, day)))
+        assert facts["gains"] is gains
+
     def test_template_needing_a_missing_fact_is_not_used(self):
         from services.uplift_engine import _backed
 
