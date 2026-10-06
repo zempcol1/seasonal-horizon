@@ -34,6 +34,13 @@ def test_search_returns_results(client):
     results = client.get('/api/search?q=Zurich').get_json()
     assert isinstance(results, list) and results
     assert results[0]['name'] == 'Zurich'
+    # Montana is off the app's clock, so its sun times would be wrong.
+    assert 'United States' not in [r['country'] for r in results]
+
+
+def test_search_in_german_uses_swiss_spelling(client):
+    names = [r['name'] for r in client.get('/api/search?q=Giessen&lang=de').get_json()]
+    assert 'Giessen' in names and 'Gießen' not in names
 
 
 @pytest.mark.parametrize('query', ['', 'B'])

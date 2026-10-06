@@ -24,7 +24,7 @@ const i18n = {
             autumn: "The season of colour and harvest."
         },
         searching: "Searching...",
-        noResults: "No cities found",
+        noResults: "No cities found. Only places on Central European Time.",
         searchFailed: "Search failed. Try again.",
         connectionError: "Connection issue. Please refresh.",
         sunHours: h => `${h} h of sun`,
@@ -53,7 +53,7 @@ const i18n = {
             autumn: "Die Zeit der Farben und der Ernte."
         },
         searching: "Suche...",
-        noResults: "Keine Städte gefunden",
+        noResults: "Keine Orte gefunden. Nur Orte mit mitteleuropäischer Zeit.",
         searchFailed: "Suche fehlgeschlagen. Nochmal versuchen.",
         connectionError: "Verbindungsproblem. Bitte neu laden.",
         sunHours: h => `${h} Std. Sonne`,
@@ -280,7 +280,7 @@ async function searchCity(q) {
     listNote(list, 'searching', labels.searching);
 
     try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&lang=${state.lang}`, {
             signal: searchController.signal
         });
 

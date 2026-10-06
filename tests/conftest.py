@@ -29,7 +29,11 @@ def _weather_payload(days=7):
 _GEO_PAYLOAD = {
     "results": [
         {"name": "Zurich", "country": "Switzerland", "admin1": "Zurich",
-         "latitude": 47.37, "longitude": 8.54},
+         "latitude": 47.37, "longitude": 8.54, "timezone": "Europe/Zurich"},
+        {"name": "Zurich", "country": "United States", "admin1": "Montana",
+         "latitude": 48.58, "longitude": -109.03, "timezone": "America/Denver"},
+        {"name": "Gießen", "country": "Deutschland", "admin1": "Hessen",
+         "latitude": 50.58, "longitude": 8.68, "timezone": "Europe/Berlin"},
     ]
 }
 
