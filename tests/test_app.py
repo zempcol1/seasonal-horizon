@@ -12,9 +12,16 @@ def test_homepage_renders(client):
     assert response.status_code == 200
     assert b'Seasonal Horizon' in response.data
     assert b'{{' not in response.data, "unrendered Jinja placeholder"
-    # The page takes its colours from the phase of the year.
-    assert re.search(rb'<html lang="en" data-phase="(darkening|returning_light|spring|summer|autumn)">',
-                     response.data)
+    # The page takes its colours, and the home screen its icon, from the phase of the year.
+    phase = re.search(rb'<html lang="en" data-phase="(darkening|returning_light|spring|summer|autumn)">',
+                      response.data)
+    assert phase
+    assert b'icons/' + phase.group(1) + b'.png' in response.data
+
+
+@pytest.mark.parametrize('phase', ['darkening', 'returning_light', 'spring', 'summer', 'autumn'])
+def test_every_phase_has_an_icon(client, phase):
+    assert client.get(f'/static/icons/{phase}.png').status_code == 200
 
 
 def test_health(client):
