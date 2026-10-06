@@ -45,7 +45,7 @@ class Config:
     # Default location (Zurich)
     DEFAULT_LAT: float = 47.37
     DEFAULT_LON: float = 8.54
-    DEFAULT_CITY: str = 'Zurich'
+    DEFAULT_CITY: str = 'Zürich'
 
 
 # Singleton instance

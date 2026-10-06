@@ -545,3 +545,19 @@ class TestNeverClaimsUnbackedFacts:
         assert format_span(22) == "22m"
         assert format_signed_span(22) == "+22 min"
         assert format_signed_span(-73) == "-1h 13m"
+
+
+class TestGeocoding:
+
+    @pytest.mark.parametrize('tz,expected', [
+        ('Europe/Berlin', True),
+        ('Europe/Madrid', True),
+        ('Europe/London', False),    # an hour behind
+        ('Europe/Helsinki', False),  # an hour ahead
+        ('Africa/Algiers', False),   # same in winter, but no summer time
+        (None, False),
+        ('Not/AZone', False),
+    ])
+    def test_keeps_only_places_on_our_clock(self, tz, expected):
+        from services.geocoding import on_our_clock
+        assert on_our_clock(tz) is expected

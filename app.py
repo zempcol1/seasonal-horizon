@@ -15,6 +15,12 @@ log_event('startup', f'debug={config.DEBUG}')
 LANGUAGES = ('en', 'de')
 
 
+def _lang():
+    """The requested language, English if it is not one we have."""
+    lang = request.args.get('lang', 'en')
+    return lang if lang in LANGUAGES else 'en'
+
+
 @app.route('/')
 def index():
     # Defaults come from config so the client does not hardcode its own.
@@ -32,7 +38,7 @@ def index():
 @rate_limit(config.RATE_LIMIT_SEARCH)
 def search_city():
     try:
-        return jsonify(search_cities(request.args.get('q', '')))
+        return jsonify(search_cities(request.args.get('q', ''), _lang()))
     except Exception as e:
         log_event('error', f'search:{str(e)[:50]}')
         return jsonify([])
@@ -44,9 +50,7 @@ def api_uplift():
     try:
         lat = max(-90, min(90, float(request.args.get('lat', config.DEFAULT_LAT))))
         lon = max(-180, min(180, float(request.args.get('lon', config.DEFAULT_LON))))
-        lang = request.args.get('lang', 'en')
-        if lang not in LANGUAGES:
-            lang = 'en'
+        lang = _lang()
         # 0 is today's message; the "another" button counts up from there.
         variant = max(0, min(999, request.args.get('v', 0, type=int)))
 
