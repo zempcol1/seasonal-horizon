@@ -12,7 +12,8 @@
 
     /* The season's sky - set per phase below; the returning light is the default. */
     --top: #22325a;
-    --bg: linear-gradient(165deg, #22325a 0%, #4f66a3 50%, #e7a27a 100%);
+    --mid: #4f66a3;
+    --bottom: #e7a27a;
     --accent: #b85c32;
     --icon: "🌅";
 }
@@ -20,31 +21,36 @@
 /* One sky per phase of the year, set by the server on <html>. */
 html[data-phase="darkening"] {
     --top: #1d2440;
-    --bg: linear-gradient(165deg, #1d2440 0%, #3b3561 55%, #7a5470 100%);
+    --mid: #3b3561;
+    --bottom: #7a5470;
     --accent: #6b5aa6;
     --icon: "🕯️";
 }
 html[data-phase="returning_light"] {
     --top: #22325a;
-    --bg: linear-gradient(165deg, #22325a 0%, #4f66a3 50%, #e7a27a 100%);
+    --mid: #4f66a3;
+    --bottom: #e7a27a;
     --accent: #b85c32;
     --icon: "🌅";
 }
 html[data-phase="spring"] {
     --top: #2f7d74;
-    --bg: linear-gradient(165deg, #2f7d74 0%, #69a96f 55%, #e4cf7a 100%);
+    --mid: #69a96f;
+    --bottom: #e4cf7a;
     --accent: #2f7d5c;
     --icon: "🌱";
 }
 html[data-phase="summer"] {
     --top: #2a74b8;
-    --bg: linear-gradient(165deg, #2a74b8 0%, #5aa6dc 55%, #f2c25e 100%);
+    --mid: #5aa6dc;
+    --bottom: #f2c25e;
     --accent: #2a74b8;
     --icon: "☀️";
 }
 html[data-phase="autumn"] {
     --top: #5a2f22;
-    --bg: linear-gradient(165deg, #5a2f22 0%, #a4552a 55%, #dc9a44 100%);
+    --mid: #a4552a;
+    --bottom: #dc9a44;
     --accent: #a4552a;
     --icon: "🍂";
 }
@@ -53,9 +59,10 @@ html[data-phase="autumn"] {
 
 html {
     min-height: 100%;
-    min-height: -webkit-fill-available;
-    background: var(--top);
-    background: var(--bg);
+    /* The plain colour fills what the gradient does not reach - the strip
+       behind the iPhone home bar, a bounce past the end - so it is never white. */
+    background: linear-gradient(165deg, var(--top), var(--mid) 55%, var(--bottom)) no-repeat var(--bottom);
+    overscroll-behavior: none;
 }
 
 body {
@@ -63,7 +70,7 @@ body {
     background: transparent;
     color: var(--text);
     min-height: 100vh;
-    min-height: -webkit-fill-available;
+    min-height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -124,9 +131,12 @@ h1 {
     align-items: center;
     justify-content: center;
 }
-.icon-btn:hover {
-    background: rgba(255,255,255,0.3);
-    transform: rotate(45deg);
+/* Only where there is a real hover - on a phone it would stick after the tap. */
+@media (hover: hover) {
+    .icon-btn:hover {
+        background: rgba(255,255,255,0.3);
+        transform: rotate(45deg);
+    }
 }
 
 /* ===== CARD ===== */
@@ -354,14 +364,18 @@ h1 {
     backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
-    align-items: center;
+    /* Held at the top: the phone keyboard opens below the search field
+       instead of shoving the box about, and results grow downwards. */
+    align-items: flex-start;
     z-index: 100;
-    padding: 1rem;
+    padding: max(1rem, env(safe-area-inset-top), 8vh) 1rem 1rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .overlay-box {
     background: white;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 16px;
     width: 100%;
     max-width: 400px;
@@ -401,29 +415,33 @@ h1 {
     margin-bottom: 1.5rem;
 }
 
-.settings-section h3 {
-    font-size: 0.85rem;
-    color: var(--text-light);
-    margin-bottom: 0.75rem;
-    font-weight: 500;
-}
-
-.overlay-box label {
+.settings-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
     font-size: 0.75rem;
     color: var(--muted);
-    display: block;
-    margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 500;
 }
 
-.overlay-box input,
-.overlay-box select {
+.current-loc {
+    color: var(--accent);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.overlay-box input {
     width: 100%;
     padding: 0.85rem 1rem;
     border: 2px solid var(--border);
     border-radius: 10px;
+    /* 16px or more, or the iPhone zooms in on focus. */
     font-size: 1rem;
     font-family: inherit;
     color: var(--text);
@@ -431,20 +449,9 @@ h1 {
     transition: border-color 0.2s;
 }
 
-.overlay-box input:focus,
-.overlay-box select:focus {
+.overlay-box input:focus {
     outline: none;
     border-color: var(--accent);
-}
-
-.overlay-box select {
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    padding-right: 2.5rem;
 }
 
 .results-list {
@@ -478,61 +485,38 @@ h1 {
     font-style: italic;
 }
 
-.current-location {
-    margin-top: 1rem;
-    padding: 0.75rem;
+/* Language: two buttons side by side, the chosen one filled. */
+.segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
     background: var(--soft);
-    border-radius: 8px;
-    color: var(--text-light);
-    font-size: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
 }
 
-/* ===== VERSION & CHANGELOG ===== */
-.version-section {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-    text-align: center;
-}
-
-.version-label {
-    background: none;
+.segmented button {
+    padding: 0.6rem;
     border: none;
+    border-radius: 7px;
+    background: none;
+    color: var(--text-light);
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.segmented button[aria-pressed="true"] {
+    background: white;
+    color: var(--accent);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.version {
+    text-align: center;
     font-size: 0.75rem;
     color: var(--muted);
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-
-.version-label:hover {
-    background: var(--border);
-    color: var(--text);
-}
-
-.changelog {
-    margin-top: 0.75rem;
-    text-align: left;
-    background: var(--soft);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-}
-
-.changelog ul { list-style: none; }
-
-.changelog li {
-    font-size: 0.8rem;
-    color: var(--text-light);
-    padding: 0.35rem 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.changelog li:last-child { border-bottom: none; }
-
-.changelog li strong {
-    color: var(--text);
-    font-weight: 600;
 }
 
 /* ===== UTILITY ===== */

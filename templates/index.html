@@ -7,8 +7,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2c3e66">
     <title>Seasonal Horizon</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.png') }}">
+    {# iOS takes the home screen icon once, when the page is added to it. #}
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/' ~ phase ~ '.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/' ~ phase ~ '.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -120,27 +121,23 @@
             </div>
 
             <div class="settings-section">
-                <h3 id="lang-title" data-i18n="language">Language</h3>
-                <select id="lang-select" onchange="changeLanguage(this.value)" aria-labelledby="lang-title">
-                    <option value="en">English</option>
-                    <option value="de">Deutsch</option>
-                </select>
+                <div class="settings-label">
+                    <label for="city-input" data-i18n="location">Location</label>
+                    <span id="current-loc" class="current-loc"></span>
+                </div>
+                <input type="text" id="city-input" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+                <ul id="city-results" class="results-list"></ul>
             </div>
 
             <div class="settings-section">
-                <h3 data-i18n="location">Location</h3>
-                <label for="city-input" data-i18n="searchCity">Search for a city</label>
-                <input type="text" id="city-input" autocomplete="off">
-                <ul id="city-results" class="results-list"></ul>
-                <div class="current-location" id="current-loc"></div>
-            </div>
-
-            <div class="version-section">
-                <button class="version-label" onclick="toggleChangelog()">{{ version }}</button>
-                <div id="changelog" class="changelog hidden">
-                    <ul id="changelog-list"></ul>
+                <div class="settings-label" id="lang-title" data-i18n="language">Language</div>
+                <div class="segmented" role="group" aria-labelledby="lang-title">
+                    <button data-lang="en" onclick="changeLanguage('en')">English</button>
+                    <button data-lang="de" onclick="changeLanguage('de')">Deutsch</button>
                 </div>
             </div>
+
+            <p class="version">{{ version }}</p>
         </div>
     </div>
 

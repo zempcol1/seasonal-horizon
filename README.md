@@ -25,6 +25,7 @@ Runs on PythonAnywhere, free accounts included. Settings are optional environmen
 
 ## Changelog
 
+- **v0.7** - Made for the iPhone home screen: seasonal icon, no white bar, settings that stay put
 - **v0.6** - Rebuilt around what is good about today: light calculated, weather from sunshine hours, nature by region and weather, seasonal look
 - **v0.5** - Winter leads with the returning light
 - **v0.4** - English and German, rate limiting

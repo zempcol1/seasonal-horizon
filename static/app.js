@@ -14,7 +14,6 @@ const i18n = {
         language: "Language",
         location: "Location",
         searchCity: "Search for a city",
-        cityPlaceholder: "e.g. Zurich, Munich, Vienna...",
         loading: "Reading the sky...",
         // One line under the card for each phase of the year.
         footer: {
@@ -24,22 +23,12 @@ const i18n = {
             summer: "The long days are here. Enjoy them.",
             autumn: "The season of colour and harvest."
         },
-        current: "Current",
         searching: "Searching...",
         noResults: "No cities found",
         searchFailed: "Search failed. Try again.",
         connectionError: "Connection issue. Please refresh.",
         sunHours: h => `${h} h of sun`,
-        sky: { grey: "Cloudy", rain: "Rain", snow: "Snow", fog: "Fog" },
-        changelog: [
-            { version: "v0.6", text: "Rebuilt around what is good about today, tuned for Central Europe: light calculated, weather read from sunshine hours, nature by region and weather, Zurich customs, and one message a day with a button for another" },
-            { version: "v0.5", text: "Winter now leads with the returning light: spring signs, sun tips, and only facts we actually measured" },
-            { version: "v0.4.1", text: "Weather-aware nature observations, better mobile layout" },
-            { version: "v0.4", text: "Multi-language support (English/German)" },
-            { version: "v0.3", text: "Smart forecast narratives with 7-day weather analysis" },
-            { version: "v0.2", text: "Location selection and improved text generation" },
-            { version: "v0.1", text: "Initial release" }
-        ]
+        sky: { grey: "Cloudy", rain: "Rain", snow: "Snow", fog: "Fog" }
     },
     de: {
         locale: "de-CH",
@@ -55,7 +44,6 @@ const i18n = {
         language: "Sprache",
         location: "Standort",
         searchCity: "Stadt suchen",
-        cityPlaceholder: "z.B. Zürich, München, Wien...",
         loading: "Blick in den Himmel...",
         footer: {
             darkening: "Das Jahr ruht, und die Wende kommt.",
@@ -64,22 +52,12 @@ const i18n = {
             summer: "Die langen Tage sind da. Geniess sie.",
             autumn: "Die Zeit der Farben und der Ernte."
         },
-        current: "Aktuell",
         searching: "Suche...",
         noResults: "Keine Städte gefunden",
         searchFailed: "Suche fehlgeschlagen. Nochmal versuchen.",
         connectionError: "Verbindungsproblem. Bitte neu laden.",
         sunHours: h => `${h} Std. Sonne`,
-        sky: { grey: "Bewölkt", rain: "Regen", snow: "Schnee", fog: "Nebel" },
-        changelog: [
-            { version: "v0.6", text: "Neu aufgebaut um das, was heute gut ist, abgestimmt auf Mitteleuropa: Licht berechnet, Wetter nach Sonnenstunden, Natur nach Region und Wetter, Zürcher Bräuche, und eine Botschaft pro Tag mit Knopf für eine andere" },
-            { version: "v0.5", text: "Im Winter steht das zurückkehrende Licht im Vordergrund: Frühlingsboten, Sonnentipps, und nur noch belegte Angaben" },
-            { version: "v0.4.1", text: "Wetterabhängige Naturbeobachtungen, optimiertes Layout" },
-            { version: "v0.4", text: "Mehrsprachigkeit (Englisch/Deutsch)" },
-            { version: "v0.3", text: "Intelligente Wetternarrative mit 7-Tage-Analyse" },
-            { version: "v0.2", text: "Standortauswahl und verbesserte Textgenerierung" },
-            { version: "v0.1", text: "Erste Version" }
-        ]
+        sky: { grey: "Bewölkt", rain: "Regen", snow: "Schnee", fog: "Nebel" }
     }
 };
 
@@ -122,7 +100,6 @@ function init() {
     if (top) document.querySelector('meta[name="theme-color"]').content = top;
 
     $('location-label').textContent = state.city;
-    $('lang-select').value = state.lang;
     document.documentElement.lang = state.lang;
     applyLabels();
     fetchData();
@@ -143,16 +120,9 @@ function applyLabels() {
         { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
     $('footer-text').textContent = labels.footer[phase] || labels.footer.returning_light;
     $('loader-text').textContent = labels.loading;
-    $('city-input').placeholder = labels.cityPlaceholder;
-
-    const changelogList = $('changelog-list');
-    changelogList.innerHTML = '';
-    labels.changelog.forEach(item => {
-        const li = document.createElement('li');
-        const version = document.createElement('strong');
-        version.textContent = item.version;
-        li.append(version, ` – ${item.text}`);
-        changelogList.appendChild(li);
+    $('city-input').placeholder = labels.searchCity;
+    document.querySelectorAll('[data-lang]').forEach(btn => {
+        btn.setAttribute('aria-pressed', btn.dataset.lang === state.lang);
     });
 }
 
@@ -249,18 +219,12 @@ function showDelta(id, value) {
 
 // ===== SETTINGS =====
 function openSettings() {
-    const labels = labelsFor();
     $('overlay').classList.remove('hidden');
     $('city-input').value = '';
     $('city-results').innerHTML = '';
-
-    const current = $('current-loc');
-    const name = document.createElement('strong');
-    name.textContent = state.city;
-    current.replaceChildren(`${labels.current}: `, name);
-
-    $('lang-select').value = state.lang;
-    $('city-input').focus();
+    $('current-loc').textContent = state.city;
+    // Not on phones: the keyboard would open just to change the language.
+    if (matchMedia('(pointer: fine)').matches) $('city-input').focus();
 }
 
 function closeSettings() {
@@ -269,6 +233,8 @@ function closeSettings() {
         searchController = null;
     }
     clearTimeout(searchTimer);
+    // Let the iPhone keyboard close before its field disappears.
+    $('city-input').blur();
     $('overlay').classList.add('hidden');
 }
 
@@ -279,10 +245,6 @@ function handleOverlayClick(e) {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !$('overlay').classList.contains('hidden')) closeSettings();
 });
-
-function toggleChangelog() {
-    $('changelog').classList.toggle('hidden');
-}
 
 // ===== CITY SEARCH =====
 $('city-input').addEventListener('input', function() {
