@@ -44,27 +44,39 @@ PHASES = {
     "darkening": {
         "en": [
             "This is the quiet end of the year. Candles, warm kitchens, early evenings - it has its own kind of comfort.",
-            "November light is low and golden when it comes. It makes even ordinary streets look painted.",
+            "The light at this time of year is low and golden. It makes even ordinary streets look painted.",
             "The year is slowing down, and it is fine to slow down with it.",
             "Dark evenings are made for the things summer never leaves room for: long dinners, books, a proper conversation.",
-            "Bare trees let more of the low sun through than you would expect. The light is scarce now, so it shows.",
+            "Bare trees let the low sun through. Rooms and paths that lay in shade all summer get light now.",
             "The shortest days are not far off, and the turn comes with them.",
             "Lit windows on a dark street are one of the best things about this time of year.",
             "Soup season, blanket season, early-to-bed season. Not every season has to be about doing more.",
             "The low sun throws long shadows even at noon. Everything looks sculpted in it.",
-            "This stretch of the year is short on light and long on evenings. Both can be used.",
+            "The sun stands low enough now to shine right to the back of a room. In summer it never gets that far.",
+            "This is the time of year for the oven: baked apples, roast chestnuts, anything that warms the kitchen.",
+            "Early dusk makes a short walk feel like an outing. The air is cold, and the lights are on by the time you turn back.",
+            "Tea tastes better at this time of year. So does anything eaten by lamplight.",
+            "The trees have put everything away for the winter. Resting is part of how they grow.",
+            "There is nothing to catch up on outside right now. The season is asking for less.",
+            "A candle on the table at five in the afternoon makes sense again. In June it never did.",
         ],
         "de": [
             "Das ist das stille Ende des Jahres. Kerzen, warme Küchen, frühe Abende - das hat seinen eigenen Trost.",
-            "Das Novemberlicht steht tief und golden, wenn es kommt. Selbst gewöhnliche Strassen sehen dann aus wie gemalt.",
+            "Das Licht steht um diese Jahreszeit tief und golden. Selbst gewöhnliche Strassen sehen darin aus wie gemalt.",
             "Das Jahr wird langsamer, und es ist in Ordnung, mit ihm langsamer zu werden.",
             "Dunkle Abende sind gemacht für das, wofür der Sommer nie Platz lässt: lange Essen, Bücher, ein richtiges Gespräch.",
-            "Kahle Bäume lassen mehr von der tiefen Sonne durch, als man denkt. Das Licht ist knapp, darum fällt es auf.",
+            "Kahle Bäume lassen die tiefe Sonne durch. Zimmer und Wege, die den ganzen Sommer im Schatten lagen, bekommen jetzt Licht.",
             "Die kürzesten Tage sind nicht mehr weit, und mit ihnen kommt die Wende.",
             "Erleuchtete Fenster in einer dunklen Strasse gehören zum Schönsten an dieser Jahreszeit.",
             "Suppenzeit, Deckenzeit, Früh-ins-Bett-Zeit. Nicht jede Jahreszeit muss davon handeln, mehr zu tun.",
             "Die tiefe Sonne wirft selbst mittags lange Schatten. Alles sieht darin aus wie modelliert.",
-            "Dieser Teil des Jahres ist knapp an Licht und reich an Abenden. Beides lässt sich nutzen.",
+            "Die Sonne steht jetzt tief genug, um bis hinten ins Zimmer zu scheinen. Im Sommer kommt sie nie so weit.",
+            "Jetzt ist die Zeit für den Ofen: Bratäpfel, heisse Marroni, alles, was die Küche wärmt.",
+            "Die frühe Dämmerung macht aus einem kurzen Spaziergang einen Ausflug. Die Luft ist kalt, und wenn du umkehrst, brennen schon die Lichter.",
+            "Tee schmeckt um diese Jahreszeit besser. Alles, was man bei Lampenlicht isst, auch.",
+            "Die Bäume haben für den Winter alles weggeräumt. Ruhen gehört dazu, wie sie wachsen.",
+            "Draussen gibt es gerade nichts nachzuholen. Die Jahreszeit verlangt weniger.",
+            "Eine Kerze auf dem Tisch um fünf Uhr nachmittags ergibt wieder Sinn. Im Juni tat sie das nie.",
         ],
     },
     "returning_light": {
@@ -265,6 +277,22 @@ SIGNALS = {
             "Noch {days_to_equinox} {days} bis zur Tagundnachtgleiche. Dann beginnt die helle Jahreshälfte.",
             "In {days_to_equinox} {days_dat} überquert die Sonne den Äquator, und der Frühling beginnt auch im Kalender.",
             "Die Tagundnachtgleiche ist {days_to_equinox} {days} entfernt. Die Tage wachsen jetzt fast so schnell wie nie im Jahr.",
+        ],
+    },
+
+    # {minutes_left} {minutes}
+    "near_shortest": {
+        "en": [
+            "The days are now within {minutes_left} {minutes} of their shortest. From here the year stands almost still, and then it turns.",
+            "Almost at the turning point: today is only {minutes_left} {minutes} longer than the shortest day will be.",
+            "The light has nearly stopped changing: today's daylight and the shortest day's differ by just {minutes_left} {minutes}.",
+            "The year is slowing to a standstill before it turns. All that separates today from the turning point is {minutes_left} {minutes} of daylight.",
+        ],
+        "de": [
+            "Die Tage sind jetzt bis auf {minutes_left} {minutes} bei ihrem kürzesten Stand. Ab hier steht das Jahr fast still, und dann wendet es.",
+            "Fast am Wendepunkt: Heute ist nur noch {minutes_left} {minutes} länger als der kürzeste Tag.",
+            "Das Licht verändert sich kaum noch: Das Tageslicht von heute und das des kürzesten Tages unterscheiden sich nur um {minutes_left} {minutes}.",
+            "Das Jahr kommt vor der Wende fast zum Stillstand. Vom Wendepunkt trennen heute nur noch {minutes_left} {minutes} Tageslicht.",
         ],
     },
 
@@ -470,12 +498,20 @@ SIGNALS = {
             "Sunset is not the end of the day: there is usable light until around {dusk}.",
             "After sunset at {sunset}, the blue hour lasts until about {dusk}. Worth a walk.",
             "Daylight officially ends at {sunset}. In practice you can walk without a lamp until about {dusk}.",
+            "Sunset at {sunset}, light without a lamp until about {dusk}. The evening starts gently.",
+            "The time between {sunset} and {dusk} is the blue hour. Lit windows look their best in it.",
+            "There is light enough for the way home until about {dusk}, well after the sun has set at {sunset}.",
+            "Dusk lingers until around {dusk} today. The sky often keeps its colour longest once the sun is gone.",
         ],
         "de": [
             "Die Sonne geht um {sunset} unter, aber hell genug für draussen bleibt es bis etwa {dusk}.",
             "Mit dem Sonnenuntergang ist der Tag nicht vorbei: Brauchbares Licht gibt es bis gegen {dusk}.",
             "Nach dem Sonnenuntergang um {sunset} dauert die blaue Stunde bis etwa {dusk}. Ein Spaziergang lohnt sich.",
             "Offiziell endet das Tageslicht um {sunset}. Tatsächlich kommst du bis etwa {dusk} ohne Lampe aus.",
+            "Sonnenuntergang um {sunset}, Licht ohne Lampe bis etwa {dusk}. Der Abend fängt sanft an.",
+            "Die Zeit zwischen {sunset} und {dusk} ist die blaue Stunde. Erleuchtete Fenster sehen darin am schönsten aus.",
+            "Für den Heimweg reicht das Licht bis etwa {dusk}, lange nachdem die Sonne um {sunset} untergegangen ist.",
+            "Die Dämmerung hält heute bis gegen {dusk}. Der Himmel behält seine Farbe oft am längsten, wenn die Sonne schon weg ist.",
         ],
     },
 
@@ -582,6 +618,19 @@ SIGNALS = {
             "Neuschnee, etwa {snow_cm} cm. Das Grau hat heute einen weissen Boden, und alles ist heller dadurch.",
         ],
     },
+    # (none) - the first snow in over a month, in autumn or the darkening
+    "snow.first": {
+        "en": [
+            "The first snow of the season. However often it has happened before, people still stop at the window for it.",
+            "Snow for the first time this season. Everything outside gets quieter with it.",
+            "First snow. The year has a few days everyone notices, and this is one of them.",
+        ],
+        "de": [
+            "Der erste Schnee der Saison. So oft es das schon gab - die Leute bleiben dafür immer noch am Fenster stehen.",
+            "Schnee, zum ersten Mal in dieser Saison. Draussen wird damit alles leiser.",
+            "Erster Schnee. Das Jahr hat ein paar Tage, die allen auffallen, und das ist einer davon.",
+        ],
+    },
     "snow.alpine": {
         "en": [
             "Snow up here today. Good for the slopes, good for the sledge run, good for the quiet.",
@@ -616,13 +665,13 @@ SIGNALS = {
     },
     "sunny_today.winter": {
         "en": [
-            "Winter sun today, about {sun_hours} {hours} of it. Low, warm on the face, and rarer than it should be.",
+            "Winter sun today, about {sun_hours} {hours} of it. Low, warm on the face, and golden all day long.",
             "A clear winter day: around {sun_hours} {hours} of sunshine. These are the days that carry you through.",
             "Sun in the cold season - roughly {sun_hours} {hours}. The light is low and long, and everything glows in it.",
             "About {sun_hours} {hours} of sun today. In this part of the year, that is a gift.",
         ],
         "de": [
-            "Wintersonne heute, rund {sun_hours} {hours}. Tief, warm im Gesicht, und seltener, als sie sein sollte.",
+            "Wintersonne heute, rund {sun_hours} {hours}. Tief, warm im Gesicht, und den ganzen Tag golden.",
             "Ein klarer Wintertag: etwa {sun_hours} {hours} Sonnenschein. Solche Tage tragen einen durch.",
             "Sonne in der kalten Jahreszeit - ungefähr {sun_hours} {hours}. Das Licht ist tief und lang, und alles leuchtet darin.",
             "Rund {sun_hours} {hours} Sonne heute. In diesem Teil des Jahres ist das ein Geschenk.",
@@ -726,6 +775,66 @@ SIGNALS = {
             "Ein frostiger Start mit {temp_low}, danach Sonne. Knirschendes Gras, klare Luft, lange Schatten.",
             "Frost und Sonnenschein: {temp_low} in der Nacht, tagsüber blauer Himmel. So sieht die Kälte am schönsten aus.",
             "Bis {temp_low} letzte Nacht, und jetzt die Sonne. Atemwolken, helle Luft, weisse Dächer.",
+        ],
+    },
+
+    # {temp_low}
+    "frost": {
+        "en": [
+            "Frost this morning, down to {temp_low}. Roofs, cars and grass stay white until the day warms up.",
+            "{temp_low} overnight. The puddles have a skin of ice, and the air smells clean.",
+            "A frosty night at {temp_low}. It is the kind of cold that makes coming back inside a pleasure.",
+            "Down to {temp_low} last night. Hoarfrost outlines every blade of grass and every fence wire.",
+        ],
+        "de": [
+            "Frost am Morgen, bis {temp_low}. Dächer, Autos und Gras bleiben weiss, bis der Tag wärmer wird.",
+            "{temp_low} in der Nacht. Die Pfützen tragen eine Eishaut, und die Luft riecht sauber.",
+            "Eine Frostnacht mit {temp_low}. Die Sorte Kälte, die das Heimkommen zum Vergnügen macht.",
+            "Bis {temp_low} letzte Nacht. Der Reif zeichnet jeden Grashalm und jeden Zaundraht nach.",
+        ],
+    },
+    "frost.first": {
+        "en": [
+            "The first frost of the season: {temp_low} overnight. White grass and white roofs make the morning brighter.",
+            "{temp_low} last night - the first frost of the season. It is what sweetens the sloes and the Brussels sprouts.",
+            "First frost, {temp_low} at the coldest. Time for the good gloves.",
+        ],
+        "de": [
+            "Der erste Frost der Saison: {temp_low} in der Nacht. Weisses Gras und weisse Dächer machen den Morgen heller.",
+            "{temp_low} letzte Nacht - der erste Frost der Saison. Er macht die Schlehen und den Rosenkohl süss.",
+            "Erster Frost, {temp_low} am kältesten Punkt. Zeit für die guten Handschuhe.",
+        ],
+    },
+
+    # {temp_high}
+    "mild_day": {
+        "en": [
+            "Up to {temp_high} today. A day to leave the jacket open and stay out a little longer.",
+            "{temp_high} at this time of year: mild enough for a coffee outside, with a coat on.",
+            "A mild day, up to {temp_high}. Good for a long walk with no hurry to get back.",
+            "{temp_high} today. A day like this, so late in the year, is a small bonus.",
+        ],
+        "de": [
+            "Bis {temp_high} heute. Ein Tag für die offene Jacke und ein bisschen länger draussen.",
+            "{temp_high} um diese Jahreszeit: mild genug für einen Kaffee draussen, mit Mantel.",
+            "Ein milder Tag, bis {temp_high}. Gut für einen langen Spaziergang, ohne Eile heimzukommen.",
+            "{temp_high} heute. So ein Tag, so spät im Jahr, ist eine kleine Zugabe.",
+        ],
+    },
+
+    # (none)
+    "rainy_day": {
+        "en": [
+            "Rain today. A good day for the things that happen indoors: soup on the stove, a book, a long phone call.",
+            "A rainy day, and nothing outside needs you. Days like this are what warm rooms are for.",
+            "A wet day. Rain on the window is one of the better sounds to read by.",
+            "Plenty of rain today. The cinema, the sauna and the sofa were all made for this.",
+        ],
+        "de": [
+            "Heute regnet es. Ein guter Tag für alles, was drinnen passiert: Suppe auf dem Herd, ein Buch, ein langes Telefonat.",
+            "Ein Regentag, und draussen braucht dich nichts. Für solche Tage gibt es warme Zimmer.",
+            "Ein nasser Tag. Regen am Fenster gehört zu den besseren Geräuschen zum Lesen.",
+            "Viel Regen heute. Kino, Sauna und Sofa sind dafür gemacht.",
         ],
     },
 
@@ -1252,7 +1361,11 @@ NATURE = {
         11: {
             "any": {
                 "en": [
-                    "November sun is precious. Bare trees let it through.",
+                    "Rosehips and spindle berries hang bright in the bare hedges.",
+                    "Starlings gather in large flocks before dusk and wheel over the fields.",
+                    "Hazel catkins are already on the bushes, closed and waiting for February.",
+                    "Next year's buds already sit on the beeches and chestnuts. The trees were ready before the leaves fell.",
+                    "Hedgehogs have gone into their nests of leaves. A pile left in the garden is a winter home.",
                     "Fieldfares and redwings arrive from the north - winter visitors.",
                     "Mistle thrushes sing even in the rain.",
                     "Fallen leaves reveal hidden paths and the shapes of the land.",
@@ -1260,7 +1373,11 @@ NATURE = {
                     "Ducks from the north arrive on the lakes - tufted ducks, pochards, goldeneyes.",
                 ],
                 "de": [
-                    "Novembersonne ist kostbar. Kahle Bäume lassen sie durch.",
+                    "Hagebutten und Pfaffenhütchen leuchten in den kahlen Hecken.",
+                    "Stare sammeln sich vor der Dämmerung in grossen Schwärmen und kreisen über den Feldern.",
+                    "Die Haselkätzchen hängen schon an den Sträuchern, geschlossen, und warten auf den Februar.",
+                    "Die Knospen fürs nächste Jahr sitzen schon an Buchen und Kastanien. Die Bäume waren bereit, bevor das Laub fiel.",
+                    "Die Igel haben sich in ihre Laubnester zurückgezogen. Ein Laubhaufen im Garten ist ein Winterquartier.",
                     "Wacholderdrosseln und Rotdrosseln kommen aus dem Norden - Wintergäste.",
                     "Misteldrosseln singen sogar im Regen.",
                     "Das gefallene Laub gibt versteckte Pfade und die Formen der Landschaft frei.",
@@ -1294,6 +1411,10 @@ NATURE = {
                     "Holly and ivy berries feed the blackbirds and thrushes through the cold.",
                     "Under the leaf litter, next spring's bulbs are already rooted and waiting.",
                     "The bare trees show their shapes now - every species has its own silhouette.",
+                    "Hazel catkins hang ready on the bare bushes. In a mild winter the first open in January.",
+                    "Tits, nuthatches and finches travel together in mixed flocks now. A feeder brings them close.",
+                    "Tawny owls call on December nights. They are pairing up for the year ahead.",
+                    "The buds on the trees are next spring already, packed small and sealed against the cold.",
                 ],
                 "de": [
                     "Rotkehlchen singen den ganzen Winter. Sie sichern ihr Revier für den Frühling.",
@@ -1302,6 +1423,10 @@ NATURE = {
                     "Ilex- und Efeubeeren ernähren Amseln und Drosseln durch die Kälte.",
                     "Unter dem Laub warten die Zwiebeln des nächsten Frühlings schon bewurzelt.",
                     "Die kahlen Bäume zeigen jetzt ihre Formen - jede Art hat ihre eigene Silhouette.",
+                    "Die Haselkätzchen hängen bereit an den kahlen Sträuchern. In einem milden Winter öffnen sich die ersten im Januar.",
+                    "Meisen, Kleiber und Finken ziehen jetzt in gemischten Trupps umher. Ein Futterhaus holt sie nah heran.",
+                    "Waldkäuze rufen in den Dezembernächten. Sie finden sich jetzt zu Paaren fürs nächste Jahr.",
+                    "Die Knospen an den Bäumen sind schon der nächste Frühling, klein verpackt und gegen die Kälte versiegelt.",
                 ],
             },
             "sunny": {

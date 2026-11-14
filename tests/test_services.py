@@ -41,6 +41,13 @@ class TestSolarService:
         assert december["delta_daily_sec"] < 0 < december["sunset_shift_sec"]
         assert get_daylight_delta(47.37, 8.54, date(2026, 1, 10))["sunrise_shift_sec"] < 0
 
+    def test_december_is_within_minutes_of_the_shortest_day(self):
+        from services.solar_service import get_daylight_delta
+
+        early = get_daylight_delta(47.37, 8.54, date(2026, 12, 3))["above_shortest_sec"]
+        assert 14 * 60 < early < 16 * 60
+        assert get_daylight_delta(47.37, 8.54, date(2026, 1, 20))["above_shortest_sec"] is None
+
     def test_autumn_twin_is_as_long_as_today(self):
         """12 February has about the light of late October."""
         from services.solar_service import get_daylight_delta
@@ -119,6 +126,18 @@ class TestWeatherService:
         assert analysis["grey_days_before"] == 17
         assert analysis["warmest_since"] == "2026-01-02"
         assert _analyze_forecast([_day("", True, temp=20)], history)["warmest_since"] == ""
+
+    def test_first_frost_needs_a_frost_free_month_behind_it(self):
+        from services.weather_service import _analyze_forecast
+
+        mild = [{**_day(f"d{i}", False), "temp_min": 4} for i in range(30)]
+        frosty = [{**_day("", False), "temp_min": -1, "code": 73}]
+        analysis = _analyze_forecast(frosty, mild)
+        assert analysis["first_frost"] and analysis["first_snow"]
+
+        mild[10]["temp_min"] = -2
+        assert not _analyze_forecast(frosty, mild)["first_frost"]
+        assert not _analyze_forecast(frosty, mild[:5])["first_snow"]    # too little history
 
     def test_low_cloud_lid(self):
         """Hochnebel: low cloud thick, nothing above - measured from the layers."""
@@ -224,6 +243,9 @@ PROBES = {
     "_mornings_turned": lambda: _ctx(),
     "_hour_mark": lambda: _ctx(solar={**SOLAR, "hour_mark": {"hours": 9, "days": 3}}),
     "_snow": lambda: _ctx(today={"code": 73, "snow_cm": 4}),
+    "_frost": lambda: _ctx(date(2026, 11, 14), today={"temp_min": -2}),
+    "_mild_day": lambda: _ctx(date(2026, 11, 14), today={"temp_max": 14}),
+    "_rainy_day": lambda: _ctx(date(2026, 11, 14), today={"precip": 8, "temp_max": 7}),
     "_custom": lambda: _ctx(date(2026, 12, 6), customs=True),
     "_hochnebel": lambda: _ctx(today={"low_cloud_lid": True, "is_sunny": False}),
     "_sunny_today": lambda: _ctx(today={"is_sunny": True, "sun_hours": 6.2}),
@@ -237,6 +259,7 @@ PROBES = {
     "_frost_clear": lambda: _ctx(today={"is_sunny": True, "sun_hours": 6, "temp_min": -4}),
     "_toads": lambda: _ctx(date(2026, 3, 5), today={"temp_min": 7, "precip": 4}),
     "_equinox_countdown": lambda: _ctx(date(2026, 3, 14)),
+    "_near_shortest": lambda: _ctx(date(2026, 12, 3), {**SOLAR, "above_shortest_sec": 900}),
     "_sunrise_milestone": lambda: _ctx(),
     "_sunny_streak": lambda: _ctx(analysis={"sunny_streak": 4}),
     "_bees": lambda: _ctx(date(2026, 3, 1), today={"temp_max": 13, "sun_hours": 5}),
@@ -297,10 +320,16 @@ class TestUpliftEngine:
         assert _solstice_countdown(_ctx(date(2025, 12, 7))).data["days_to_solstice"] == 14
 
     def test_wording_follows_strength_and_place(self):
-        from services.uplift_engine import _daily_gain, _snow, _sunny_today
+        from services.uplift_engine import _daily_gain, _frost, _snow, _sunny_today
 
         assert _daily_gain(_ctx(solar={**SOLAR, "delta_daily_sec": 200})).pool == "daily_gain.fast"
         assert _snow(_ctx(today={"code": 73}, elevation=1500)).pool == "snow.alpine"
+        november = date(2026, 11, 14)
+        assert _snow(_ctx(november, today={"code": 73},
+                          analysis={"first_snow": True})).pool == "snow.first"
+        assert _frost(_ctx(november, today={"temp_min": -1},
+                           analysis={"first_frost": True})).pool == "frost.first"
+        assert _frost(_ctx(today={"temp_min": -1})) is None      # January: nothing new
         assert _sunny_today(_ctx(date(2026, 5, 1), today={"is_sunny": True, "sun_hours": 9})) \
             .pool == "sunny_today"
 

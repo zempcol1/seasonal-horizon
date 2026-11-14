@@ -14,7 +14,8 @@ suggestion for using the sun.
   pick a variant ("daily_gain.fast", "snow.alpine") so the wording follows
   how strong the signal is and where the reader is.
 - Shrinking daylight has no signal. It is true, but it is not what this app
-  is for.
+  is for. Its end has one: close to the solstice the days hardly change any
+  more, and that is good news.
 - Nothing is stated that was not measured. Templates declare the facts they
   need through their placeholders, and only templates whose every
   placeholder is backed are offered.
@@ -53,6 +54,13 @@ EVENT_WEIGHT = 90
 POLLEN_EVERY_DAYS = 7
 POLLEN_BY_MONTH = {2: "alder", 3: "alder", 4: "birch", 5: "grass", 6: "grass"}
 POLLEN_NOTICEABLE = 20   # grains per m³
+
+# Within this many minutes of the shortest day, the year "stands almost still".
+NEAR_SHORTEST_MIN = 20
+
+# What counts as a mild day, and as a wet one, in the weeks before the solstice.
+MILD_DAY_C = 12
+RAINY_DAY_MM = 5
 
 # Customs are a local special for the Zurich and Aargau area. A box, not the
 # real borders: it takes in a strip of the neighbours, which is close enough.
@@ -318,6 +326,20 @@ def _solstice_countdown(ctx):
     })
 
 
+def _near_shortest(ctx):
+    """
+    From about the start of December the day is within minutes of its
+    shortest: the losing is as good as over, weeks before the solstice.
+    """
+    left = ctx.solar.get("above_shortest_sec")
+    if ctx.phase != "darkening" or left is None or not 60 <= left <= NEAR_SHORTEST_MIN * 60:
+        return None
+    minutes = int(left // 60)
+    return Signal("near_shortest", 65, {
+        "minutes_left": minutes, **_counted(minutes, "minutes", lang=ctx.lang),
+    })
+
+
 def _equinox_countdown(ctx):
     """The last ten days before day and night are equal."""
     if ctx.phase != "returning_light" or ctx.today.month != 3:
@@ -480,6 +502,8 @@ def _snow(ctx):
     snow_cm = ctx.weather.get("snow_cm") or 0
     if ctx.weather.get("code") not in SNOW_CODES and snow_cm < 1:
         return None
+    if ctx.analysis.get("first_snow") and ctx.phase in ("autumn", "darkening"):
+        return Signal("snow", 88, {}, pool="snow.first")
     if ctx.region == "alpine":
         pool = "snow.alpine"
     else:
@@ -544,6 +568,34 @@ def _frost_clear(ctx):
     if not ctx.is_cold or low is None or low > 0 or not ctx.weather.get("is_sunny"):
         return None
     return Signal("frost_clear", 70, {"temp_low": f"{round(low)}°C"})
+
+
+def _frost(ctx):
+    """
+    A night at or below freezing as the year winds down - and the first one
+    of the season, which is news. Later in winter frost is the normal state.
+    """
+    low = ctx.weather.get("temp_min")
+    if ctx.phase not in ("autumn", "darkening") or low is None or low > 0:
+        return None
+    first = ctx.analysis.get("first_frost")
+    return Signal("frost", 80 if first else 55, {"temp_low": f"{round(low)}°C"},
+                  pool="frost.first" if first else "frost")
+
+
+def _mild_day(ctx):
+    """Late in the year, a day mild enough to notice."""
+    high = ctx.weather.get("temp_max")
+    if ctx.phase != "darkening" or high is None or high < MILD_DAY_C:
+        return None
+    return Signal("mild_day", 60, {"temp_high": f"{round(high)}°C"})
+
+
+def _rainy_day(ctx):
+    """A properly wet day in the dark weeks: a reason to stay in, and enjoy it."""
+    if ctx.phase != "darkening" or (ctx.weather.get("precip") or 0) < RAINY_DAY_MM             or _sky(ctx.weather) == "snow":
+        return None
+    return Signal("rainy_day", 50, {})
 
 
 def _warming(ctx):
@@ -692,7 +744,7 @@ SIGNALS = (
     _solstice_countdown,    # 80
     _mornings_turned,       # 80 / 50
     _hour_mark,             # 80 / 60
-    _snow,                  # 80 / 50
+    _snow,                  # 88 first / 80 / 50
     _hochnebel,             # 78
     _sunny_today,           # 75 / 50
     _sunset_milestone,      # 75 / 55
@@ -702,19 +754,23 @@ SIGNALS = (
     _pollen,                # 70, on rare days only
     _fog,                   # 70
     _frost_clear,           # 70
+    _frost,                 # 80 first / 55
     _toads,                 # 66
     _equinox_countdown,     # 65
+    _near_shortest,         # 65
     _lichtmess,             # 65, low-key on purpose
     _sunrise_milestone,     # 65 / 45
     _sunny_streak,          # 65
     _bees,                  # 62
     _daily_gain,            # 60 / 45
+    _mild_day,              # 60
     _autumn_twin,           # 60
     _uv_strength,           # 60
     _some_sun,              # 55
     _sunny_week,            # 55
     _weekend_sunny,         # 55
     _noon_sun,              # 50
+    _rainy_day,             # 50
     _dusk_light,            # 45
     _peak_light,            # 45
     _season,                # 30, always matches

@@ -25,6 +25,7 @@ Texts live in `services/uplift_content.py`, the rules that choose them in `servi
 
 ## Changelog
 
+- **v0.6.3** - More to say before the solstice: first frost and snow, mild and rainy days, the days standing almost still in December
 - **v0.6.2** - City search limited to Central European Time; no losses shown in the days after the solstice
 - **v0.6.1** - Made for the iPhone home screen: seasonal icon, no white bar, settings that stay put
 - **v0.6** - Rebuilt around what is good about today: light calculated, weather from sunshine hours, nature by region and weather, seasonal look
