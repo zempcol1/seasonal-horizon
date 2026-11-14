@@ -335,8 +335,10 @@ def _near_shortest(ctx):
     if ctx.phase != "darkening" or left is None or not 60 <= left <= NEAR_SHORTEST_MIN * 60:
         return None
     minutes = int(left // 60)
+    days = (date(ctx.today.year, 12, 21) - ctx.today).days
     return Signal("near_shortest", 65, {
         "minutes_left": minutes, **_counted(minutes, "minutes", lang=ctx.lang),
+        "days_to_solstice": days, **_counted(days, "days", lang=ctx.lang),
     })
 
 
