@@ -280,19 +280,23 @@ SIGNALS = {
         ],
     },
 
-    # {minutes_left} {minutes}
+    # {minutes_left} {minutes} {days_to_solstice} {days}
     "near_shortest": {
         "en": [
             "The days are now within {minutes_left} {minutes} of their shortest. From here the year stands almost still, and then it turns.",
             "Almost at the turning point: today is only {minutes_left} {minutes} longer than the shortest day will be.",
             "The light has nearly stopped changing: today's daylight and the shortest day's differ by just {minutes_left} {minutes}.",
             "The year is slowing to a standstill before it turns. All that separates today from the turning point is {minutes_left} {minutes} of daylight.",
+            "Only {minutes_left} {minutes} of daylight and {days_to_solstice} {days} to go until the year turns. Nearly all of it is done.",
+            "{days_to_solstice} {days} until it turns, and the days have only {minutes_left} {minutes} left to give. Almost there.",
         ],
         "de": [
             "Die Tage sind jetzt bis auf {minutes_left} {minutes} bei ihrem kürzesten Stand. Ab hier steht das Jahr fast still, und dann wendet es.",
             "Fast am Wendepunkt: Heute ist nur noch {minutes_left} {minutes} länger als der kürzeste Tag.",
             "Das Licht verändert sich kaum noch: Das Tageslicht von heute und das des kürzesten Tages unterscheiden sich nur um {minutes_left} {minutes}.",
             "Das Jahr kommt vor der Wende fast zum Stillstand. Vom Wendepunkt trennen heute nur noch {minutes_left} {minutes} Tageslicht.",
+            "Nur noch {minutes_left} {minutes} Tageslicht und {days_to_solstice} {days} bis zur Wende. Fast alles ist geschafft.",
+            "Noch {days_to_solstice} {days}, bis das Jahr wendet, und die Tage geben nur noch {minutes_left} {minutes} her. Fast geschafft.",
         ],
     },
 
