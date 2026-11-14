@@ -157,6 +157,8 @@ def _analyze_forecast(forecast, history=()):
         "warmest_since": None,
         "week_sun_hours": None,
         "past_week_sun_hours": None,
+        "first_frost": False,
+        "first_snow": False,
     }
 
     if forecast[0]["is_sunny"]:
@@ -187,7 +189,20 @@ def _analyze_forecast(forecast, history=()):
     if history:
         analysis["grey_days_before"] = _grey_days_before(history)
         analysis["warmest_since"] = _warmest_since(forecast[0], history)
+    if len(history) >= PAST_DAYS - 2:
+        # Nothing of the kind for a month: in autumn that makes today's the first.
+        analysis["first_frost"] = _is_frosty(forecast[0]) and not any(map(_is_frosty, history))
+        analysis["first_snow"] = _is_snowy(forecast[0]) and not any(map(_is_snowy, history))
     return analysis
+
+
+def _is_frosty(day):
+    low = day.get("temp_min")
+    return low is not None and low <= 0
+
+
+def _is_snowy(day):
+    return day.get("code") in SNOW_CODES or (day.get("snow_cm") or 0) >= 1
 
 
 def _grey_days_before(history):

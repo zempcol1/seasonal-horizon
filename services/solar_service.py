@@ -147,8 +147,15 @@ def get_daylight_delta(lat, lon, today):
     except ValueError:
         return {}
 
+    # Before the December solstice: how far the day still is from its
+    # shortest. Close to zero, the year is standing almost still.
+    above_shortest = None
+    if solstice.month == 6:
+        above_shortest = today_sec - _day_length(observer, date(today.year, 12, 21))
+
     return {
         "day_len_sec": today_sec,
+        "above_shortest_sec": above_shortest,
         "delta_daily_sec": today_sec - yesterday_sec,
         "delta_weekly_sec": today_sec - last_week_sec,
         "delta_solstice_sec": today_sec - solstice_sec,
