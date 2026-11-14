@@ -8,8 +8,10 @@ Tuned for Central and Western Europe (Switzerland, Germany, Austria, the Benelux
 
 - One short message a day: a true, good thing about today, plus a line from nature. The same all day for one place; "Another thought" asks for a different one.
 - Light is calculated (minutes gained, later sunsets, the sun higher at noon); weather comes from Open-Meteo's sunshine hours; nature lines follow month, region (lowland or alpine) and weather.
+- The year has five phases, each with its own tone and look: the darkening (November to the solstice), the returning light (solstice to the March equinox, the fullest one), spring, summer and autumn.
 - Nothing is stated that was not measured, and shrinking days are never the topic.
-- English and German.
+- English and German (Swiss spelling). Any city on Central European Time can be picked.
+- No accounts; place and language stay in the browser.
 
 ## Run locally
 
@@ -19,8 +21,11 @@ python app.py        # http://localhost:8080
 pytest
 ```
 
+Texts live in `services/uplift_content.py`, the rules that choose them in `services/uplift_engine.py`, settings in `config.py`.
+
 ## Changelog
 
+- **v0.6.2** - City search limited to Central European Time; no losses shown in the days after the solstice
 - **v0.6.1** - Made for the iPhone home screen: seasonal icon, no white bar, settings that stay put
 - **v0.6** - Rebuilt around what is good about today: light calculated, weather from sunshine hours, nature by region and weather, seasonal look
 - **v0.5** - Winter leads with the returning light

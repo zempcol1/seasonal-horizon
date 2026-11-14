@@ -2,7 +2,7 @@
 
 import os
 import sys
-from datetime import date, timedelta
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -12,7 +12,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def _weather_payload(days=7):
-    start = date.today()
+    from config import today
+    start = today()     # the app's clock, not the machine's
     return {
         "elevation": 422,
         "daily": {

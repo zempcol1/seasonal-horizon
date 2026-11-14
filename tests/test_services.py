@@ -509,6 +509,8 @@ class TestNeverClaimsUnbackedFacts:
 
     @pytest.mark.parametrize('day,gains', [
         (date(2026, 1, 20), True), (date(2026, 10, 5), False), (date(2026, 5, 1), False),
+        # Just after the solstice the day is still shorter than a week before.
+        (date(2026, 12, 22), False), (date(2026, 12, 27), True),
     ])
     def test_gains_only_shown_while_they_are_gains(self, day, gains):
         from services.solar_service import get_daylight_delta

@@ -821,7 +821,8 @@ def _format_facts(ctx):
     The numbers shown beside the text. Unmeasured values read "--".
 
     The changes against yesterday, last week and the solstice are only shown
-    while they are gains - in the returning light. The rest of the year they
+    while they are gains - in the returning light, once the day is longer
+    than a week ago (from about 25 December). The rest of the year they
     would mostly count losses, which is not what this app is for.
     """
     solar = ctx.solar
@@ -829,13 +830,13 @@ def _format_facts(ctx):
     sun_hours = ctx.weather.get("sun_hours")
 
     def minutes(key):
-        return int(solar[key] // 60)
+        return int(solar[key] / 60)     # towards zero: -5 seconds is not "-1 min"
 
     return {
         "sunrise": _clock(solar.get("sunrise")),
         "sunset": _clock(solar.get("sunset")),
         "day_length": format_duration(solar["day_len_sec"]) if solar else "--",
-        "gains": ctx.phase == "returning_light",
+        "gains": ctx.phase == "returning_light" and solar.get("delta_weekly_sec", -1) >= 0,
         "delta_yesterday": f"{minutes('delta_daily_sec'):+d} min" if solar else "--",
         "delta_week": f"{minutes('delta_weekly_sec'):+d} min" if solar else "--",
         "delta_solstice": format_signed_span(minutes("delta_solstice_sec")) if solar else "--",
