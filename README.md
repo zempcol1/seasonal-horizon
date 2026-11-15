@@ -6,7 +6,7 @@ Tuned for Central and Western Europe (Switzerland, Germany, Austria, the Benelux
 
 ## How it works
 
-- One short message a day: a true, good thing about today, plus a line from nature. The same all day for one place; "Another thought" asks for a different one.
+- One short message a day: a true, good thing about today, plus a line from nature. The same all day for one place; "Another thought" asks for a different one. After dusk it looks ahead to tomorrow.
 - Light is calculated (minutes gained, later sunsets, the sun higher at noon); weather comes from Open-Meteo's sunshine hours; nature lines follow month, region (lowland or alpine) and weather.
 - The year has five phases, each with its own tone and look: the darkening (November to the solstice), the returning light (solstice to the March equinox, the fullest one), spring, summer and autumn.
 - Nothing is stated that was not measured, and shrinking days are never the topic.
@@ -25,6 +25,7 @@ Texts live in `services/uplift_content.py`, the rules that choose them in `servi
 
 ## Changelog
 
+- **v0.6.4** - After dusk the message looks ahead: today's weather steps back, tomorrow's is shown; about 90 more lines for the cold months
 - **v0.6.3** - More to say before the solstice: first frost and snow, mild and rainy days, the days standing almost still in December
 - **v0.6.2** - City search limited to Central European Time; no losses shown in the days after the solstice
 - **v0.6.1** - Made for the iPhone home screen: seasonal icon, no white bar, settings that stay put
