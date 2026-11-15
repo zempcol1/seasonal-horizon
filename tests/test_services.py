@@ -378,6 +378,36 @@ class TestUpliftEngine:
         days = [Picker("47.37:8.54", JANUARY + timedelta(days=d)).pick(pool, "x") for d in range(5)]
         assert sorted(days) == pool
 
+    def test_after_dusk_the_day_is_over(self):
+        """Tonight the message drops today's sun and frost, and looks to tomorrow."""
+        from services.uplift_engine import _format_facts, _signals
+
+        sunny = {"is_sunny": True, "sun_hours": 6, "temp_min": -2, "temp_max": 4}
+        tomorrow = {"is_sunny": True, "sun_hours": 5, "temp_max": 9, "weekday_index": 2}
+
+        def ctx(evening):
+            from services.uplift_engine import _build_context
+            weather = {"today": sunny, "forecast": [sunny, tomorrow], "analysis": {}}
+            return _build_context(SOLAR, weather, JANUARY, "en", evening=evening)
+
+        by_day = {s.key: s for s in _signals(ctx(False))}
+        by_night = {s.key: s for s in _signals(ctx(True))}
+        assert {"sunny_today", "frost_clear", "dusk_light"} <= set(by_day)
+        assert not {"sunny_today", "frost_clear", "dusk_light"} & set(by_night)
+        assert "since_solstice" in by_night                     # the light gained still holds
+        assert "sun_ahead" not in by_day
+        assert by_night["sun_ahead"].pool == "sun_ahead.again"
+
+        assert _format_facts(ctx(False))["temp_max"] == "4°C"
+        from services import uplift_content as content
+        from services.uplift_engine import Picker, _lead, _season
+        quiet = ctx(True)
+        assert _lead(quiet, _season(quiet), Picker("x", JANUARY)) \
+            in content.EVENINGS["returning_light"]["en"]
+
+        night = _format_facts(ctx(True))
+        assert night["tomorrow"] and night["temp_max"] == "9°C"
+
     def test_pollen_stays_rare(self):
         """Hay fever: pollen may only come up on one day in POLLEN_EVERY_DAYS."""
         from services.uplift_engine import POLLEN_EVERY_DAYS, Picker
@@ -506,7 +536,7 @@ class TestNeverClaimsUnbackedFacts:
                     missing = set(_PLACEHOLDER.findall(template)) - data[key]
                     assert not missing, f"{name}/{lang}: {template}"
 
-        for phase in content.PHASES.values():
+        for phase in list(content.PHASES.values()) + list(content.EVENINGS.values()):
             for templates in phase.values():
                 assert not any("{" in t for t in templates), "phase lines take no figures"
 
@@ -514,6 +544,7 @@ class TestNeverClaimsUnbackedFacts:
         from services import uplift_content as content
 
         pools = list(content.SIGNALS.values()) + list(content.PHASES.values()) + \
+            list(content.EVENINGS.values()) + \
             [content.SUN_ENJOYMENT] + \
             [tag for region in content.NATURE.values() for month in region.values()
              for tag in month.values()]

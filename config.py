@@ -40,7 +40,7 @@ class Config:
     LOG_LEVEL: str = os.environ.get('LOG_LEVEL', 'INFO')
     
     # Shown in the settings; the changelog is in the README
-    VERSION: str = 'v0.6.3'
+    VERSION: str = 'v0.6.4'
 
     # Default location (Zurich)
     DEFAULT_LAT: float = 47.37
@@ -52,6 +52,10 @@ class Config:
 config = Config()
 
 
+def now() -> datetime:
+    """The local clock. The server runs on UTC, an hour behind."""
+    return datetime.now(ZoneInfo(TIMEZONE))
+
+
 def today() -> date:
-    """Today on the local clock. The server runs on UTC, an hour behind."""
-    return datetime.now(ZoneInfo(TIMEZONE)).date()
+    return now().date()

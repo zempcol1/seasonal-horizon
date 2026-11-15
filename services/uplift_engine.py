@@ -22,6 +22,8 @@ suggestion for using the sun.
 - The message stays the same all day for one place, and each pool steps
   through its lines day by day, so a line comes back only once the pool is
   used up. `variant` asks for another message.
+- After dusk the day is over. Signals about today's daytime step back, and
+  the weather shown is tomorrow's - see DAYTIME_ONLY.
 """
 
 import random
@@ -29,7 +31,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
-from config import today as local_today
+from config import now as local_now
 from services.solar_service import get_daylight_delta
 from services.weather_service import (FOG_CODES, SNOW_CODES, fetch_daily_weather,
                                       fetch_pollen)
@@ -57,6 +59,16 @@ POLLEN_NOTICEABLE = 20   # grains per m³
 
 # Within this many minutes of the shortest day, the year "stands almost still".
 NEAR_SHORTEST_MIN = 20
+
+# Signals about today's daytime: its sun, its fog, its frosty morning. After
+# dusk they are yesterday's news, so the evening message leaves them out. What
+# stays holds at night as well - the light gained, snow on the ground, the
+# days ahead.
+DAYTIME_ONLY = frozenset([
+    "sunny_today", "some_sun", "first_sun", "sunny_streak", "frost_clear", "frost",
+    "fog", "hochnebel", "warmest_since", "mild_day", "rainy_day", "uv_strength",
+    "dusk_light", "bees", "pollen",
+])
 
 # What counts as a mild day, and as a wet one, in the weeks before the solstice.
 MILD_DAY_C = 12
@@ -255,14 +267,24 @@ class Context:
     analysis: dict      # what stands out in the week ahead and the month behind
     customs: bool = False
     pollen: dict = field(default_factory=dict)
+    evening: bool = False                           # after dusk
+    tomorrow: dict = field(default_factory=dict)    # tomorrow's row of the forecast
 
     @property
     def is_cold(self):
         return self.phase in COLD_PHASES
 
+    @property
+    def outlook(self):
+        """The weather still ahead: today's, or tomorrow's once it is evening."""
+        return self.tomorrow if self.evening and self.tomorrow else self.weather
 
-def _build_context(solar, weather, today, lang, customs=False, pollen=None):
+
+def _build_context(solar, weather, today, lang, customs=False, pollen=None, evening=False):
+    forecast = weather.get("forecast") or []
     return Context(
+        evening=evening,
+        tomorrow=forecast[1] if len(forecast) > 1 else {},
         today=today,
         lang=lang,
         region=_region(weather.get("elevation")),
@@ -477,7 +499,16 @@ def _first_sun(ctx):
 
 
 def _sun_ahead(ctx):
-    """Not much sun today, but a sunny day within the next four."""
+    """
+    Not much sun today, but a sunny day within the next four. In the evening
+    of a sunny day, tomorrow's sun is worth saying too.
+    """
+    if ctx.evening and ctx.weather.get("is_sunny") and ctx.tomorrow.get("is_sunny"):
+        return Signal("sun_ahead", 85 if ctx.is_cold else 60, {
+            "sunny_day": _weekday_name(ctx.tomorrow["weekday_index"], ctx.lang),
+            "when": _when(1, ctx.lang),
+            **_sun_hours_data(ctx.tomorrow["sun_hours"], ctx.lang),
+        }, pool="sun_ahead.again")
     days = ctx.analysis.get("next_sunny_in_days")
     if days is None or days > 4:
         return None
@@ -780,8 +811,10 @@ SIGNALS = (
 
 
 def _signals(ctx):
-    """Every signal that holds today, strongest first."""
+    """Every signal that holds today - or still holds tonight - strongest first."""
     found = [s for s in (signal(ctx) for signal in SIGNALS) if s is not None]
+    if ctx.evening:
+        found = [s for s in found if s.key not in DAYTIME_ONLY]
     return sorted(found, key=lambda s: s.weight, reverse=True)
 
 
@@ -818,8 +851,13 @@ def _conditions(weather):
 
 
 def _lead(ctx, signal, picker):
-    name = f"phase.{ctx.phase}" if signal.key == "season" else (signal.pool or signal.key)
-    pool = content.PHASES[ctx.phase] if signal.key == "season" else content.SIGNALS[name]
+    if signal.key != "season":
+        name = signal.pool or signal.key
+        pool = content.SIGNALS[name]
+    elif ctx.evening and ctx.phase in content.EVENINGS:
+        name, pool = f"evening.{ctx.phase}", content.EVENINGS[ctx.phase]
+    else:
+        name, pool = f"phase.{ctx.phase}", content.PHASES[ctx.phase]
     template = picker.pick(_backed(_localized(pool, ctx.lang), signal.data), name)
     return template.format(**signal.data) if template else None
 
@@ -835,7 +873,7 @@ def _companion(ctx, lead, picker):
         return picker.pick(_localized(content.SUN_ENJOYMENT, ctx.lang), "sun_enjoyment")
 
     month = content.NATURE[ctx.region][ctx.today.month]
-    holds = {"any"} | _conditions(ctx.weather)
+    holds = {"any"} | _conditions(ctx.outlook)
     pool = [line for tag, lines in month.items() if tag in holds
             for line in _localized(lines, ctx.lang)]
     return picker.pick(pool, f"nature.{ctx.region}.{ctx.today.month}")
@@ -850,7 +888,7 @@ def _compose(ctx, picker):
 
 def current_phase():
     """Where the year stands today - the page takes its colours from it."""
-    return _phase(local_today())
+    return _phase(local_now().date())
 
 
 # ===== Facts =====
@@ -884,8 +922,9 @@ def _format_facts(ctx):
     would mostly count losses, which is not what this app is for.
     """
     solar = ctx.solar
-    temp = ctx.weather.get("temp_max")
-    sun_hours = ctx.weather.get("sun_hours")
+    weather = ctx.outlook
+    temp = weather.get("temp_max")
+    sun_hours = weather.get("sun_hours")
 
     def minutes(key):
         return int(solar[key] / 60)     # towards zero: -5 seconds is not "-1 min"
@@ -898,7 +937,8 @@ def _format_facts(ctx):
         "delta_yesterday": f"{minutes('delta_daily_sec'):+d} min" if solar else "--",
         "delta_week": f"{minutes('delta_weekly_sec'):+d} min" if solar else "--",
         "delta_solstice": format_signed_span(minutes("delta_solstice_sec")) if solar else "--",
-        "sky": _sky(ctx.weather),
+        "tomorrow": weather is not ctx.weather,     # the weather shown is tomorrow's
+        "sky": _sky(weather),
         "sun_hours": round(sun_hours) if sun_hours is not None else None,
         "temp_max": f"{temp:.0f}°C" if temp is not None else "--",
     }
@@ -909,9 +949,11 @@ def generate_uplift_data(lat, lon, lang="en", variant=0):
     if lang not in ("en", "de"):
         lang = "en"
 
-    today = local_today()
+    now = local_now()
+    today = now.date()
     picker = Picker(f"{lat:.2f}:{lon:.2f}", today, variant)
     solar = get_daylight_delta(lat, lon, today)
+    evening = bool(solar) and now >= solar["dusk"]
     weather = fetch_daily_weather(lat, lon, days=7) or {}
 
     # Only asked for on the rare days pollen may be mentioned at all.
@@ -919,8 +961,8 @@ def generate_uplift_data(lat, lon, lang="en", variant=0):
     if today.month in POLLEN_BY_MONTH and picker.every(POLLEN_EVERY_DAYS, "pollen"):
         pollen = fetch_pollen(lat, lon)
 
-    ctx = _build_context(solar, weather, today, lang,
-                         customs=_in_customs_area(lat, lon), pollen=pollen)
+    ctx = _build_context(solar, weather, today, lang, customs=_in_customs_area(lat, lon),
+                         pollen=pollen, evening=evening)
     lead, companion = _compose(ctx, picker)
     return {
         "text": f"{lead} {companion}",

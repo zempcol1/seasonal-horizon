@@ -28,6 +28,7 @@ const i18n = {
         searchFailed: "Search failed. Try again.",
         connectionError: "Connection issue. Please refresh.",
         sunHours: h => `${h} h of sun`,
+        tomorrow: "Tomorrow",
         sky: { grey: "Cloudy", rain: "Rain", snow: "Snow", fog: "Fog" }
     },
     de: {
@@ -57,6 +58,7 @@ const i18n = {
         searchFailed: "Suche fehlgeschlagen. Nochmal versuchen.",
         connectionError: "Verbindungsproblem. Bitte neu laden.",
         sunHours: h => `${h} Std. Sonne`,
+        tomorrow: "Morgen",
         sky: { grey: "Bewölkt", rain: "Regen", snow: "Schnee", fog: "Nebel" }
     }
 };
@@ -81,6 +83,7 @@ const state = {
 };
 
 let dataController = null;
+let fetchedAt = 0;
 let searchController = null;
 let searchTimer = null;
 let searchRequestId = 0;
@@ -164,6 +167,7 @@ async function fetchData({ gentle = false } = {}) {
         const data = await res.json();
 
         if (data.success) {
+            fetchedAt = Date.now();
             showMessage(data.lead, data.companion);
             showFacts(data.facts, labels);
         } else {
@@ -201,7 +205,9 @@ function showFacts(facts, labels) {
 
     const { sky, sun_hours: sun } = facts;
     $('weather-icon').textContent = SKY_ICONS[sky] || '';
-    $('f-weather').textContent = sun >= 1 ? labels.sunHours(sun) : (labels.sky[sky] || '--');
+    // After dusk the server sends tomorrow's weather; say so.
+    const weather = sun >= 1 ? labels.sunHours(sun) : (labels.sky[sky] || '--');
+    $('f-weather').textContent = facts.tomorrow ? `${labels.tomorrow}: ${weather}` : weather;
     $('f-temp').textContent = facts.temp_max;
 }
 
@@ -328,6 +334,17 @@ function selectCity(name, lat, lon, country) {
     closeSettings();
     fetchData();
 }
+
+// A page left open - on the home screen it stays open for days - asks again
+// when it comes back into view, so it never shows this morning's message at
+// night or yesterday's today.
+const STALE_AFTER_MS = 30 * 60 * 1000;
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden || Date.now() - fetchedAt < STALE_AFTER_MS) return;
+    state.variant = 0;
+    applyLabels();
+    fetchData();
+});
 
 // ===== START =====
 init();

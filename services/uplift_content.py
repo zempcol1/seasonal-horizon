@@ -3,8 +3,9 @@ Text library for Seasonal Horizon, in English and German.
 
 A message is a lead plus a companion line. The lead comes from SIGNALS (one
 pool per signal in uplift_engine, some with variants like "snow.alpine") or,
-when nothing stands out, from PHASES. The companion comes from NATURE or,
-on a sunny winter day, SUN_ENJOYMENT.
+when nothing stands out, from PHASES - after dusk in the cold phases from
+EVENINGS. The companion comes from NATURE or, on a sunny winter day,
+SUN_ENJOYMENT.
 
 How these are written:
 
@@ -342,11 +343,15 @@ SIGNALS = {
             "The day passes {hours_mark} hours {when}. Another mark on the way back to summer.",
             "{hours_mark} hours of daylight is close: {days_until} more {days}.",
             "Watch for it {when}: the first day with more than {hours_mark} hours of light.",
+            "The {hours_mark}-hour day is coming {when}. Each of these marks is a little further from winter.",
+            "More than {hours_mark} hours of daylight, {when}. The light is counting in whole hours now.",
         ],
         "de": [
             "Der Tag knackt {when} die {hours_mark}-Stunden-Marke. Wieder eine Etappe auf dem Weg zum Sommer.",
             "{hours_mark} Stunden Tageslicht sind nah: noch {days_until} {days}.",
             "Achte {when} darauf: der erste Tag mit mehr als {hours_mark} Stunden Licht.",
+            "Der {hours_mark}-Stunden-Tag kommt {when}. Jede dieser Marken liegt ein Stück weiter weg vom Winter.",
+            "Mehr als {hours_mark} Stunden Tageslicht, {when}. Das Licht zählt jetzt in ganzen Stunden.",
         ],
     },
     "hour_mark.today": {
@@ -354,11 +359,15 @@ SIGNALS = {
             "Today is the first day with more than {hours_mark} hours of daylight.",
             "{hours_mark} hours of light, passed today - for the first time this year.",
             "A small milestone: the day is over {hours_mark} hours long again.",
+            "The day has crossed {hours_mark} hours. It was last this long in autumn, heading the other way.",
+            "From today there are more than {hours_mark} hours between sunrise and sunset. One more whole hour won back.",
         ],
         "de": [
             "Heute ist der erste Tag mit mehr als {hours_mark} Stunden Tageslicht.",
             "{hours_mark} Stunden Licht, heute geknackt - zum ersten Mal in diesem Jahr.",
             "Ein kleiner Meilenstein: Der Tag ist wieder über {hours_mark} Stunden lang.",
+            "Der Tag hat die {hours_mark} Stunden überschritten. So lang war er zuletzt im Herbst, in der anderen Richtung.",
+            "Ab heute liegen mehr als {hours_mark} Stunden zwischen Sonnenaufgang und Sonnenuntergang. Wieder eine ganze Stunde zurückgewonnen.",
         ],
     },
 
@@ -546,12 +555,16 @@ SIGNALS = {
             "The sun is back. The first proper sunshine in {grey_days} {days} - around {sun_hours} {hours} of it.",
             "{grey_days} {days} without much sun, and now this: roughly {sun_hours} {hours} today.",
             "Finally. After {grey_days} {days} of grey, today brings about {sun_hours} {hours} of sunshine.",
+            "The grey has broken: about {sun_hours} {hours} of sun today, after {grey_days} {days} without.",
+            "Today the sun shows it was there all along: around {sun_hours} {hours}, the first real sunshine in {grey_days} {days}.",
         ],
         "de": [
             "Nach {grey_days} grauen {days_dat} ein sonniger: rund {sun_hours} {hours} Sonne heute.",
             "Die Sonne ist zurück. Der erste richtige Sonnentag seit {grey_days} {days_dat} - etwa {sun_hours} {hours}.",
             "{grey_days} {days} ohne viel Sonne, und jetzt das: heute ungefähr {sun_hours} {hours}.",
             "Endlich. Nach {grey_days} {days_dat} Grau bringt heute rund {sun_hours} {hours} Sonnenschein.",
+            "Das Grau ist aufgerissen: etwa {sun_hours} {hours} Sonne heute, nach {grey_days} {days_dat} ohne.",
+            "Heute zeigt die Sonne, dass sie die ganze Zeit da war: rund {sun_hours} {hours}, der erste richtige Sonnenschein seit {grey_days} {days_dat}.",
         ],
     },
 
@@ -575,6 +588,20 @@ SIGNALS = {
         ],
     },
 
+    # the evening of a sunny day, with another one to follow
+    "sun_ahead.again": {
+        "en": [
+            "Tomorrow brings sun again: about {sun_hours} {hours} of it.",
+            "More of the same tomorrow - around {sun_hours} {hours} of sunshine on {sunny_day}.",
+            "{sunny_day} looks bright again, with about {sun_hours} {hours} of sun. Worth planning something outside.",
+        ],
+        "de": [
+            "Morgen gibt es wieder Sonne: etwa {sun_hours} {hours}.",
+            "Morgen geht es so weiter - rund {sun_hours} {hours} Sonnenschein am {sunny_day}.",
+            "Der {sunny_day} sieht wieder hell aus, mit etwa {sun_hours} {hours} Sonne. Es lohnt sich, etwas draussen zu planen.",
+        ],
+    },
+
     # (none)
     "hochnebel": {
         "en": [
@@ -583,6 +610,8 @@ SIGNALS = {
             "The grey today is a layer, not a heavy sky. Above it the sun is shining - worth a trip up if you can.",
             "A fog-lid day. From a viewpoint above it, the land below looks like a sea of cloud.",
             "The cloud today sits low and flat, and the sky above it is clear. The sun has not gone anywhere.",
+            "Grey below, sun above: today's cloud is a flat lid. The nearest hill or mountain railway may be enough to get over it.",
+            "Hochnebel today. It keeps the nights milder underneath, and the sun is waiting just above.",
         ],
         "de": [
             "Heute liegt ein Deckel aus tiefen Wolken über dem Land, darüber klarer Himmel. Ein paar hundert Meter höher scheint die Sonne.",
@@ -590,6 +619,8 @@ SIGNALS = {
             "Das Grau heute ist eine Schicht, kein schwerer Himmel. Darüber scheint die Sonne - wer kann, fährt hinauf.",
             "Ein Hochnebeltag. Von einem Aussichtspunkt darüber sieht das Land darunter aus wie ein Nebelmeer.",
             "Die Wolken liegen heute tief und flach, der Himmel darüber ist klar. Die Sonne ist nirgends hingegangen.",
+            "Unten grau, oben Sonne: Die Wolke ist heute ein flacher Deckel. Der nächste Hügel oder die nächste Bergbahn reicht vielleicht, um darüber zu kommen.",
+            "Hochnebel heute. Darunter bleiben die Nächte milder, und gleich darüber wartet die Sonne.",
         ],
     },
 
@@ -615,11 +646,15 @@ SIGNALS = {
             "{snow_cm} cm of fresh snow today. The world goes quiet and bright at the same time.",
             "Around {snow_cm} cm of new snow. Tracks to read, a muffled town, and light coming from the ground.",
             "Fresh snow, about {snow_cm} cm. The grey has a white floor today, and everything is lighter for it.",
+            "About {snow_cm} cm of new snow. Enough to change the sound of the whole neighbourhood.",
+            "{snow_cm} cm of snow today. Tonight the streets will be brighter than on any evening without it.",
         ],
         "de": [
             "{snow_cm} cm Neuschnee heute. Die Welt wird gleichzeitig still und hell.",
             "Rund {snow_cm} cm Neuschnee. Spuren zum Lesen, eine gedämpfte Stadt, und Licht, das vom Boden kommt.",
             "Neuschnee, etwa {snow_cm} cm. Das Grau hat heute einen weissen Boden, und alles ist heller dadurch.",
+            "Etwa {snow_cm} cm Neuschnee. Genug, um den Klang des ganzen Quartiers zu verändern.",
+            "{snow_cm} cm Schnee heute. Am Abend sind die Strassen heller als an jedem Abend ohne.",
         ],
     },
     # (none) - the first snow in over a month, in autumn or the darkening
@@ -673,12 +708,18 @@ SIGNALS = {
             "A clear winter day: around {sun_hours} {hours} of sunshine. These are the days that carry you through.",
             "Sun in the cold season - roughly {sun_hours} {hours}. The light is low and long, and everything glows in it.",
             "About {sun_hours} {hours} of sun today. In this part of the year, that is a gift.",
+            "Around {sun_hours} {hours} of sun today. The low sun lights up rooms right to the back wall.",
+            "A bright day: about {sun_hours} {hours} of sunshine. Long shadows, clear air, and colour back in everything.",
+            "Sunshine for about {sun_hours} {hours} today. The sunny side of the street is the warm one.",
         ],
         "de": [
             "Wintersonne heute, rund {sun_hours} {hours}. Tief, warm im Gesicht, und den ganzen Tag golden.",
             "Ein klarer Wintertag: etwa {sun_hours} {hours} Sonnenschein. Solche Tage tragen einen durch.",
             "Sonne in der kalten Jahreszeit - ungefähr {sun_hours} {hours}. Das Licht ist tief und lang, und alles leuchtet darin.",
             "Rund {sun_hours} {hours} Sonne heute. In diesem Teil des Jahres ist das ein Geschenk.",
+            "Rund {sun_hours} {hours} Sonne heute. Die tiefe Sonne leuchtet die Zimmer bis zur Rückwand aus.",
+            "Ein heller Tag: etwa {sun_hours} {hours} Sonnenschein. Lange Schatten, klare Luft, und alles hat wieder Farbe.",
+            "Etwa {sun_hours} {hours} Sonnenschein heute. Die Sonnenseite der Strasse ist die warme.",
         ],
     },
 
@@ -688,11 +729,15 @@ SIGNALS = {
             "Up to {temp_high} today - the warmest day since {since_date}.",
             "{temp_high} at its warmest: no day has been this mild since {since_date}.",
             "The mildest day since {since_date}, reaching about {temp_high}. The air feels different.",
+            "You have to go back to {since_date} for a day as warm as today's {temp_high}.",
+            "{temp_high} today. The last time the thermometer got this far was {since_date}.",
         ],
         "de": [
             "Bis {temp_high} heute - der wärmste Tag seit dem {since_date}.",
             "{temp_high} in der Spitze: So mild war es seit dem {since_date} nicht mehr.",
             "Der mildeste Tag seit dem {since_date}, mit rund {temp_high}. Die Luft fühlt sich anders an.",
+            "Für einen Tag so warm wie heute mit {temp_high} musst du bis zum {since_date} zurückgehen.",
+            "{temp_high} heute. So weit kam das Thermometer zuletzt am {since_date}.",
         ],
     },
     "warmest_since.month": {
@@ -714,11 +759,15 @@ SIGNALS = {
             "UV index {uv} at midday. The sun has real strength again - you can feel it on your skin.",
             "The midday sun reaches UV {uv} today. Winter sun does not usually manage that; this one does.",
             "UV {uv}: the sun is strong enough again to warm a wall, and your face.",
+            "UV index {uv} today. A sun that strong is no longer a winter sun.",
+            "At midday the UV index reaches {uv}. On a sheltered bench the sun warms properly again.",
         ],
         "de": [
             "UV-Index {uv} am Mittag. Die Sonne hat wieder echte Kraft - man spürt sie auf der Haut.",
             "Die Mittagssonne erreicht heute UV {uv}. Das schafft Wintersonne normalerweise nicht; diese schon.",
             "UV {uv}: Die Sonne ist wieder stark genug, um eine Mauer zu wärmen, und dein Gesicht.",
+            "UV-Index {uv} heute. Eine so kräftige Sonne ist keine Wintersonne mehr.",
+            "Am Mittag erreicht der UV-Index {uv}. Auf einer geschützten Bank wärmt die Sonne wieder richtig.",
         ],
     },
 
@@ -728,11 +777,15 @@ SIGNALS = {
             "The week ahead has about {week_hours} hours of sun in the forecast, against {past_week_hours} in the week behind.",
             "A brighter week is coming: around {week_hours} hours of sunshine, where the last one had {past_week_hours}.",
             "{week_hours} hours of sun forecast for the next seven days. The last seven managed {past_week_hours}.",
+            "Around {week_hours} hours of sun in the next seven days, up from {past_week_hours} in the last seven. A week to look forward to.",
+            "The forecast has turned brighter: about {week_hours} hours of sunshine this coming week, compared with {past_week_hours} last week.",
         ],
         "de": [
             "Die kommende Woche hat rund {week_hours} Sonnenstunden in der Vorhersage, gegenüber {past_week_hours} in der letzten.",
             "Eine hellere Woche kommt: etwa {week_hours} Stunden Sonne, wo die letzte {past_week_hours} hatte.",
             "{week_hours} Sonnenstunden sind für die nächsten sieben Tage angesagt. Die letzten sieben schafften {past_week_hours}.",
+            "Rund {week_hours} Sonnenstunden in den nächsten sieben Tagen, nach {past_week_hours} in den letzten sieben. Eine Woche zum Vorfreuen.",
+            "Die Vorhersage ist heller geworden: etwa {week_hours} Stunden Sonnenschein in der kommenden Woche, gegenüber {past_week_hours} in der letzten.",
         ],
     },
 
@@ -743,12 +796,16 @@ SIGNALS = {
             "Everything is soft-edged today. Fog like this often lifts by midday, or sits below clear sky on the hills.",
             "A fog day: quiet, close and calm. If you can get a little higher, there is a fair chance of sun above it.",
             "Fog today: the world shrinks to a few streets, and the light turns soft and silver.",
+            "Fog today. Trees and houses come out of it one at a time, like a drawing being finished.",
+            "A foggy day. Spider webs and bare twigs carry rows of drops - fog shows what is usually invisible.",
         ],
         "de": [
             "Heute Nebel. Darüber - oft nur ein paar hundert Meter höher - scheint meistens die Sonne.",
             "Alles hat heute weiche Kanten. Solcher Nebel löst sich oft bis Mittag auf oder liegt unter klarem Himmel auf den Hügeln.",
             "Ein Nebeltag: still, nah und windstill. Wer etwas höher kommt, hat gute Chancen auf Sonne darüber.",
             "Nebel heute: Die Welt schrumpft auf ein paar Strassen, und das Licht wird weich und silbern.",
+            "Nebel heute. Bäume und Häuser treten einzeln daraus hervor, wie eine Zeichnung, die gerade fertig wird.",
+            "Ein Nebeltag. Spinnweben und kahle Zweige tragen Tropfenreihen - der Nebel zeigt, was sonst unsichtbar ist.",
         ],
     },
     "fog.alpine": {
@@ -918,11 +975,15 @@ SIGNALS = {
             "Up to {temp_high} and sunny: warm enough for the first bees. Watch the crocuses and willow catkins.",
             "{temp_high} in the sun today - the bumblebee queens are out looking for nest sites.",
             "Bee weather: {temp_high} and sunshine. The first ones are working the early flowers.",
+            "{temp_high} and sun: honeybees leave the hive from about ten degrees. Today they are flying.",
+            "Warm enough for wings: at {temp_high} in the sun, the first bees and hoverflies are on the hazel and the snowdrops.",
         ],
         "de": [
             "Bis {temp_high} und sonnig: warm genug für die ersten Bienen. Schau bei Krokussen und Weidenkätzchen.",
             "{temp_high} an der Sonne heute - die Hummelköniginnen sind auf Nistplatzsuche.",
             "Bienenwetter: {temp_high} und Sonnenschein. Die ersten fliegen schon die frühen Blüten an.",
+            "{temp_high} und Sonne: Ab etwa zehn Grad verlassen die Honigbienen den Stock. Heute fliegen sie.",
+            "Warm genug zum Fliegen: Bei {temp_high} in der Sonne sitzen die ersten Bienen und Schwebfliegen auf Hasel und Schneeglöckchen.",
         ],
     },
 
@@ -932,11 +993,15 @@ SIGNALS = {
             "Mild and wet: on evenings like this the toads set off for their ponds. Watch the roads near water.",
             "Above five degrees and raining - toad migration weather. In many places volunteers carry them across the roads.",
             "A mild, damp evening. This is when frogs and toads move to the water where they were born.",
+            "A mild, wet night ahead. The first toads and frogs use nights like this to cross to their spawning ponds.",
+            "Rain and mild air after dark: amphibian weather. Drive slowly near ponds and woods tonight.",
         ],
         "de": [
             "Mild und nass: An solchen Abenden machen sich die Kröten auf den Weg zu ihren Teichen. Achtung auf den Strassen am Wasser.",
             "Über fünf Grad und Regen - Krötenwanderwetter. Vielerorts tragen Freiwillige sie über die Strassen.",
             "Ein milder, feuchter Abend. Jetzt wandern Frösche und Kröten zu dem Gewässer, in dem sie geboren wurden.",
+            "Eine milde, nasse Nacht steht bevor. Die ersten Kröten und Frösche nutzen solche Nächte für den Weg zu ihren Laichgewässern.",
+            "Regen und milde Luft nach Einbruch der Dunkelheit: Amphibienwetter. Fahr heute Abend langsam in der Nähe von Weihern und Wäldern.",
         ],
     },
 
@@ -1057,6 +1122,10 @@ NATURE = {
                     "Robins sing from bare branches, holding their ground through the winter.",
                     "Without leaves, the buzzards on the fence posts are easy to spot.",
                     "Moss and lichen glow green on walls and tree trunks - winter is their season.",
+                    "Witch hazel is flowering in gardens - yellow threads on bare twigs, in the middle of winter.",
+                    "Wrens sing all winter from the hedges - a huge voice for a tiny bird.",
+                    "Foxes are calling at night around now. January is their mating season.",
+                    "Goosanders, tufted ducks and coots winter on the lakes in their thousands.",
                 ],
                 "de": [
                     "In geschützten Ecken von Gärten und Parks stehen die Schneeglöckchen.",
@@ -1065,6 +1134,10 @@ NATURE = {
                     "Rotkehlchen singen von kahlen Ästen und halten ihr Revier durch den Winter.",
                     "Ohne Laub sind die Mäusebussarde auf den Zaunpfählen gut zu sehen.",
                     "Moos und Flechten leuchten grün an Mauern und Stämmen - der Winter ist ihre Saison.",
+                    "In den Gärten blüht die Zaubernuss - gelbe Fäden an kahlen Zweigen, mitten im Winter.",
+                    "Zaunkönige singen den ganzen Winter aus den Hecken - eine riesige Stimme für einen winzigen Vogel.",
+                    "Füchse rufen jetzt in der Nacht. Im Januar ist ihre Paarungszeit.",
+                    "Gänsesäger, Reiherenten und Blässhühner überwintern zu Tausenden auf den Seen.",
                 ],
             },
             "frost": {
@@ -1091,6 +1164,10 @@ NATURE = {
                     "Rooks and jackdaws are pairing up and inspecting last year's nests.",
                     "Woodpeckers are drumming - on bare trunks the sound carries a long way.",
                     "Buds are visibly swelling; the horse chestnut buds are already fat and sticky.",
+                    "Song thrushes are back in voice - each phrase sung two or three times over.",
+                    "The first skylarks return to the fields and sing high over the bare ground.",
+                    "Crocus tips and the first leaves of the daffodils are pushing through.",
+                    "Pussy willow buds are splitting, showing the silver fur underneath.",
                 ],
                 "de": [
                     "Hasel und Erle blühen, der erste Pollen liegt schon in der Luft.",
@@ -1099,6 +1176,10 @@ NATURE = {
                     "Saatkrähen und Dohlen finden sich paarweise und begutachten die alten Nester.",
                     "Die Spechte trommeln - an kahlen Stämmen trägt der Klang weit.",
                     "Die Knospen schwellen sichtbar; die der Rosskastanie sind schon dick und klebrig.",
+                    "Die Singdrosseln singen wieder - jede Strophe zwei- oder dreimal wiederholt.",
+                    "Die ersten Feldlerchen kehren auf die Felder zurück und singen hoch über dem kahlen Boden.",
+                    "Krokusspitzen und die ersten Blätter der Osterglocken stossen durch.",
+                    "Die Knospen der Salweide platzen auf und zeigen das silberne Fell darunter.",
                 ],
             },
             "sunny": {
@@ -1127,6 +1208,11 @@ NATURE = {
                     "Migrating birds are moving back through - cranes on the high routes.",
                     "Wild garlic is coming up in the damp woods. You smell it before you see it.",
                     "Blackbirds sing before sunrise now - the dawn chorus is filling out.",
+                    "Chiffchaffs are back, calling their own name from the treetops.",
+                    "Coltsfoot flowers on bare banks and verges - yellow before a single leaf.",
+                    "Wood anemones are starting to open on the forest floor, before the trees take the light.",
+                    "The willows are in full catkin, and loud with bees on a mild day.",
+                    "White storks are returning to their nests.",
                 ],
                 "de": [
                     "In den Parks sind die Krokusse offen und die ersten Bienen sitzen darauf.",
@@ -1135,6 +1221,11 @@ NATURE = {
                     "Der Vogelzug geht wieder nach Norden - Kraniche auf den hohen Routen.",
                     "In feuchten Wäldern kommt der Bärlauch. Man riecht ihn, bevor man ihn sieht.",
                     "Die Amseln singen jetzt vor Sonnenaufgang - das Morgenkonzert wird voller.",
+                    "Die Zilpzalpe sind zurück und rufen ihren eigenen Namen aus den Baumkronen.",
+                    "Huflattich blüht an kahlen Böschungen und Wegrändern - gelb, bevor ein einziges Blatt da ist.",
+                    "Die Buschwindröschen beginnen am Waldboden zu blühen, bevor die Bäume das Licht nehmen.",
+                    "Die Weiden stehen voll in Kätzchen und summen an milden Tagen vor Bienen.",
+                    "Die Weissstörche kehren zu ihren Horsten zurück.",
                 ],
             },
             "sunny": {
@@ -1456,12 +1547,18 @@ NATURE = {
                     "Chamois and ibex come lower in deep winter; look along the sunny slopes.",
                     "On mild days snow fleas - tiny springtails - dot the snow near the trees.",
                     "Ravens and alpine choughs work the ski areas for scraps.",
+                    "Bearded vultures are already sitting on eggs - they breed in the middle of winter.",
+                    "Ptarmigan dig into the powder snow to sleep. It is warmer in there than outside.",
+                    "Crossbills breed even now, as long as the spruces carry cones.",
                 ],
                 "de": [
                     "Der Schnee hält das Licht - an klaren Tagen ist die Helligkeit hier oben kaum zu schlagen.",
                     "Gämsen und Steinböcke kommen im tiefen Winter weiter herunter; schau an den Sonnenhängen.",
                     "An milden Tagen sprenkeln Schneeflöhe - winzige Springschwänze - den Schnee bei den Bäumen.",
                     "Kolkraben und Alpendohlen suchen die Skigebiete nach Resten ab.",
+                    "Die Bartgeier sitzen schon auf ihren Eiern - sie brüten mitten im Winter.",
+                    "Schneehühner graben sich zum Schlafen in den Pulverschnee. Darin ist es wärmer als draussen.",
+                    "Fichtenkreuzschnäbel brüten sogar jetzt, solange die Fichten Zapfen tragen.",
                 ],
             },
             "sunny": {
@@ -1484,12 +1581,18 @@ NATURE = {
                     "Hazel and alder are flowering down in the valleys; on warm days the pollen drifts up.",
                     "Great tits and nuthatches start calling again on bright mornings.",
                     "The sun clears the ridges a little earlier every week.",
+                    "The sun is reaching valley villages again that lay in shadow for weeks.",
+                    "Golden eagles are displaying over their territories - long dives and climbs on clear days.",
+                    "Icicles grow on the south side of the roofs: thawing by day, freezing by night.",
                 ],
                 "de": [
                     "An Südhängen zieht sich der Schnee rund um die Felsen langsam zurück.",
                     "Unten in den Tälern blühen Hasel und Erle; an warmen Tagen treibt der Pollen herauf.",
                     "Kohlmeisen und Kleiber rufen an hellen Morgen wieder.",
                     "Die Sonne kommt jede Woche ein wenig früher über die Grate.",
+                    "Die Sonne erreicht wieder Taldörfer, die wochenlang im Schatten lagen.",
+                    "Steinadler zeigen ihre Balzflüge über dem Revier - lange Sturzflüge und Aufstiege an klaren Tagen.",
+                    "An der Südseite der Dächer wachsen Eiszapfen: tagsüber taut es, nachts friert es.",
                 ],
             },
             "sunny": {
@@ -1508,12 +1611,18 @@ NATURE = {
                     "Black grouse start displaying at dawn in the clearings near the treeline.",
                     "The first crocuses push up at the edge of the melting snow.",
                     "Meltwater is starting to run - the streams get louder week by week.",
+                    "Marmots are still asleep, but not for long - the first come out through the snow in April.",
+                    "Alpine choughs follow the skiers up; down in the valley the first coltsfoot is out.",
+                    "Larch buds are swelling; in a few weeks the bare trees turn the lightest green on the mountain.",
                 ],
                 "de": [
                     "Die Schneedecke setzt sich; unterhalb von etwa tausend Metern verliert sie schnell an Boden.",
                     "Die Birkhähne beginnen in der Morgendämmerung zu balzen, auf Lichtungen nahe der Waldgrenze.",
                     "Am Rand des schmelzenden Schnees stossen die ersten Krokusse durch.",
                     "Das Schmelzwasser beginnt zu fliessen - die Bäche werden Woche für Woche lauter.",
+                    "Die Murmeltiere schlafen noch, aber nicht mehr lange - die ersten kommen im April durch den Schnee.",
+                    "Die Alpendohlen folgen den Skifahrern nach oben; unten im Tal blüht der erste Huflattich.",
+                    "Die Lärchenknospen schwellen; in wenigen Wochen tragen die kahlen Bäume das hellste Grün am Berg.",
                 ],
             },
             "sunny": {
@@ -1688,12 +1797,18 @@ NATURE = {
                     "The larches drop their needles, carpeting the paths in gold.",
                     "Mountain villages go quiet between the seasons - the in-between has its own peace.",
                     "Ptarmigan and mountain hares are turning white for the winter.",
+                    "Chamois are in their rut now; the bucks chase each other across the steep slopes.",
+                    "The first snow on the peaks sharpens every ridge line.",
+                    "Nutcrackers are living off the stone pine seeds they hid in autumn.",
                 ],
                 "de": [
                     "Der Novembernebel bleibt oft unten in den Tälern; hier oben ist die Sonne leichter zu finden.",
                     "Die Lärchen werfen ihre Nadeln ab und legen einen goldenen Teppich auf die Wege.",
                     "Die Bergdörfer werden still zwischen den Saisons - das Dazwischen hat seine eigene Ruhe.",
                     "Schneehühner und Schneehasen werden weiss für den Winter.",
+                    "Die Gämsen sind in der Brunft; die Böcke jagen einander über die steilen Hänge.",
+                    "Der erste Schnee auf den Gipfeln zeichnet jede Gratlinie scharf.",
+                    "Die Tannenhäher leben von den Arvennüssen, die sie im Herbst versteckt haben.",
                 ],
             },
             "snow": {
@@ -1712,12 +1827,18 @@ NATURE = {
                     "Golden eagles are easier to spot over the snowy slopes now.",
                     "Ibex gather on the sunny cliffs, where the snow slides off first.",
                     "Long nights, bright snow - the light up here is thrown back twice.",
+                    "Ibex are in their rut - December is when the big males join the herds.",
+                    "Above the valley fog the days are often clear, and the view reaches further than at other times of year.",
+                    "Marmots are deep asleep under the snow, a whole family in one burrow.",
                 ],
                 "de": [
                     "Der Winter richtet sich hier oben ein: klare Nächte, kurze helle Tage, und Schnee, der kommt oder schon liegt.",
                     "Steinadler sind über den verschneiten Hängen jetzt leichter zu entdecken.",
                     "Steinböcke sammeln sich an den sonnigen Felsen, wo der Schnee zuerst abrutscht.",
                     "Lange Nächte, heller Schnee - das Licht wird hier oben doppelt zurückgeworfen.",
+                    "Die Steinböcke sind in der Brunft - im Dezember stossen die grossen Böcke zu den Herden.",
+                    "Über dem Talnebel sind die Tage oft klar, und die Sicht reicht weiter als sonst im Jahr.",
+                    "Die Murmeltiere schlafen tief unter dem Schnee, die ganze Familie in einem Bau.",
                 ],
             },
             "snow": {
@@ -1764,4 +1885,81 @@ SUN_ENJOYMENT = {
         "Halte das Gesicht eine Minute in die Sonne und schliess die Augen. Wintersonne ist wärmer, als sie aussieht.",
         "Nimm heute den längeren Heimweg, den mit Blick nach Süden.",
     ],
+}
+
+
+# ===== Evenings =====
+#
+# The fallback lead after dusk in the cold phases, in place of PHASES: the
+# day is over, so these are about the evening itself. No figures.
+
+EVENINGS = {
+    "darkening": {
+        "en": [
+            "The day is done, and the evening is long. That is the part of this season worth having.",
+            "Dark early means a long evening. Room for a film, a game, a slow dinner.",
+            "Lamps on, curtains drawn, something warm in a cup. This season is good at evenings.",
+            "This is the time of year when staying in needs no excuse.",
+            "A long evening is a good place for the book that has been waiting since summer.",
+            "Evenings like this are for cooking something that takes its time. The oven warms the kitchen along the way.",
+            "The nights are long enough now to sleep properly. It is the one season that hands out extra rest.",
+            "Lit windows up and down the street: for once everyone is home at the same time.",
+            "An evening walk at this time of year has the streets almost to itself, and every window is a small stage.",
+            "Candles look right again. So do blankets, thick socks and second helpings.",
+            "Nothing more is expected of today. The evening is yours.",
+            "Long evenings are when people get round to each other: a call, a visit, a table that stays full a while.",
+            "The best seat of the season is the one nearest the lamp.",
+            "Warm light indoors, cold air on the other side of the glass. The contrast is half the comfort.",
+        ],
+        "de": [
+            "Der Tag ist vorbei, und der Abend ist lang. Das ist der Teil dieser Jahreszeit, der sich lohnt.",
+            "Früh dunkel heisst langer Abend. Platz für einen Film, ein Spiel, ein langsames Abendessen.",
+            "Lampen an, Vorhänge zu, etwas Warmes in der Tasse. Abende kann diese Jahreszeit gut.",
+            "Das ist die Jahreszeit, in der Daheimbleiben keine Ausrede braucht.",
+            "Ein langer Abend ist ein guter Ort für das Buch, das seit dem Sommer wartet.",
+            "Solche Abende sind für Gerichte, die Zeit brauchen. Der Ofen wärmt nebenbei die Küche.",
+            "Die Nächte sind jetzt lang genug, um richtig zu schlafen. Es ist die eine Jahreszeit, die zusätzliche Ruhe verteilt.",
+            "Erleuchtete Fenster die ganze Strasse entlang: Für einmal sind alle gleichzeitig zu Hause.",
+            "Ein Abendspaziergang hat um diese Jahreszeit die Strassen fast für sich, und jedes Fenster ist eine kleine Bühne.",
+            "Kerzen passen wieder. Decken, dicke Socken und ein Nachschlag auch.",
+            "Von heute wird nichts mehr erwartet. Der Abend gehört dir.",
+            "An langen Abenden kommt man endlich zueinander: ein Anruf, ein Besuch, ein Tisch, der eine Weile voll bleibt.",
+            "Der beste Platz der Saison ist der gleich neben der Lampe.",
+            "Warmes Licht drinnen, kalte Luft auf der anderen Seite der Scheibe. Der Gegensatz ist die halbe Gemütlichkeit.",
+        ],
+    },
+    "returning_light": {
+        "en": [
+            "Another day on the returning side of the year is done. Tomorrow has a little more light in it.",
+            "It is dark now, and tomorrow it will be dark a little later. That is how this part of the year works.",
+            "The long evenings are still here, and still worth using. They will not last: the light is already taking them back.",
+            "Winter evenings are for slow food and early nights. Spring will ask more of you soon enough.",
+            "While you sleep tonight, the year moves another small step towards the light.",
+            "Lamps on, something warm in a cup. The evenings are still long, and each one a little shorter than the last.",
+            "Nothing more is expected of today. The light did its part, and will do a little more tomorrow.",
+            "A winter evening is a good place for making plans. The days to carry them out are on their way.",
+            "Seed catalogues, hiking maps, summer plans: winter evenings are when the bright half of the year gets planned.",
+            "The evening is long enough for the book, the film and an early night. Use it while it lasts.",
+            "Cold outside, warm inside, and the year heading the right way. A good evening to be home.",
+            "Tonight is a little shorter than last night. It has been that way since the solstice, and it adds up.",
+            "Soup, a blanket, an early night. Winter still knows how to do evenings.",
+            "Rest is part of the season. The light is doing the work for now.",
+        ],
+        "de": [
+            "Wieder ein Tag auf der zurückkehrenden Seite des Jahres geschafft. Morgen steckt ein bisschen mehr Licht drin.",
+            "Jetzt ist es dunkel, und morgen wird es ein wenig später dunkel. So funktioniert dieser Teil des Jahres.",
+            "Die langen Abende sind noch da und immer noch gut zu gebrauchen. Sie bleiben nicht: Das Licht holt sie sich schon zurück.",
+            "Winterabende sind für langsames Essen und frühes Schlafen. Der Frühling verlangt bald genug mehr.",
+            "Während du heute Nacht schläfst, rückt das Jahr wieder einen kleinen Schritt aufs Licht zu.",
+            "Lampen an, etwas Warmes in der Tasse. Die Abende sind noch lang, und jeder ein wenig kürzer als der davor.",
+            "Von heute wird nichts mehr erwartet. Das Licht hat seinen Teil getan und tut morgen etwas mehr.",
+            "Ein Winterabend ist ein guter Ort, um Pläne zu machen. Die Tage dafür sind unterwegs.",
+            "Samenkataloge, Wanderkarten, Sommerpläne: An Winterabenden wird die helle Jahreshälfte geplant.",
+            "Der Abend reicht für das Buch, den Film und frühes Schlafen. Nutz ihn, solange er dauert.",
+            "Draussen kalt, drinnen warm, und das Jahr in der richtigen Richtung unterwegs. Ein guter Abend, um zu Hause zu sein.",
+            "Die heutige Nacht ist ein wenig kürzer als die letzte. So geht das seit der Sonnenwende, und es summiert sich.",
+            "Suppe, Decke, früh ins Bett. Abende kann der Winter immer noch.",
+            "Ausruhen gehört zur Jahreszeit. Die Arbeit macht vorerst das Licht.",
+        ],
+    },
 }
