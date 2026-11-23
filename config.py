@@ -41,7 +41,7 @@ class Config:
     LOG_LEVEL: str = os.environ.get('LOG_LEVEL', 'INFO')
     
     # Shown in the settings; the changelog is in the README
-    VERSION: str = 'v0.6.5'
+    VERSION: str = 'v0.6.6'
 
     # Default location (Zurich)
     DEFAULT_LAT: float = 47.37
@@ -54,7 +54,15 @@ config = Config()
 
 
 def now() -> datetime:
-    """The local clock. The server runs on UTC, an hour behind."""
+    """
+    The local clock. The server runs on UTC, an hour behind.
+
+    SEASONAL_NOW="2027-02-10T12:00" sets it, to try another time of year
+    locally. Without a forecast for that day the weather stays empty.
+    """
+    fixed = os.environ.get('SEASONAL_NOW')
+    if fixed:
+        return datetime.fromisoformat(fixed).replace(tzinfo=ZoneInfo(TIMEZONE))
     return datetime.now(ZoneInfo(TIMEZONE))
 
 
