@@ -57,6 +57,9 @@ POLLEN_EVERY_DAYS = 7
 POLLEN_BY_MONTH = {2: "alder", 3: "alder", 4: "birch", 5: "grass", 6: "grass"}
 POLLEN_NOTICEABLE = 20   # grains per m³
 
+# How long after the solstice "the year has turned" is news.
+TURNED_DAYS = 12
+
 # Within this many minutes of the shortest day, the year "stands almost still".
 NEAR_SHORTEST_MIN = 20
 
@@ -91,6 +94,14 @@ def format_span(minutes):
     """Unsigned minutes as "1h 13m", or "22m" below the hour."""
     hours, mins = abs(minutes) // 60, abs(minutes) % 60
     return f"{hours}h {mins}m" if hours else f"{mins}m"
+
+
+def _span_text(minutes, lang):
+    """Minutes for a sentence: "22 minutes", "1 h 13 min" / "22 Minuten", "1 Std. 13 Min."."""
+    hours, mins = abs(minutes) // 60, abs(minutes) % 60
+    if not hours:
+        return f"{mins} {_noun(mins, 'minutes', lang)}"
+    return f"{hours} Std. {mins} Min." if lang == "de" else f"{hours} h {mins} min"
 
 
 def format_signed_span(minutes):
@@ -333,7 +344,7 @@ def _lichtmess(ctx):
     minutes = int(ctx.solar.get("delta_solstice_sec", 0) // 60)
     if (ctx.today.month, ctx.today.day) != (2, 2) or minutes < 60:
         return None
-    return Signal("lichtmess", 65, {"hours_gained": format_span(minutes)})
+    return Signal("lichtmess", 65, {"hours_gained": _span_text(minutes, ctx.lang)})
 
 
 def _solstice_countdown(ctx):
@@ -406,13 +417,33 @@ def _since_solstice(ctx):
     minutes = int(ctx.solar.get("delta_solstice_sec", 0) // 60)
     if ctx.phase != "returning_light" or minutes < 1:
         return None
-    return Signal("since_solstice", 70, {"hours_gained": format_span(minutes)})
+    return Signal("since_solstice", 70, {"hours_gained": _span_text(minutes, ctx.lang)})
+
+
+def _turned(ctx):
+    """
+    The first days after the solstice, when the gain is still seconds and
+    the other signals have little to count. The evenings are already
+    measurably later, so that is the figure to give.
+    """
+    since = (ctx.today - date(ctx.today.year if ctx.today.month == 12 else ctx.today.year - 1,
+                              12, 21)).days
+    if ctx.phase != "returning_light" or not 1 <= since <= TURNED_DAYS:
+        return None
+    data = {"days_since": since, **_counted(since, "days", lang=ctx.lang)}
+    later = int((ctx.solar.get("sunset_later_sec") or 0) // 60)
+    if later >= 1:
+        data.update(sunset_later=later, **_counted(later, "minutes", lang=ctx.lang))
+    return Signal("turned", 82, data)
 
 
 def _autumn_twin(ctx):
-    """The day is back to the length it had on a date people remember."""
+    """
+    The day is back to the length it had on a date people remember - which
+    a day in mid-December is not, so the twin has to lie a while back.
+    """
     twin = ctx.solar.get("autumn_twin")
-    if ctx.phase != "returning_light" or not twin:
+    if ctx.phase != "returning_light" or not twin or (twin.month, twin.day) > (11, 30):
         return None
     return Signal("autumn_twin", 60, {"twin_date": _format_date(twin, ctx.lang)})
 
@@ -773,6 +804,7 @@ SIGNALS = (
     _custom,                # 90 event / 80 soon / 55 season
     _first_sun,             # 88 / 70
     _evenings_turned,       # 85
+    _turned,                # 82
     _sun_ahead,             # 85 / 60
     _solstice_countdown,    # 80
     _mornings_turned,       # 80 / 50

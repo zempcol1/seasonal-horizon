@@ -20,8 +20,9 @@ class Config:
     DEBUG: bool = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     
     # API Settings
-    API_TIMEOUT: int = int(os.environ.get('API_TIMEOUT', '8'))
-    API_MAX_RETRIES: int = int(os.environ.get('API_MAX_RETRIES', '3'))
+    # Open-Meteo answers in well under a second; past this it is not coming.
+    API_TIMEOUT: int = int(os.environ.get('API_TIMEOUT', '4'))
+    API_MAX_RETRIES: int = int(os.environ.get('API_MAX_RETRIES', '2'))
     
     # Calls to Open-Meteo per day and process, below its free tier of ~10,000
     UPSTREAM_DAILY_LIMIT: int = int(os.environ.get('UPSTREAM_DAILY_LIMIT', '8000'))
@@ -40,7 +41,7 @@ class Config:
     LOG_LEVEL: str = os.environ.get('LOG_LEVEL', 'INFO')
     
     # Shown in the settings; the changelog is in the README
-    VERSION: str = 'v0.6.4'
+    VERSION: str = 'v0.6.5'
 
     # Default location (Zurich)
     DEFAULT_LAT: float = 47.37

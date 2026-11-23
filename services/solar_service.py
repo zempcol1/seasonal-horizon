@@ -126,6 +126,19 @@ def _next_sunset_milestone(observer, today, today_sunset):
     return None
 
 
+def _earliest_sunset_gain(observer, today, today_sunset, solstice):
+    """
+    How much later the sun sets today than at its earliest, about ten days
+    before the December solstice. Only asked for in the weeks after it,
+    when the evenings are the first part of the day to grow back.
+    """
+    if solstice.month != 12 or (today - solstice).days > 31:
+        return None
+    earliest = min(_clock_seconds(_sun(observer, solstice - timedelta(days=back))[1])
+                   for back in range(25))
+    return _clock_seconds(today_sunset) - earliest
+
+
 def get_daylight_delta(lat, lon, today):
     """
     Day length, sunrise and sunset, and how the day has changed since
@@ -165,6 +178,7 @@ def get_daylight_delta(lat, lon, today):
         "sunrise_milestone": _next_sunrise_milestone(observer, today, sunrise),
         "hour_mark": _hour_mark(observer, today, today_sec, yesterday_sec),
         "autumn_twin": _autumn_twin(observer, today, today_sec, solstice),
+        "sunset_later_sec": _earliest_sunset_gain(observer, today, sunset, solstice),
         # Civil dusk: still light enough to be outside without a lamp.
         "dusk": times["dusk"],
         # On the clock, against yesterday: negative means earlier. Sunsets

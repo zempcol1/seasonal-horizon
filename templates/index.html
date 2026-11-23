@@ -10,9 +10,9 @@
     {# iOS takes the home screen icon once, when the page is added to it. #}
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/' ~ phase ~ '.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/' ~ phase ~ '.png') }}">
+    <link rel="preload" href="{{ url_for('static', filename='fonts/inter.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/merriweather.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <main class="container">
