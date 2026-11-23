@@ -25,6 +25,7 @@ Texts live in `services/uplift_content.py`, the rules that choose them in `servi
 
 ## Changelog
 
+- **v0.6.6** - In the returning light the message takes one more sign of the light along
 - **v0.6.5** - The days after the solstice get their own news; fonts served locally; a service outage no longer slows every visit
 - **v0.6.4** - After dusk the message looks ahead: today's weather steps back, tomorrow's is shown; about 90 more lines for the cold months
 - **v0.6.3** - More to say before the solstice: first frost and snow, mild and rainy days, the days standing almost still in December

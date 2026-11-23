@@ -1187,7 +1187,7 @@ NATURE = {
                     "Song thrushes are back in voice - each phrase sung two or three times over.",
                     "The first skylarks return to the fields and sing high over the bare ground.",
                     "Crocus tips and the first leaves of the daffodils are pushing through.",
-                    "Pussy willow buds are splitting, showing the silver fur underneath.",
+                    "Willow buds are splitting, showing the silver fur underneath.",
                 ],
                 "de": [
                     "Hasel und Erle blühen, der erste Pollen liegt schon in der Luft.",
@@ -1981,5 +1981,71 @@ EVENINGS = {
             "Suppe, Decke, früh ins Bett. Abende kann der Winter immer noch.",
             "Ausruhen gehört zur Jahreszeit. Die Arbeit macht vorerst das Licht.",
         ],
+    },
+}
+
+
+# ===== Also =====
+#
+# In the returning light the lead takes one more sign of it along, in one
+# short sentence: more evidence, inside the message. Only signals listed here
+# can come along; they use the same data as their own pools.
+
+ALSO = {
+    "turned": {
+        "en": ["And the sun already sets {sunset_later} {minutes} later than at its earliest."],
+        "de": ["Und die Sonne geht schon {sunset_later} {minutes} später unter als an ihrem frühesten Tag."],
+    },
+    "since_solstice": {
+        "en": ["Since the solstice the day has grown by {hours_gained}."],
+        "de": ["Seit der Sonnenwende ist der Tag um {hours_gained} gewachsen."],
+    },
+    "daily_gain": {
+        "en": ["Today alone adds {delta} {minutes} of light."],
+        "de": ["Allein heute kommen {delta} {minutes} Licht dazu."],
+    },
+    "mornings_turned": {
+        "en": ["The mornings are turning too: sunrise at {sunrise}, a little earlier each day."],
+        "de": ["Auch die Morgen drehen: Sonnenaufgang um {sunrise}, jeden Tag etwas früher."],
+    },
+    "sunset_milestone": {
+        "en": ["And {when} the sun sets after {milestone_time}."],
+        "de": ["Und {when} geht die Sonne nach {milestone_time} unter."],
+    },
+    "sunrise_milestone": {
+        "en": ["Sunrise moves before {milestone_time} {when}."],
+        "de": ["Der Sonnenaufgang rückt {when} vor {milestone_time}."],
+    },
+    "hour_mark": {
+        "en": ["The day passes {hours_mark} hours {when}."],
+        "de": ["Der Tag überschreitet {when} die {hours_mark} Stunden."],
+    },
+    "noon_sun": {
+        "en": ["At noon the sun already stands {noon_gain}° higher than at the solstice."],
+        "de": ["Am Mittag steht die Sonne schon {noon_gain}° höher als zur Sonnenwende."],
+    },
+    "autumn_twin": {
+        "en": ["The day is as long again as on {twin_date}."],
+        "de": ["Der Tag ist wieder so lang wie am {twin_date}."],
+    },
+    "equinox_countdown": {
+        "en": ["Day and night are equal in {days_to_equinox} {days}."],
+        "de": ["In {days_to_equinox} {days_dat} sind Tag und Nacht gleich lang."],
+    },
+    "sun_ahead": {
+        "en": ["And {sunny_day} brings about {sun_hours} {hours} of sun."],
+        "de": ["Und der {sunny_day} bringt etwa {sun_hours} {hours} Sonne."],
+    },
+    "sunny_week": {
+        "en": ["The week ahead has about {week_hours} hours of sun, after {past_week_hours} in the last."],
+        "de": ["Die kommende Woche hat etwa {week_hours} Sonnenstunden, nach {past_week_hours} in der letzten."],
+    },
+    "warming": {
+        "en": ["By the end of the week it is about {temp_change}°C milder."],
+        "de": ["Bis Ende Woche wird es etwa {temp_change}°C milder."],
+    },
+    "uv_strength": {
+        "en": ["At midday the UV index reaches {uv}."],
+        "de": ["Am Mittag erreicht der UV-Index {uv}."],
     },
 }

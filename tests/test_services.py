@@ -612,6 +612,33 @@ class TestNeverClaimsUnbackedFacts:
         facts = _format_facts(_ctx(day, get_daylight_delta(47.37, 8.54, day)))
         assert facts["gains"] is gains
 
+    @pytest.mark.parametrize('day,shown', [
+        (date(2026, 1, 20), True), (date(2026, 12, 23), True),
+        (date(2026, 11, 20), False), (date(2026, 5, 1), False),
+    ])
+    def test_the_returning_light_brings_one_more_sign(self, day, shown):
+        from services import uplift_content as content
+        from services.solar_service import get_daylight_delta
+        from services.uplift_engine import Picker, _also, _select
+
+        ctx, picker = _ctx(day, get_daylight_delta(47.37, 8.54, day)), Picker("x", day)
+        also = _also(ctx, _select(ctx, picker).key, picker)
+        assert bool(also) is shown
+        if also:
+            assert "{" not in also and also.endswith(".")
+
+        data = {}
+        from services.uplift_engine import SIGNALS
+        for signal in SIGNALS:
+            fired = signal(PROBES[signal.__name__]())
+            data[fired.key] = set(fired.data)
+        from services.uplift_engine import _PLACEHOLDER
+        for key, pool in content.ALSO.items():
+            assert len(pool["en"]) == len(pool["de"]) > 0
+            for templates in pool.values():
+                for template in templates:
+                    assert not set(_PLACEHOLDER.findall(template)) - data[key], (key, template)
+
     def test_template_needing_a_missing_fact_is_not_used(self):
         from services.uplift_engine import _backed
 

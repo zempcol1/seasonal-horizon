@@ -4,7 +4,8 @@ Supports multiple languages (en, de).
 
 Every message has the same shape: a lead from the strongest signal of the
 day, then a companion line from nature - or, on a sunny winter day, a
-suggestion for using the sun.
+suggestion for using the sun. In the returning light the lead takes one
+more sign along, in a sentence of its own (content.ALSO).
 
 - A signal is one true, good thing about today: the light gaining, sun in
   the forecast, fresh snow. Each is a function in SIGNALS returning a Signal
@@ -210,9 +211,9 @@ class Picker:
         start = random.Random(f"{self.place}:{name}").randrange(len(pool))
         return pool[(start + self.day.toordinal() + self.variant) % len(pool)]
 
-    def rng(self):
-        """For the weighted draw of the lead."""
-        return random.Random(f"{self.place}:{self.day}:{self.variant}")
+    def rng(self, name=""):
+        """For the weighted draws of the lead and the sign beside it."""
+        return random.Random(f"{self.place}:{self.day}:{self.variant}{name}")
 
     def every(self, days, name):
         """True on one day in `days` for this place - for things kept rare."""
@@ -911,11 +912,28 @@ def _companion(ctx, lead, picker):
     return picker.pick(pool, f"nature.{ctx.region}.{ctx.today.month}")
 
 
+def _also(ctx, lead_key, picker):
+    """
+    In the returning light, one more sign of it beside the lead - drawn from
+    the strongest few, so the same one does not come along every day.
+    """
+    if ctx.phase != "returning_light":
+        return None
+    found = [(s, _backed(_localized(content.ALSO.get(s.key, {}), ctx.lang), s.data))
+             for s in _signals(ctx) if s.key != lead_key]
+    found = [(s, templates) for s, templates in found if templates][:TOP_N]
+    if not found:
+        return None
+    signal, templates = picker.rng(":also").choices(found, weights=[s.weight for s, _ in found])[0]
+    return picker.pick(templates, f"also.{signal.key}").format(**signal.data)
+
+
 def _compose(ctx, picker):
     """The lead and its companion line, kept apart so the page can set them apart."""
     lead = _select(ctx, picker)
     text = _lead(ctx, lead, picker) or _lead(ctx, _season(ctx), picker)
-    return text, _companion(ctx, lead, picker)
+    also = _also(ctx, lead.key, picker)
+    return (f"{text} {also}" if also else text), _companion(ctx, lead, picker)
 
 
 def current_phase():
