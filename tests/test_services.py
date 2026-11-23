@@ -252,6 +252,7 @@ PROBES = {
     "_sunset_milestone": lambda: _ctx(),
     "_warming": lambda: _ctx(analysis={"temp_trend": "warming", "temp_change": 3.1}),
     "_since_solstice": lambda: _ctx(),
+    "_turned": lambda: _ctx(date(2025, 12, 25), {**SOLAR, "sunset_later_sec": 250}),
     "_warmest_since": lambda: _ctx(today={"temp_max": 11},
                                    analysis={"warmest_since": "2025-12-28"}),
     "_pollen": lambda: _ctx(date(2026, 3, 1), pollen={"alder": 80}),
@@ -332,6 +333,23 @@ class TestUpliftEngine:
         assert _frost(_ctx(today={"temp_min": -1})) is None      # January: nothing new
         assert _sunny_today(_ctx(date(2026, 5, 1), today={"is_sunny": True, "sun_hours": 9})) \
             .pool == "sunny_today"
+
+    def test_the_turn_days(self):
+        """Right after the solstice: news of the turn, gains in words, no mid-December twin."""
+        from services.solar_service import get_daylight_delta
+        from services.uplift_engine import _autumn_twin, _since_solstice, _turned
+
+        day = date(2026, 12, 24)
+        solar = get_daylight_delta(47.37, 8.54, day)
+        assert 2 * 60 < solar["sunset_later_sec"] < 6 * 60
+        assert _turned(_ctx(day, solar)).data["sunset_later"] >= 2
+        assert _turned(_ctx(date(2027, 1, 10), solar)) is None
+        assert _autumn_twin(_ctx(day, solar)) is None
+
+        small = {**SOLAR, "delta_solstice_sec": 150}
+        assert _since_solstice(_ctx(solar=small)).data["hours_gained"] == "2 minutes"
+        assert _since_solstice(_ctx(solar=small, lang="de")).data["hours_gained"] == "2 Minuten"
+        assert _since_solstice(_ctx()).data["hours_gained"] == "31 minutes"
 
     def test_one_day_away_reads_tomorrow(self):
         from services.uplift_engine import Picker, _lead, _sunset_milestone

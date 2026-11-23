@@ -281,6 +281,26 @@ SIGNALS = {
         ],
     },
 
+    # {days_since} {days} {sunset_later} {minutes}
+    "turned": {
+        "en": [
+            "The year has turned. For now the day gains seconds; by the end of January it is two or three minutes a day.",
+            "{days_since} {days} past the shortest day. The light comes back slowly at first, then faster every week.",
+            "The turn is behind you. The sun already sets {sunset_later} {minutes} later than at its earliest, in mid-December.",
+            "The evenings are leading the way: sunset is {sunset_later} {minutes} later than at its earliest. The mornings follow in early January.",
+            "The shortest day is behind you. Every day from here is longer than the one before, all the way to June.",
+            "The shortest day is behind you, and from here the numbers only point one way.",
+        ],
+        "de": [
+            "Das Jahr hat gewendet. Noch gewinnt der Tag Sekunden; Ende Januar sind es zwei bis drei Minuten am Tag.",
+            "{days_since} {days} nach dem kürzesten Tag. Das Licht kommt zurück, zuerst langsam, dann jede Woche schneller.",
+            "Die Wende liegt hinter dir. Die Sonne geht schon {sunset_later} {minutes} später unter als an ihrem frühesten Tag Mitte Dezember.",
+            "Die Abende gehen voran: Die Sonne geht {sunset_later} {minutes} später unter als an ihrem frühesten Tag. Die Morgen folgen Anfang Januar.",
+            "Der kürzeste Tag liegt hinter dir. Ab jetzt ist jeder Tag länger als der davor, bis im Juni.",
+            "Der kürzeste Tag liegt hinter dir, und ab hier zeigen die Zahlen nur noch in eine Richtung.",
+        ],
+    },
+
     # {minutes_left} {minutes} {days_to_solstice} {days}
     "near_shortest": {
         "en": [
@@ -1462,9 +1482,7 @@ NATURE = {
                     "Next year's buds already sit on the beeches and chestnuts. The trees were ready before the leaves fell.",
                     "Hedgehogs have gone into their nests of leaves. A pile left in the garden is a winter home.",
                     "Fieldfares and redwings arrive from the north - winter visitors.",
-                    "Mistle thrushes sing even in the rain.",
                     "Fallen leaves reveal hidden paths and the shapes of the land.",
-                    "Fungi season goes on in the mild spells.",
                     "Ducks from the north arrive on the lakes - tufted ducks, pochards, goldeneyes.",
                 ],
                 "de": [
@@ -1474,9 +1492,7 @@ NATURE = {
                     "Die Knospen fürs nächste Jahr sitzen schon an Buchen und Kastanien. Die Bäume waren bereit, bevor das Laub fiel.",
                     "Die Igel haben sich in ihre Laubnester zurückgezogen. Ein Laubhaufen im Garten ist ein Winterquartier.",
                     "Wacholderdrosseln und Rotdrosseln kommen aus dem Norden - Wintergäste.",
-                    "Misteldrosseln singen sogar im Regen.",
                     "Das gefallene Laub gibt versteckte Pfade und die Formen der Landschaft frei.",
-                    "Bei mildem Wetter geht die Pilzsaison weiter.",
                     "Auf den Seen kommen die Wintergäste aus dem Norden an - Reiher-, Tafel- und Schellenten.",
                 ],
             },
@@ -1493,8 +1509,12 @@ NATURE = {
                 "de": ["Ein sonniger Novembertag ist mehr wert als drei im Mai. Kahle Äste lassen alles davon durch."],
             },
             "wet": {
-                "en": ["Rain on the fallen leaves: the woods smell rich and earthy."],
-                "de": ["Regen auf dem Laub: Der Wald riecht satt und erdig."],
+                "en": ["Rain on the fallen leaves: the woods smell rich and earthy.",
+                       "Mistle thrushes sing even in the rain.",
+                       "After rain, the fungi season carries on at the forest edges."],
+                "de": ["Regen auf dem Laub: Der Wald riecht satt und erdig.",
+                       "Misteldrosseln singen sogar im Regen.",
+                       "Nach dem Regen geht die Pilzsaison an den Waldrändern weiter."],
             },
         },
         12: {
