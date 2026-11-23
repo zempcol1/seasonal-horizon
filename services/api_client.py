@@ -1,6 +1,7 @@
 """Shared plumbing for calling external HTTP APIs: retries, caching and a daily budget."""
 
 import time
+from urllib.parse import urlsplit
 
 import requests
 
@@ -15,6 +16,12 @@ from services.logging_service import log_event
 UPSTREAM_DAILY_LIMIT = config.UPSTREAM_DAILY_LIMIT
 
 _budget = {"day": None, "used": 0}
+
+# After a service fails every retry it is left alone for this long, so an
+# outage costs one slow request instead of one per visitor. Per host, since
+# the forecast can be down while the city search is fine.
+DOWN_PAUSE_SEC = 60
+_down_until = {}
 
 
 class TTLCache:
@@ -74,7 +81,8 @@ def request_json(url, params, retries=None, timeout=None):
     attempt fails or the day's budget is spent, so callers can fall back
     rather than handle exceptions.
     """
-    if not _spend_budget():
+    host = urlsplit(url).netloc
+    if time.time() < _down_until.get(host, 0) or not _spend_budget():
         return None
 
     retries = retries or config.API_MAX_RETRIES
@@ -88,6 +96,7 @@ def request_json(url, params, retries=None, timeout=None):
         except requests.exceptions.RequestException as e:
             if attempt == retries - 1:
                 log_event('api_fail', f'{url}:{str(e)[:50]}')
+                _down_until[host] = time.time() + DOWN_PAUSE_SEC
             else:
                 time.sleep(0.3 * (attempt + 1))
 

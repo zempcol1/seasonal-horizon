@@ -183,6 +183,21 @@ class TestRateLimiter:
 
 class TestApiClient:
 
+    def test_a_failed_service_is_left_alone_for_a_minute(self):
+        import requests
+        from services import api_client
+
+        with patch.dict(api_client._down_until, clear=True), \
+             patch.object(api_client.time, 'sleep'), \
+             patch.object(api_client.requests, 'get',
+                          side_effect=requests.exceptions.Timeout) as mock_get:
+            assert api_client.request_json("https://down.example", {}) is None
+            assert api_client.request_json("https://down.example", {}) is None
+            assert mock_get.call_count == api_client.config.API_MAX_RETRIES
+
+            api_client.request_json("https://other.example", {})    # other hosts still tried
+            assert mock_get.call_count == 2 * api_client.config.API_MAX_RETRIES
+
     def test_daily_budget_stops_upstream_calls(self):
         """Past the budget the app stops asking, so nobody can spend the quota alone."""
         from services import api_client

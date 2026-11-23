@@ -89,11 +89,15 @@ def test_uplift_handles_every_language(client, lang):
     (89, 0),            # near the pole
     (-33.87, 151.21),   # far outside the region still answers
     (999, 8.54),        # out of range, gets clamped
-    ('invalid', 8.54),  # not a number at all
 ])
 def test_uplift_survives_awkward_coordinates(client, lat, lon):
     response = client.get(f'/api/uplift?lat={lat}&lon={lon}')
-    assert response.status_code in (200, 500)
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize('lat', ['invalid', 'nan', 'inf'])
+def test_uplift_rejects_coordinates_that_are_not_numbers(client, lat):
+    assert client.get(f'/api/uplift?lat={lat}&lon=8.54').status_code == 400
 
 
 # ===== Rate limiting =====

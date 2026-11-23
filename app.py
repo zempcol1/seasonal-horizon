@@ -1,3 +1,5 @@
+import math
+
 from flask import Flask, render_template, request, jsonify
 
 from config import config
@@ -19,6 +21,15 @@ def _lang():
     """The requested language, English if it is not one we have."""
     lang = request.args.get('lang', 'en')
     return lang if lang in LANGUAGES else 'en'
+
+
+def _coordinate(name, default, limit):
+    """A coordinate from the query, clamped to its range; None if it is not a number."""
+    try:
+        value = float(request.args.get(name, default))
+    except ValueError:
+        return None
+    return max(-limit, min(limit, value)) if math.isfinite(value) else None
 
 
 @app.route('/')
@@ -47,9 +58,11 @@ def search_city():
 @app.route('/api/uplift')
 @rate_limit(config.RATE_LIMIT_UPLIFT)
 def api_uplift():
+    lat = _coordinate('lat', config.DEFAULT_LAT, 90)
+    lon = _coordinate('lon', config.DEFAULT_LON, 180)
+    if lat is None or lon is None:
+        return jsonify({"success": False, "error": "Invalid coordinates"}), 400
     try:
-        lat = max(-90, min(90, float(request.args.get('lat', config.DEFAULT_LAT))))
-        lon = max(-180, min(180, float(request.args.get('lon', config.DEFAULT_LON))))
         lang = _lang()
         # 0 is today's message; the "another" button counts up from there.
         variant = max(0, min(999, request.args.get('v', 0, type=int)))

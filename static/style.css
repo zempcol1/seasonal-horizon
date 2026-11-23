@@ -1,3 +1,19 @@
+/* ===== FONTS =====
+   Served from here rather than Google, so no visitor's address goes to a
+   third party. Variable fonts, Latin subset; licence in fonts/OFL-*.txt. */
+@font-face {
+    font-family: 'Inter';
+    font-weight: 400 600;
+    font-display: swap;
+    src: url(fonts/inter.woff2) format('woff2');
+}
+@font-face {
+    font-family: 'Merriweather';
+    font-weight: 300 400;
+    font-display: swap;
+    src: url(fonts/merriweather.woff2) format('woff2');
+}
+
 /* ===== BASE ===== */
 :root {
     --card: #ffffff;
