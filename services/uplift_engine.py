@@ -416,7 +416,7 @@ def _hour_mark(ctx):
 
 def _since_solstice(ctx):
     minutes = int(ctx.solar.get("delta_solstice_sec", 0) // 60)
-    if ctx.phase != "returning_light" or minutes < 1:
+    if ctx.phase != "returning_light" or minutes < 2:     # "1 minute" reads oddly; "turned" covers it
         return None
     return Signal("since_solstice", 70, {"hours_gained": _span_text(minutes, ctx.lang)})
 

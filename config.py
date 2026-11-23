@@ -41,7 +41,7 @@ class Config:
     LOG_LEVEL: str = os.environ.get('LOG_LEVEL', 'INFO')
     
     # Shown in the settings; the changelog is in the README
-    VERSION: str = 'v0.6.6'
+    VERSION: str = 'v0.6.7'
 
     # Default location (Zurich)
     DEFAULT_LAT: float = 47.37
